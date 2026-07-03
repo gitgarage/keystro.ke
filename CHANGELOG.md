@@ -45,6 +45,7 @@ The project follows semantic versioning where practical during early development
 - GitHub source link.
 - AGPL-3.0 license identification in the application UI.
 - Canonical production URL metadata.
+- SVG application favicon.
 
 ### Changed
 
