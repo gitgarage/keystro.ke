@@ -8,7 +8,10 @@
  * License, or (at your option) any later version.
  */
 
-import { BASE_SCORE_PER_LETTER } from "./constants.js";
+import {
+    BASE_SCORE_PER_LETTER,
+    POWER_UP_SCORE_MULTIPLIER
+} from "./constants.js";
 
 /**
  * ============================================================================
@@ -19,26 +22,8 @@ import { BASE_SCORE_PER_LETTER } from "./constants.js";
  * --------------
  * Owns combo and score state for the current typing session.
  *
- * Responsibilities include:
- *
- * - tracking the current combo
- * - tracking the current score
- * - rewarding completed words
- * - applying combo only to perfect words
- * - resetting combo after mistakes
- * - resetting combo after escaped words
- * - updating score and combo HUD elements
- *
- * This class intentionally does NOT:
- *
- * - listen to keyboard input
- * - select word targets
- * - validate typed letters
- * - move word targets
- * - own the main animation frame
- *
- * Gameplay systems report meaningful events to ScoreManager. ScoreManager
- * decides what those events mean numerically.
+ * Power-up words reward clean execution more heavily than normal words, but an
+ * imperfect power-up completion still receives only normal base score.
  * ============================================================================
  */
 
@@ -68,10 +53,14 @@ export class ScoreManager {
     rewardPerfectWord(word) {
         this.combo += 1;
 
+        const targetMultiplier =
+            word.type === "power-up" ? POWER_UP_SCORE_MULTIPLIER : 1;
+
         const wordScore =
             word.text.length *
             BASE_SCORE_PER_LETTER *
-            this.combo;
+            this.combo *
+            targetMultiplier;
 
         this.score += wordScore;
     }

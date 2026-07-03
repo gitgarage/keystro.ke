@@ -132,6 +132,7 @@ It is responsible for:
 - moving active words
 - locking onto a target
 - tracking typed progress
+- tracking whether a word remains perfect
 - removing completed and offscreen words
 - reporting meaningful word events
 
@@ -140,7 +141,9 @@ Each active word is represented as a plain JavaScript object:
 ```text
 {
     text,
+    type,
     progress,
+    isPerfect,
     x,
     y,
     speed,
@@ -150,6 +153,30 @@ Each active word is represented as a plain JavaScript object:
 
 The object stores game state.  
 The DOM element renders that state.
+
+---
+
+## Word Target Types
+
+Word targets currently have one of two types:
+
+```text
+normal
+power-up
+```
+
+Both target types use the same core typing rules.
+
+A target type may influence:
+
+- word selection
+- movement speed
+- visual presentation
+- scoring behavior
+
+Power-up words are intentionally represented as typed word targets instead of a separate gameplay system.
+
+This keeps shared behavior in `WordManager` while allowing other systems to react to the target type.
 
 ---
 
@@ -166,13 +193,22 @@ It responds to gameplay events:
 Current scoring rules:
 
 ```text
-perfect completed word
+perfect normal word
     combo += 1
 
-perfect word score
+normal word score
     word length
     × 100
     × current combo
+
+perfect power-up word
+    combo += 1
+
+power-up word score
+    word length
+    × 100
+    × current combo
+    × 4
 
 imperfect completed word
     combo does not increase
@@ -189,6 +225,8 @@ escaped word
     combo = 0
 ```
 
+A power-up receives its special score multiplier only when completed perfectly.
+
 Existing score is never removed when a combo breaks.
 
 The score system should not know how words move or how keyboard input is captured.
@@ -201,12 +239,16 @@ The score system should not know how words move or how keyboard input is capture
 
 It currently stores:
 
-- word pool
+- normal word pool
+- power-up word pool
 - spawn timing
-- movement speeds
+- power-up spawn probability
+- normal movement speeds
+- power-up movement speeds
 - viewport ratios
 - visual threshold values
 - base score per letter
+- power-up score multiplier
 
 Configuration should be named instead of hidden as unexplained numbers inside gameplay code.
 
@@ -223,8 +265,10 @@ CSS currently handles:
 - HUD placement
 - score presentation
 - combo presentation
-- word target appearance
-- target state feedback
+- normal word target appearance
+- power-up word target appearance
+- active target feedback
+- incorrect letter feedback
 
 ---
 
@@ -242,6 +286,7 @@ word completion
 combo feedback
 basic score
 power-up words
+session end condition
 results screen
 ```
 

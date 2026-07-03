@@ -16,11 +16,6 @@
  * Responsibility
  * --------------
  * Stores shared configuration values used by the first playable loop.
- *
- * Keeping configuration outside the game systems prevents unexplained values
- * from becoming scattered throughout the source code.
- *
- * These values are expected to evolve as gameplay is tested and balanced.
  * ============================================================================
  */
 
@@ -37,13 +32,26 @@ export const WORD_POOL = [
     "resonance"
 ];
 
+export const POWER_UP_WORD_POOL = [
+    "overdrive",
+    "radiance",
+    "harmony",
+    "zenith"
+];
+
 export const MAX_ACTIVE_WORDS = 6;
 
 export const SPAWN_INTERVAL_MS = 1400;
 
+export const POWER_UP_SPAWN_CHANCE = 0.16;
+
 export const MIN_WORD_SPEED = 65;
 
 export const MAX_WORD_SPEED = 150;
+
+export const MIN_POWER_UP_SPEED = 52;
+
+export const MAX_POWER_UP_SPEED = 88;
 
 export const SLOW_WORD_SPEED = 85;
 
@@ -60,3 +68,5 @@ export const MAX_WORD_Y_RATIO = 0.86;
 export const ERROR_FLASH_DURATION_MS = 120;
 
 export const BASE_SCORE_PER_LETTER = 100;
+
+export const POWER_UP_SCORE_MULTIPLIER = 4;

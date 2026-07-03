@@ -29,7 +29,7 @@ Status: In progress
 
 ## Current Task
 
-Track combo and basic score.
+Add the first power-up word target.
 
 ---
 
@@ -47,12 +47,15 @@ Track combo and basic score.
 - Game loop modularized.
 - Combo tracking added.
 - Basic score tracking added.
+- Perfect and imperfect word completion distinguished.
+- Power-up word targets added.
+- Power-up bonus scoring added.
 
 ---
 
 ## Next Task
 
-Add the first power-up word.
+Add a simple session end condition and results screen.
 
 ---
 
@@ -68,8 +71,23 @@ Add the first power-up word.
 - [x] Modularize the game loop
 - [x] Track combo
 - [x] Track basic score
-- [ ] Add power-up word
+- [x] Distinguish perfect and imperfect words
+- [x] Add power-up word
+- [ ] Add session end condition
 - [ ] Add simple results screen
+
+---
+
+## Public Deployment
+
+The first public build should include:
+
+- a complete playable session
+- a simple results screen
+- a subtle open-source project link
+- AGPL-3.0 license identification
+
+The public application should link to the keystro.ke source repository.
 
 ---
 

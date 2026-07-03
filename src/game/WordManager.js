@@ -12,10 +12,14 @@ import {
     ERROR_FLASH_DURATION_MS,
     FAST_WORD_SPEED,
     MAX_ACTIVE_WORDS,
+    MAX_POWER_UP_SPEED,
     MAX_WORD_SPEED,
     MAX_WORD_Y_RATIO,
+    MIN_POWER_UP_SPEED,
     MIN_WORD_SPEED,
     MIN_WORD_Y_RATIO,
+    POWER_UP_SPAWN_CHANCE,
+    POWER_UP_WORD_POOL,
     SLOW_WORD_SPEED,
     WORD_EXIT_X,
     WORD_POOL,
@@ -31,27 +35,8 @@ import {
  * --------------
  * Owns the lifecycle of moving word targets.
  *
- * Responsibilities include:
- *
- * - selecting available words
- * - reserving starting letters
- * - spawning word targets
- * - moving active words
- * - locking onto a selected target
- * - tracking progress through the active target
- * - marking imperfect words after mistakes
- * - removing completed and offscreen words
- * - reporting meaningful word events to the game coordinator
- *
- * This class intentionally does NOT:
- *
- * - listen directly to the keyboard
- * - own the main animation frame
- * - calculate combo or score
- * - play sounds
- * - create particle effects
- *
- * Those responsibilities belong to other game systems.
+ * Power-up words are still word targets. They use the same typing rules, but
+ * carry a different target type so scoring and styling can treat them specially.
  * ============================================================================
  */
 
@@ -80,10 +65,10 @@ export class WordManager {
         );
     }
 
-    chooseWord() {
+    chooseWordFromPool(wordPool) {
         const reservedLetters = this.getReservedStartingLetters();
 
-        const availableWords = WORD_POOL.filter((word) => {
+        const availableWords = wordPool.filter((word) => {
             return !reservedLetters.has(word[0]);
         });
 
@@ -96,11 +81,41 @@ export class WordManager {
         return availableWords[index];
     }
 
-    createWordElement(wordText, speed) {
+    chooseWordTarget() {
+        const shouldTryPowerUp = Math.random() < POWER_UP_SPAWN_CHANCE;
+
+        if (shouldTryPowerUp) {
+            const powerUpText = this.chooseWordFromPool(POWER_UP_WORD_POOL);
+
+            if (powerUpText) {
+                return {
+                    text: powerUpText,
+                    type: "power-up"
+                };
+            }
+        }
+
+        const normalText = this.chooseWordFromPool(WORD_POOL);
+
+        if (!normalText) {
+            return null;
+        }
+
+        return {
+            text: normalText,
+            type: "normal"
+        };
+    }
+
+    createWordElement(wordTarget, speed) {
         const element = document.createElement("span");
 
         element.className = "word-target";
-        element.textContent = wordText;
+        element.textContent = wordTarget.text;
+
+        if (wordTarget.type === "power-up") {
+            element.classList.add("is-power-up");
+        }
 
         if (speed > FAST_WORD_SPEED) {
             element.classList.add("is-fast");
@@ -111,23 +126,35 @@ export class WordManager {
         return element;
     }
 
+    chooseSpeedForTarget(wordTarget) {
+        if (wordTarget.type === "power-up") {
+            return (
+                MIN_POWER_UP_SPEED +
+                Math.random() * (MAX_POWER_UP_SPEED - MIN_POWER_UP_SPEED)
+            );
+        }
+
+        return (
+            MIN_WORD_SPEED +
+            Math.random() * (MAX_WORD_SPEED - MIN_WORD_SPEED)
+        );
+    }
+
     spawnWord() {
         if (this.activeWords.length >= MAX_ACTIVE_WORDS) {
             return;
         }
 
-        const wordText = this.chooseWord();
+        const wordTarget = this.chooseWordTarget();
 
-        if (!wordText) {
+        if (!wordTarget) {
             return;
         }
 
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const speed =
-            MIN_WORD_SPEED +
-            Math.random() * (MAX_WORD_SPEED - MIN_WORD_SPEED);
+        const speed = this.chooseSpeedForTarget(wordTarget);
 
         const y =
             viewportHeight *
@@ -138,12 +165,13 @@ export class WordManager {
 
         const x = viewportWidth + WORD_SPAWN_OFFSET_X;
 
-        const element = this.createWordElement(wordText, speed);
+        const element = this.createWordElement(wordTarget, speed);
 
         this.wordLayer.appendChild(element);
 
         this.activeWords.push({
-            text: wordText,
+            text: wordTarget.text,
+            type: wordTarget.type,
             progress: 0,
             isPerfect: true,
             x,
