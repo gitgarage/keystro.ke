@@ -22,17 +22,15 @@ The project follows semantic versioning where practical during early development
 - Dedicated input management.
 - Dedicated word target management.
 - Dedicated score management.
+- Dedicated session management.
 - Combo tracking.
 - Highest combo tracking.
 - Basic score tracking.
 - Perfect and imperfect word state.
-- Combo reset after incorrect letters.
-- Combo reset after escaped words.
 - Power-up word targets.
 - Distinct power-up target presentation.
 - Power-up-specific movement speeds.
 - Perfect power-up score multiplier.
-- Dedicated session management.
 - Sixty-second timed typing sessions.
 - Visible session countdown.
 - Completed word statistics.
@@ -43,6 +41,10 @@ The project follows semantic versioning where practical during early development
 - Final score summary.
 - Highest combo summary.
 - Application shell validation.
+- Subtle open-source project footer.
+- GitHub source link.
+- AGPL-3.0 license identification in the application UI.
+- Canonical production URL metadata.
 
 ### Changed
 
@@ -55,6 +57,7 @@ The project follows semantic versioning where practical during early development
 - Clear remaining word targets when session time expires.
 - Use animation-frame delta time for session timing.
 - Expanded the HUD to display remaining session time.
+- Prepared the application shell for public deployment.
 
 ### Fixed
 

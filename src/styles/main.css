@@ -316,6 +316,48 @@ body {
     font-size: 0.95rem;
 }
 
+.source-footer {
+    position: absolute;
+    z-index: 30;
+    left: 1.5rem;
+    bottom: 1.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+    max-width: calc(100vw - 3rem);
+    color: rgba(243, 247, 255, 0.34);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    pointer-events: auto;
+    transition: color 160ms ease, text-shadow 160ms ease;
+}
+
+.source-footer:hover,
+.source-footer:focus-within {
+    color: rgba(243, 247, 255, 0.72);
+    text-shadow: 0 0 1rem rgba(87, 214, 255, 0.18);
+}
+
+.source-footer a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.source-footer a:hover,
+.source-footer a:focus-visible {
+    color: rgba(127, 235, 255, 0.95);
+    outline: none;
+}
+
+.source-footer span:not(:last-child)::after,
+.source-footer a::after {
+    content: "·";
+    margin-left: 0.45rem;
+    color: rgba(243, 247, 255, 0.24);
+}
+
 @media (max-width: 760px) {
     .hud {
         grid-template-columns: 1fr 1fr;
@@ -333,5 +375,11 @@ body {
 
     .result-item:first-child {
         grid-column: 1 / -1;
+    }
+
+    .source-footer {
+        right: 1.5rem;
+        justify-content: center;
+        text-align: center;
     }
 }
