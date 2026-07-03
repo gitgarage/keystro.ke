@@ -29,7 +29,7 @@ Status: In progress
 
 ## Current Task
 
-Add keyboard input, target locking, and unambiguous word spawning.
+Modularize the first playable game loop.
 
 ---
 
@@ -40,6 +40,10 @@ Add keyboard input, target locking, and unambiguous word spawning.
 - Static application shell created.
 - Moving word targets created.
 - First playable loop architecture documented.
+- Keyboard input added.
+- Target locking added.
+- Unambiguous first-letter targeting added.
+- Typed word completion added.
 
 ---
 
@@ -58,6 +62,7 @@ Track combo and basic score.
 - [x] Add keyboard input
 - [x] Lock onto selected target
 - [x] Complete typed word targets
+- [x] Modularize the game loop
 - [ ] Track combo
 - [ ] Track basic score
 - [ ] Add power-up word
