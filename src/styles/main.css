@@ -1,0 +1,149 @@
+/*
+ * keystro.ke
+ * Copyright (C) 2026 Mike O'Riley
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ */
+
+/*
+ * Global page reset.
+ *
+ * The first demo is intentionally simple: one fullscreen application shell,
+ * no framework, no build system, and no external dependencies.
+ */
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    overflow: hidden;
+    color: #f3f7ff;
+    background:
+        radial-gradient(circle at 70% 20%, rgba(92, 126, 255, 0.22), transparent 32rem),
+        radial-gradient(circle at 20% 80%, rgba(0, 255, 210, 0.12), transparent 28rem),
+        #070914;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/*
+ * The application shell owns the full browser window.
+ *
+ * Later, this element can host either a DOM-based renderer, a canvas renderer,
+ * or a WebGL renderer without changing the outer page structure.
+ */
+.app-shell {
+    width: 100vw;
+    height: 100vh;
+}
+
+/*
+ * The game viewport is the visible play area.
+ *
+ * Keeping this as a dedicated element gives us a stable coordinate space for
+ * moving words, particles, HUD elements, and future canvas/WebGL layers.
+ */
+.game-viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/*
+ * The HUD should stay readable but quiet.
+ *
+ * keystro.ke should feel like a game world first and a dashboard second.
+ */
+.hud {
+    position: absolute;
+    z-index: 10;
+    top: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.brand,
+.combo-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.brand-mark {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.build-label,
+.combo-label {
+    color: rgba(243, 247, 255, 0.58);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.combo-panel {
+    align-items: flex-end;
+}
+
+.combo-value {
+    color: #ffffff;
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    font-weight: 800;
+    line-height: 0.9;
+    text-shadow: 0 0 1.25rem rgba(87, 214, 255, 0.5);
+}
+
+/*
+ * Temporary center stage copy.
+ *
+ * This text gives the first deployed page a deliberate look while we build the
+ * actual game loop underneath it.
+ */
+.stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    max-width: 42rem;
+    padding: 2rem;
+    text-align: center;
+    transform: translate(-50%, -50%);
+}
+
+.stage-kicker {
+    margin: 0 0 0.75rem;
+    color: rgba(127, 235, 255, 0.84);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+.stage-title {
+    margin: 0;
+    font-size: clamp(2.2rem, 7vw, 5.8rem);
+    line-height: 0.95;
+}
+
+.stage-copy {
+    max-width: 32rem;
+    margin: 1.25rem auto 0;
+    color: rgba(243, 247, 255, 0.72);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    line-height: 1.6;
+}
