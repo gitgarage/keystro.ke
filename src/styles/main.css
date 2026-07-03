@@ -46,13 +46,14 @@ body {
     top: 1.5rem;
     left: 1.5rem;
     right: 1.5rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: start;
     pointer-events: none;
 }
 
 .brand,
+.score-panel,
 .combo-panel {
     display: flex;
     flex-direction: column;
@@ -67,6 +68,7 @@ body {
 }
 
 .build-label,
+.score-label,
 .combo-label {
     color: rgba(243, 247, 255, 0.58);
     font-size: 0.72rem;
@@ -74,8 +76,20 @@ body {
     text-transform: uppercase;
 }
 
+.score-panel {
+    align-items: center;
+}
+
 .combo-panel {
     align-items: flex-end;
+}
+
+.score-value {
+    color: rgba(243, 247, 255, 0.82);
+    font-size: clamp(1.4rem, 3vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 0 1rem rgba(87, 214, 255, 0.28);
 }
 
 .combo-value {

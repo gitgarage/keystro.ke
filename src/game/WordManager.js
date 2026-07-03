@@ -39,7 +39,9 @@ import {
  * - moving active words
  * - locking onto a selected target
  * - tracking progress through the active target
+ * - marking imperfect words after mistakes
  * - removing completed and offscreen words
+ * - reporting meaningful word events to the game coordinator
  *
  * This class intentionally does NOT:
  *
@@ -54,18 +56,22 @@ import {
  */
 
 export class WordManager {
-    constructor(wordLayer) {
+    constructor({
+        wordLayer,
+        onWordCompleted,
+        onIncorrectLetter,
+        onWordEscaped
+    }) {
         this.wordLayer = wordLayer;
+
+        this.onWordCompleted = onWordCompleted;
+        this.onIncorrectLetter = onIncorrectLetter;
+        this.onWordEscaped = onWordEscaped;
+
         this.activeWords = [];
         this.activeTarget = null;
     }
 
-    /**
-     * Returns the first letters currently reserved by untargeted words.
-     *
-     * A visible word must not compete with another available word for the same
-     * starting key. This keeps target selection visually unambiguous.
-     */
     getReservedStartingLetters() {
         return new Set(
             this.activeWords
@@ -74,12 +80,6 @@ export class WordManager {
         );
     }
 
-    /**
-     * Selects a random word whose starting letter is currently available.
-     *
-     * Returning null is valid. It means the current word pool cannot safely
-     * produce another target without creating an ambiguous starting letter.
-     */
     chooseWord() {
         const reservedLetters = this.getReservedStartingLetters();
 
@@ -96,9 +96,6 @@ export class WordManager {
         return availableWords[index];
     }
 
-    /**
-     * Creates the DOM element used to display a word target.
-     */
     createWordElement(wordText, speed) {
         const element = document.createElement("span");
 
@@ -114,9 +111,6 @@ export class WordManager {
         return element;
     }
 
-    /**
-     * Creates one new word target just beyond the right edge of the viewport.
-     */
     spawnWord() {
         if (this.activeWords.length >= MAX_ACTIVE_WORDS) {
             return;
@@ -151,6 +145,7 @@ export class WordManager {
         this.activeWords.push({
             text: wordText,
             progress: 0,
+            isPerfect: true,
             x,
             y,
             speed,
@@ -158,9 +153,6 @@ export class WordManager {
         });
     }
 
-    /**
-     * Updates the visual text of a partially typed word.
-     */
     renderWordProgress(word) {
         const typedText = word.text.slice(0, word.progress);
         const remainingText = word.text.slice(word.progress);
@@ -179,9 +171,6 @@ export class WordManager {
         word.element.append(typedElement, remainingElement);
     }
 
-    /**
-     * Locks gameplay input onto one word target.
-     */
     setActiveTarget(word) {
         this.activeTarget = word;
 
@@ -196,9 +185,6 @@ export class WordManager {
         }
     }
 
-    /**
-     * Releases the current target and restores normal word visibility.
-     */
     clearActiveTarget() {
         this.activeTarget = null;
 
@@ -207,9 +193,6 @@ export class WordManager {
         }
     }
 
-    /**
-     * Removes a word from both gameplay state and the document.
-     */
     removeWord(word) {
         const index = this.activeWords.indexOf(word);
 
@@ -224,18 +207,12 @@ export class WordManager {
         }
     }
 
-    /**
-     * Finds an available word whose first letter matches typed input.
-     */
     findTargetForLetter(letter) {
         return this.activeWords.find((word) => {
             return word.progress === 0 && word.text.startsWith(letter);
         });
     }
 
-    /**
-     * Briefly displays error feedback on a specific word.
-     */
     flashWordError(word) {
         word.element.classList.add("has-error");
 
@@ -244,9 +221,6 @@ export class WordManager {
         }, ERROR_FLASH_DURATION_MS);
     }
 
-    /**
-     * Applies one accepted keyboard letter to the word targeting system.
-     */
     handleTypedLetter(letter) {
         if (!this.activeTarget) {
             const target = this.findTargetForLetter(letter);
@@ -262,7 +236,9 @@ export class WordManager {
             this.activeTarget.text[this.activeTarget.progress];
 
         if (letter !== expectedLetter) {
+            this.activeTarget.isPerfect = false;
             this.flashWordError(this.activeTarget);
+            this.onIncorrectLetter();
 
             return;
         }
@@ -272,13 +248,13 @@ export class WordManager {
         this.renderWordProgress(this.activeTarget);
 
         if (this.activeTarget.progress >= this.activeTarget.text.length) {
-            this.removeWord(this.activeTarget);
+            const completedWord = this.activeTarget;
+
+            this.onWordCompleted(completedWord);
+            this.removeWord(completedWord);
         }
     }
 
-    /**
-     * Moves active words according to elapsed frame time.
-     */
     update(deltaSeconds) {
         for (
             let index = this.activeWords.length - 1;
@@ -293,6 +269,7 @@ export class WordManager {
                 `translate3d(${word.x}px, ${word.y}px, 0)`;
 
             if (word.x < WORD_EXIT_X) {
+                this.onWordEscaped(word);
                 this.removeWord(word);
             }
         }

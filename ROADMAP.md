@@ -29,7 +29,7 @@ Status: In progress
 
 ## Current Task
 
-Modularize the first playable game loop.
+Track combo and basic score.
 
 ---
 
@@ -44,12 +44,15 @@ Modularize the first playable game loop.
 - Target locking added.
 - Unambiguous first-letter targeting added.
 - Typed word completion added.
+- Game loop modularized.
+- Combo tracking added.
+- Basic score tracking added.
 
 ---
 
 ## Next Task
 
-Track combo and basic score.
+Add the first power-up word.
 
 ---
 
@@ -63,8 +66,8 @@ Track combo and basic score.
 - [x] Lock onto selected target
 - [x] Complete typed word targets
 - [x] Modularize the game loop
-- [ ] Track combo
-- [ ] Track basic score
+- [x] Track combo
+- [x] Track basic score
 - [ ] Add power-up word
 - [ ] Add simple results screen
 

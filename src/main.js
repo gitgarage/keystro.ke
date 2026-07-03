@@ -37,6 +37,7 @@ import { Game } from "./game/Game.js";
 function startApplication() {
     const wordLayer = document.querySelector("#word-layer");
     const comboValue = document.querySelector("#combo-value");
+    const scoreValue = document.querySelector("#score-value");
 
     if (!wordLayer) {
         console.error(
@@ -54,14 +55,23 @@ function startApplication() {
         return;
     }
 
+    if (!scoreValue) {
+        console.error(
+            "Unable to start keystro.ke: score value element was not found."
+        );
+
+        return;
+    }
+
     const game = new Game({
         wordLayer,
-        comboValue
+        comboValue,
+        scoreValue
     });
 
     game.start();
 
-    console.info("keystro.ke modular game loop loaded.");
+    console.info("keystro.ke combo and score demo loaded.");
 }
 
 window.addEventListener("DOMContentLoaded", startApplication);

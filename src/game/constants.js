@@ -58,3 +58,5 @@ export const MIN_WORD_Y_RATIO = 0.18;
 export const MAX_WORD_Y_RATIO = 0.86;
 
 export const ERROR_FLASH_DURATION_MS = 120;
+
+export const BASE_SCORE_PER_LETTER = 100;

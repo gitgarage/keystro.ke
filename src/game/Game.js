@@ -9,6 +9,7 @@
  */
 
 import { InputManager } from "./InputManager.js";
+import { ScoreManager } from "./ScoreManager.js";
 import { WordManager } from "./WordManager.js";
 import { SPAWN_INTERVAL_MS } from "./constants.js";
 
@@ -26,7 +27,7 @@ import { SPAWN_INTERVAL_MS } from "./constants.js";
  * - owning the animation frame lifecycle
  * - calculating elapsed frame time
  * - scheduling word spawning
- * - coordinating input with the word system
+ * - connecting gameplay systems through meaningful events
  *
  * This class intentionally does NOT:
  *
@@ -41,10 +42,27 @@ import { SPAWN_INTERVAL_MS } from "./constants.js";
  */
 
 export class Game {
-    constructor({ wordLayer, comboValue }) {
-        this.comboValue = comboValue;
+    constructor({ wordLayer, comboValue, scoreValue }) {
+        this.scoreManager = new ScoreManager({
+            comboValue,
+            scoreValue
+        });
 
-        this.wordManager = new WordManager(wordLayer);
+        this.wordManager = new WordManager({
+            wordLayer,
+
+            onWordCompleted: (word) => {
+                this.scoreManager.handleWordCompleted(word);
+            },
+
+            onIncorrectLetter: () => {
+                this.scoreManager.handleIncorrectLetter();
+            },
+
+            onWordEscaped: () => {
+                this.scoreManager.handleWordEscaped();
+            }
+        });
 
         this.inputManager = new InputManager((letter) => {
             this.wordManager.handleTypedLetter(letter);
@@ -60,8 +78,7 @@ export class Game {
      * Starts the current game session.
      */
     start() {
-        this.comboValue.textContent = "0";
-
+        this.scoreManager.start();
         this.inputManager.start();
 
         window.requestAnimationFrame(this.runFrame);
@@ -69,10 +86,6 @@ export class Game {
 
     /**
      * Runs one frame of the game loop.
-     *
-     * requestAnimationFrame supplies a monotonic timestamp. The difference
-     * between frames is converted into seconds so movement remains based on
-     * elapsed time instead of monitor refresh rate.
      */
     runFrame(currentTime) {
         if (this.lastFrameTime === 0) {

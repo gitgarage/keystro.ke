@@ -20,15 +20,24 @@ Game
     +---- InputManager
     |
     +---- WordManager
-              |
-              v
-       DOM word-target elements
+    |
+    +---- ScoreManager
+```
 
-constants.js
+`Game` coordinates systems through gameplay events.
+
+```text
+InputManager
     |
-    +---- Game
+    | typed letter
+    v
+WordManager
     |
-    +---- WordManager
+    +---- word completed ----+
+    |                        |
+    +---- incorrect letter --+----> ScoreManager
+    |                        |
+    +---- word escaped ------+
 ```
 
 ---
@@ -41,6 +50,7 @@ src/
 ├── game/
 │   ├── Game.js
 │   ├── InputManager.js
+│   ├── ScoreManager.js
 │   ├── WordManager.js
 │   └── constants.js
 └── styles/
@@ -85,11 +95,11 @@ It should not contain gameplay rules.
 
 It is responsible for:
 
-- starting the input system
+- starting game systems
 - scheduling animation frames
 - calculating elapsed frame time
 - scheduling word spawns
-- coordinating game systems
+- connecting systems through gameplay events
 
 `Game` should coordinate systems, not absorb their responsibilities.
 
@@ -104,9 +114,9 @@ It is responsible for:
 - listening for keydown events
 - ignoring modifier shortcuts
 - accepting plain alphabetic input
-- forwarding normalized letters to the game
+- forwarding normalized letters
 
-It should not know about word movement, score, combo, or rendering.
+It should not know about words, score, combo, or rendering.
 
 ---
 
@@ -123,6 +133,7 @@ It is responsible for:
 - locking onto a target
 - tracking typed progress
 - removing completed and offscreen words
+- reporting meaningful word events
 
 Each active word is represented as a plain JavaScript object:
 
@@ -140,7 +151,47 @@ Each active word is represented as a plain JavaScript object:
 The object stores game state.  
 The DOM element renders that state.
 
-This separation lets the project later replace DOM rendering with canvas or WebGL without changing the core idea of a moving word target.
+---
+
+## Score System
+
+`src/game/ScoreManager.js` owns combo and score state.
+
+It responds to gameplay events:
+
+- completed word
+- incorrect letter
+- escaped word
+
+Current scoring rules:
+
+```text
+perfect completed word
+    combo += 1
+
+perfect word score
+    word length
+    × 100
+    × current combo
+
+imperfect completed word
+    combo does not increase
+
+imperfect word score
+    word length
+    × 100
+
+incorrect letter
+    current word becomes imperfect
+    combo = 0
+
+escaped word
+    combo = 0
+```
+
+Existing score is never removed when a combo breaks.
+
+The score system should not know how words move or how keyboard input is captured.
 
 ---
 
@@ -155,6 +206,7 @@ It currently stores:
 - movement speeds
 - viewport ratios
 - visual threshold values
+- base score per letter
 
 Configuration should be named instead of hidden as unexplained numbers inside gameplay code.
 
@@ -169,10 +221,10 @@ CSS currently handles:
 - full-screen layout
 - background atmosphere
 - HUD placement
+- score presentation
+- combo presentation
 - word target appearance
 - target state feedback
-
-The visual layer is intentionally separated from game behavior so the renderer can evolve later.
 
 ---
 
@@ -189,6 +241,8 @@ target locking
 word completion
 combo feedback
 basic score
+power-up words
+results screen
 ```
 
 Deferred until later:
