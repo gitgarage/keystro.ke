@@ -4,7 +4,7 @@
 
 First Playable Loop
 
-Status: In progress
+Status: Complete
 
 ---
 
@@ -29,7 +29,7 @@ Status: In progress
 
 ## Current Task
 
-Add the first power-up word target.
+Complete the first playable typing session.
 
 ---
 
@@ -50,12 +50,17 @@ Add the first power-up word target.
 - Perfect and imperfect word completion distinguished.
 - Power-up word targets added.
 - Power-up bonus scoring added.
+- Timed typing sessions added.
+- Session statistics added.
+- Highest combo tracking added.
+- Session completion behavior added.
+- Results screen added.
 
 ---
 
 ## Next Task
 
-Add a simple session end condition and results screen.
+Prepare the first playable build for public deployment.
 
 ---
 
@@ -73,8 +78,8 @@ Add a simple session end condition and results screen.
 - [x] Track basic score
 - [x] Distinguish perfect and imperfect words
 - [x] Add power-up word
-- [ ] Add session end condition
-- [ ] Add simple results screen
+- [x] Add session end condition
+- [x] Add simple results screen
 
 ---
 
@@ -88,6 +93,21 @@ The first public build should include:
 - AGPL-3.0 license identification
 
 The public application should link to the keystro.ke source repository.
+
+---
+
+## Near-Term Development
+
+After the first public deployment:
+
+- refine the game concept before final visual design
+- establish stage progression
+- introduce themed word pools
+- design stage-specific visual environments
+- create the first browser-generated audio system
+- map letters to deterministic tones
+- experiment with repeated melodic typing patterns
+- introduce deeper power-up behavior
 
 ---
 

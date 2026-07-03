@@ -10,6 +10,7 @@
 
 import { InputManager } from "./InputManager.js";
 import { ScoreManager } from "./ScoreManager.js";
+import { SessionManager } from "./SessionManager.js";
 import { WordManager } from "./WordManager.js";
 import { SPAWN_INTERVAL_MS } from "./constants.js";
 
@@ -28,24 +29,44 @@ import { SPAWN_INTERVAL_MS } from "./constants.js";
  * - calculating elapsed frame time
  * - scheduling word spawning
  * - connecting gameplay systems through meaningful events
+ * - coordinating session completion
+ * - presenting final session results
  *
- * This class intentionally does NOT:
- *
- * - interpret raw browser keyboard events
- * - select words
- * - render individual word targets
- * - calculate score
- * - play sounds
- *
- * Game coordinates systems. It should not absorb their responsibilities.
+ * Game coordinates systems. It should not absorb their internal rules.
  * ============================================================================
  */
 
 export class Game {
-    constructor({ wordLayer, comboValue, scoreValue }) {
+    constructor({
+        wordLayer,
+        comboValue,
+        scoreValue,
+        timerValue,
+        resultsScreen,
+        resultScore,
+        resultHighestCombo,
+        resultCompletedWords,
+        resultPerfectWords,
+        resultMistakes
+    }) {
+        this.resultsScreen = resultsScreen;
+        this.resultScore = resultScore;
+        this.resultHighestCombo = resultHighestCombo;
+        this.resultCompletedWords = resultCompletedWords;
+        this.resultPerfectWords = resultPerfectWords;
+        this.resultMistakes = resultMistakes;
+
         this.scoreManager = new ScoreManager({
             comboValue,
             scoreValue
+        });
+
+        this.sessionManager = new SessionManager({
+            timerValue,
+
+            onSessionEnded: () => {
+                this.endSession();
+            }
         });
 
         this.wordManager = new WordManager({
@@ -53,10 +74,12 @@ export class Game {
 
             onWordCompleted: (word) => {
                 this.scoreManager.handleWordCompleted(word);
+                this.sessionManager.handleWordCompleted(word);
             },
 
             onIncorrectLetter: () => {
                 this.scoreManager.handleIncorrectLetter();
+                this.sessionManager.handleIncorrectLetter();
             },
 
             onWordEscaped: () => {
@@ -65,6 +88,10 @@ export class Game {
         });
 
         this.inputManager = new InputManager((letter) => {
+            if (!this.sessionManager.isActive) {
+                return;
+            }
+
             this.wordManager.handleTypedLetter(letter);
         });
 
@@ -78,10 +105,40 @@ export class Game {
      * Starts the current game session.
      */
     start() {
+        this.resultsScreen.hidden = true;
+
         this.scoreManager.start();
+        this.sessionManager.start();
         this.inputManager.start();
 
         window.requestAnimationFrame(this.runFrame);
+    }
+
+    /**
+     * Ends gameplay and renders the final session summary.
+     */
+    endSession() {
+        this.inputManager.stop();
+        this.wordManager.clearWords();
+
+        const scoreSummary = this.scoreManager.getSummary();
+        const sessionSummary = this.sessionManager.getSummary();
+
+        this.resultScore.textContent = String(scoreSummary.score);
+        this.resultHighestCombo.textContent = String(
+            scoreSummary.highestCombo
+        );
+        this.resultCompletedWords.textContent = String(
+            sessionSummary.completedWords
+        );
+        this.resultPerfectWords.textContent = String(
+            sessionSummary.perfectWords
+        );
+        this.resultMistakes.textContent = String(
+            sessionSummary.mistakes
+        );
+
+        this.resultsScreen.hidden = false;
     }
 
     /**
@@ -94,6 +151,12 @@ export class Game {
 
         const deltaSeconds =
             (currentTime - this.lastFrameTime) / 1000;
+
+        this.sessionManager.update(deltaSeconds);
+
+        if (!this.sessionManager.isActive) {
+            return;
+        }
 
         if (
             currentTime - this.lastSpawnTime >= SPAWN_INTERVAL_MS

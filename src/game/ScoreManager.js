@@ -22,8 +22,28 @@ import {
  * --------------
  * Owns combo and score state for the current typing session.
  *
- * Power-up words reward clean execution more heavily than normal words, but an
- * imperfect power-up completion still receives only normal base score.
+ * Responsibilities include:
+ *
+ * - tracking current combo
+ * - tracking highest combo
+ * - tracking current score
+ * - rewarding completed words
+ * - applying combo only to perfect words
+ * - applying special power-up rewards
+ * - resetting combo after mistakes
+ * - resetting combo after escaped words
+ * - updating score and combo HUD elements
+ *
+ * This class intentionally does NOT:
+ *
+ * - listen to keyboard input
+ * - select word targets
+ * - validate typed letters
+ * - move word targets
+ * - own session timing
+ *
+ * Gameplay systems report meaningful events to ScoreManager. ScoreManager
+ * decides what those events mean numerically.
  * ============================================================================
  */
 
@@ -33,13 +53,24 @@ export class ScoreManager {
         this.scoreValue = scoreValue;
 
         this.combo = 0;
+        this.highestCombo = 0;
         this.score = 0;
     }
 
+    /**
+     * Initializes score state for a new session.
+     */
     start() {
+        this.combo = 0;
+        this.highestCombo = 0;
+        this.score = 0;
+
         this.render();
     }
 
+    /**
+     * Rewards a completed word according to its accuracy state.
+     */
     handleWordCompleted(word) {
         if (word.isPerfect) {
             this.rewardPerfectWord(word);
@@ -50,8 +81,15 @@ export class ScoreManager {
         this.render();
     }
 
+    /**
+     * Rewards a perfect word and advances the current combo.
+     */
     rewardPerfectWord(word) {
         this.combo += 1;
+
+        if (this.combo > this.highestCombo) {
+            this.highestCombo = this.combo;
+        }
 
         const targetMultiplier =
             word.type === "power-up" ? POWER_UP_SCORE_MULTIPLIER : 1;
@@ -65,6 +103,9 @@ export class ScoreManager {
         this.score += wordScore;
     }
 
+    /**
+     * Rewards an imperfect word with base score only.
+     */
     rewardImperfectWord(word) {
         const wordScore =
             word.text.length *
@@ -73,14 +114,23 @@ export class ScoreManager {
         this.score += wordScore;
     }
 
+    /**
+     * Breaks the current combo after an incorrect typed letter.
+     */
     handleIncorrectLetter() {
         this.resetCombo();
     }
 
+    /**
+     * Breaks the current combo after an escaped word.
+     */
     handleWordEscaped() {
         this.resetCombo();
     }
 
+    /**
+     * Resets the active combo without removing earned score.
+     */
     resetCombo() {
         if (this.combo === 0) {
             return;
@@ -91,6 +141,19 @@ export class ScoreManager {
         this.render();
     }
 
+    /**
+     * Returns score statistics needed by the results screen.
+     */
+    getSummary() {
+        return {
+            score: this.score,
+            highestCombo: this.highestCombo
+        };
+    }
+
+    /**
+     * Synchronizes score state with the HUD.
+     */
     render() {
         this.comboValue.textContent = String(this.combo);
         this.scoreValue.textContent = String(this.score);

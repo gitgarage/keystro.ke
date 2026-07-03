@@ -17,61 +17,47 @@ import { Game } from "./game/Game.js";
  *
  * Responsibility
  * --------------
- * Creates and starts the keystro.ke game.
+ * Finds the application shell, creates the top-level Game, and starts it.
  *
- * The entry point intentionally contains almost no application logic. Its job
- * is to connect the browser document to the top-level Game object.
- *
- * This file intentionally does NOT:
- *
- * - select words
- * - move word targets
- * - interpret typing
- * - calculate score
- * - render gameplay state
- *
- * Those responsibilities belong to dedicated game systems.
+ * Gameplay rules belong to dedicated systems rather than this entry point.
  * ============================================================================
  */
 
 function startApplication() {
-    const wordLayer = document.querySelector("#word-layer");
-    const comboValue = document.querySelector("#combo-value");
-    const scoreValue = document.querySelector("#score-value");
+    const elements = {
+        wordLayer: document.querySelector("#word-layer"),
+        comboValue: document.querySelector("#combo-value"),
+        scoreValue: document.querySelector("#score-value"),
+        timerValue: document.querySelector("#timer-value"),
+        resultsScreen: document.querySelector("#results-screen"),
+        resultScore: document.querySelector("#result-score"),
+        resultHighestCombo: document.querySelector(
+            "#result-highest-combo"
+        ),
+        resultCompletedWords: document.querySelector(
+            "#result-completed-words"
+        ),
+        resultPerfectWords: document.querySelector(
+            "#result-perfect-words"
+        ),
+        resultMistakes: document.querySelector("#result-mistakes")
+    };
 
-    if (!wordLayer) {
-        console.error(
-            "Unable to start keystro.ke: word layer was not found."
-        );
+    for (const [name, element] of Object.entries(elements)) {
+        if (!element) {
+            console.error(
+                `Unable to start keystro.ke: ${name} element was not found.`
+            );
 
-        return;
+            return;
+        }
     }
 
-    if (!comboValue) {
-        console.error(
-            "Unable to start keystro.ke: combo value element was not found."
-        );
-
-        return;
-    }
-
-    if (!scoreValue) {
-        console.error(
-            "Unable to start keystro.ke: score value element was not found."
-        );
-
-        return;
-    }
-
-    const game = new Game({
-        wordLayer,
-        comboValue,
-        scoreValue
-    });
+    const game = new Game(elements);
 
     game.start();
 
-    console.info("keystro.ke combo and score demo loaded.");
+    console.info("keystro.ke timed session demo loaded.");
 }
 
 window.addEventListener("DOMContentLoaded", startApplication);

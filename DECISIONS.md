@@ -47,6 +47,7 @@ Current systems include:
 - `InputManager`
 - `WordManager`
 - `ScoreManager`
+- `SessionManager`
 
 ### Reason
 
@@ -131,4 +132,60 @@ An imperfect power-up receives normal base score.
 
 The visually distinct target presents a higher-value opportunity.
 
-The special reward should require clean execution. Allowing a player to make mistakes and retain the full power-up multiplier would weaken the meaning of both perfect words and combo streaks.
+The special reward should require clean execution.
+
+Allowing a player to make mistakes and retain the full power-up multiplier would weaken the meaning of both perfect words and combo streaks.
+
+---
+
+## 2026-07-03 — Use animation-frame delta time for session timing
+
+### Decision
+
+Advance session time using the animation-frame delta time calculated by `Game`.
+
+Do not create a separate `setInterval` timer for the gameplay session.
+
+### Reason
+
+The game already owns a frame lifecycle and calculates elapsed time between frames.
+
+Supplying that elapsed time to `SessionManager` keeps gameplay timing inside one coordinated loop.
+
+This avoids maintaining a separate timer lifecycle that could drift independently from gameplay state.
+
+---
+
+## 2026-07-03 — Define mistakes as incorrect typed letters
+
+### Decision
+
+Count each incorrect typed letter as one mistake.
+
+Escaped words break combo but do not count as mistakes.
+
+### Reason
+
+The results screen should distinguish typing accuracy from missed gameplay opportunities.
+
+An incorrect letter is a direct typing error.
+
+An escaped word may occur because the player chose another target, could not reach a target in time, or made a strategic decision.
+
+These events should not be represented by the same statistic.
+
+---
+
+## 2026-07-03 — Clear remaining targets without escape events when a session ends
+
+### Decision
+
+Remove all active word targets when session time expires without reporting them as escaped words.
+
+### Reason
+
+Session completion is cleanup, not gameplay failure.
+
+Treating every remaining target as escaped would alter combo state at the exact moment gameplay ends and would make final statistics depend on arbitrary targets still visible when the timer reaches zero.
+
+Final session results should represent gameplay events that occurred while the session was active.

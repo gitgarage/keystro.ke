@@ -37,6 +37,9 @@ import {
  *
  * Power-up words are still word targets. They use the same typing rules, but
  * carry a different target type so scoring and styling can treat them specially.
+ *
+ * WordManager also exposes a clear operation for removing all targets when a
+ * session ends.
  * ============================================================================
  */
 
@@ -233,6 +236,21 @@ export class WordManager {
         if (this.activeTarget === word) {
             this.clearActiveTarget();
         }
+    }
+
+    /**
+     * Removes every active word without reporting escape events.
+     *
+     * Session cleanup is not gameplay failure. Remaining targets disappear when
+     * time expires without breaking combo or altering final statistics.
+     */
+    clearWords() {
+        for (const word of this.activeWords) {
+            word.element.remove();
+        }
+
+        this.activeWords = [];
+        this.activeTarget = null;
     }
 
     findTargetForLetter(letter) {

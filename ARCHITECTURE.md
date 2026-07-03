@@ -22,6 +22,8 @@ Game
     +---- WordManager
     |
     +---- ScoreManager
+    |
+    +---- SessionManager
 ```
 
 `Game` coordinates systems through gameplay events.
@@ -33,11 +35,26 @@ InputManager
     v
 WordManager
     |
-    +---- word completed ----+
+    +---- word completed ----+----> ScoreManager
     |                        |
+    |                        +----> SessionManager
+    |
     +---- incorrect letter --+----> ScoreManager
     |                        |
-    +---- word escaped ------+
+    |                        +----> SessionManager
+    |
+    +---- word escaped -----------> ScoreManager
+
+SessionManager
+    |
+    | session ended
+    v
+Game
+    |
+    +---- stop input
+    +---- clear word targets
+    +---- collect summaries
+    +---- render results
 ```
 
 ---
@@ -51,6 +68,7 @@ src/
 │   ├── Game.js
 │   ├── InputManager.js
 │   ├── ScoreManager.js
+│   ├── SessionManager.js
 │   ├── WordManager.js
 │   └── constants.js
 └── styles/
@@ -69,9 +87,14 @@ It provides:
 - the game viewport
 - the HUD
 - the word layer
+- the results screen
 - the script and stylesheet links
 
-The HTML should stay small. Game behavior belongs in JavaScript, not markup.
+The HTML should stay small.
+
+Game behavior belongs in JavaScript, not markup.
+
+Static presentation structure may remain in HTML when JavaScript only needs to update its state or values.
 
 ---
 
@@ -82,10 +105,13 @@ The HTML should stay small. Game behavior belongs in JavaScript, not markup.
 It is responsible for:
 
 - finding required DOM elements
+- validating the application shell
 - creating the top-level `Game`
 - starting the game
 
 It should not contain gameplay rules.
+
+The application should fail clearly when a required shell element is missing instead of starting in a partially initialized state.
 
 ---
 
@@ -100,8 +126,13 @@ It is responsible for:
 - calculating elapsed frame time
 - scheduling word spawns
 - connecting systems through gameplay events
+- coordinating session completion
+- collecting system summaries
+- presenting final results
 
-`Game` should coordinate systems, not absorb their responsibilities.
+`Game` should coordinate systems, not absorb their internal rules.
+
+Systems communicate through meaningful events rather than directly controlling one another.
 
 ---
 
@@ -115,8 +146,9 @@ It is responsible for:
 - ignoring modifier shortcuts
 - accepting plain alphabetic input
 - forwarding normalized letters
+- stopping keyboard capture when requested
 
-It should not know about words, score, combo, or rendering.
+It should not know about words, score, combo, session timing, or rendering.
 
 ---
 
@@ -134,6 +166,7 @@ It is responsible for:
 - tracking typed progress
 - tracking whether a word remains perfect
 - removing completed and offscreen words
+- clearing remaining targets at session completion
 - reporting meaningful word events
 
 Each active word is represented as a plain JavaScript object:
@@ -151,8 +184,11 @@ Each active word is represented as a plain JavaScript object:
 }
 ```
 
-The object stores game state.  
+The object stores game state.
+
 The DOM element renders that state.
+
+Session cleanup removes active targets without reporting escape events.
 
 ---
 
@@ -183,6 +219,12 @@ This keeps shared behavior in `WordManager` while allowing other systems to reac
 ## Score System
 
 `src/game/ScoreManager.js` owns combo and score state.
+
+It tracks:
+
+- current combo
+- highest combo
+- current score
 
 It responds to gameplay events:
 
@@ -229,7 +271,70 @@ A power-up receives its special score multiplier only when completed perfectly.
 
 Existing score is never removed when a combo breaks.
 
-The score system should not know how words move or how keyboard input is captured.
+`ScoreManager` exposes a summary of final score and highest combo for session results.
+
+The score system should not know how words move, how keyboard input is captured, or when a session ends.
+
+---
+
+## Session System
+
+`src/game/SessionManager.js` owns the lifecycle and statistics of one playable session.
+
+It is responsible for:
+
+- tracking whether the session is active
+- tracking elapsed session time
+- calculating visible remaining time
+- tracking completed words
+- tracking perfect words
+- tracking incorrect typed letters
+- reporting session completion
+
+The current session duration is 60 seconds.
+
+Session time advances using animation-frame delta time supplied by `Game`.
+
+`SessionManager` does not create a separate interval or animation loop.
+
+Current session statistics are:
+
+```text
+completed words
+perfect words
+mistakes
+```
+
+A mistake means an incorrect typed letter.
+
+An escaped word may break combo, but it is not recorded as a typing mistake.
+
+`SessionManager` exposes its final statistics through a summary object.
+
+---
+
+## Session Completion
+
+When session time reaches zero:
+
+```text
+SessionManager
+    marks the session inactive
+    renders zero remaining seconds
+    reports session completion
+
+Game
+    stops keyboard input
+    clears remaining word targets
+    collects ScoreManager summary
+    collects SessionManager summary
+    updates result values
+    reveals the results screen
+```
+
+Remaining words are cleared without being treated as escaped words.
+
+Session cleanup should not change final score, combo, or mistake statistics.
 
 ---
 
@@ -249,6 +354,7 @@ It currently stores:
 - visual threshold values
 - base score per letter
 - power-up score multiplier
+- session duration
 
 Configuration should be named instead of hidden as unexplained numbers inside gameplay code.
 
@@ -264,19 +370,24 @@ CSS currently handles:
 - background atmosphere
 - HUD placement
 - score presentation
+- timer presentation
 - combo presentation
 - normal word target appearance
 - power-up word target appearance
 - active target feedback
 - incorrect letter feedback
+- results screen presentation
+- basic responsive layout
+
+The current visual design is intentionally provisional.
+
+The first playable loop uses enough presentation to evaluate gameplay behavior without establishing the final stage or renderer design.
 
 ---
 
 ## Design Direction
 
-The first demo should prove the game feel before adding deeper systems.
-
-Current priority:
+The first playable loop has proven:
 
 ```text
 moving words
@@ -286,16 +397,23 @@ word completion
 combo feedback
 basic score
 power-up words
-session end condition
-results screen
+timed sessions
+session statistics
+results presentation
 ```
 
-Deferred until later:
+The next development phase should establish the broader game design before heavily refining visual presentation.
+
+Deferred systems include:
 
 ```text
+stage progression
+themed word pools
 WebGL
 particles
-audio
+generated audio
+letter tone mapping
+melodic typing patterns
 statistics depth
 GitHub login
 Cloudflare D1 sync

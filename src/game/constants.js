@@ -16,6 +16,9 @@
  * Responsibility
  * --------------
  * Stores shared configuration values used by the first playable loop.
+ *
+ * Configuration belongs here when multiple systems may depend on a value or
+ * when a gameplay value is expected to change during balancing.
  * ============================================================================
  */
 
@@ -70,3 +73,5 @@ export const ERROR_FLASH_DURATION_MS = 120;
 export const BASE_SCORE_PER_LETTER = 100;
 
 export const POWER_UP_SCORE_MULTIPLIER = 4;
+
+export const SESSION_DURATION_SECONDS = 60;

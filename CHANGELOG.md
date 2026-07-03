@@ -21,7 +21,9 @@ The project follows semantic versioning where practical during early development
 - Modular game loop architecture.
 - Dedicated input management.
 - Dedicated word target management.
+- Dedicated score management.
 - Combo tracking.
+- Highest combo tracking.
 - Basic score tracking.
 - Perfect and imperfect word state.
 - Combo reset after incorrect letters.
@@ -30,6 +32,17 @@ The project follows semantic versioning where practical during early development
 - Distinct power-up target presentation.
 - Power-up-specific movement speeds.
 - Perfect power-up score multiplier.
+- Dedicated session management.
+- Sixty-second timed typing sessions.
+- Visible session countdown.
+- Completed word statistics.
+- Perfect word statistics.
+- Incorrect letter statistics.
+- Session completion behavior.
+- Final results screen.
+- Final score summary.
+- Highest combo summary.
+- Application shell validation.
 
 ### Changed
 
@@ -37,8 +50,14 @@ The project follows semantic versioning where practical during early development
 - Replaced direct HTML word-progress rendering with DOM element construction.
 - Updated scoring so imperfect completed words receive base score without increasing combo.
 - Generalized word selection to support multiple target pools and target types.
+- Extended score tracking to preserve the highest combo reached during a session.
+- Stopped gameplay input when a session ends.
+- Clear remaining word targets when session time expires.
+- Use animation-frame delta time for session timing.
+- Expanded the HUD to display remaining session time.
 
 ### Fixed
 
 - Prevented multiple untargeted visible words from sharing the same starting letter.
 - Prevented delayed error feedback from referencing a different active target.
+- Prevented session cleanup from treating remaining targets as escaped words.

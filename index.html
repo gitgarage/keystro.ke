@@ -28,6 +28,11 @@
                     <span id="score-value" class="score-value">0</span>
                 </div>
 
+                <div class="timer-panel" aria-live="polite">
+                    <span class="timer-label">Time</span>
+                    <span id="timer-value" class="timer-value">60</span>
+                </div>
+
                 <div class="combo-panel" aria-live="polite">
                     <span class="combo-label">Combo</span>
                     <span id="combo-value" class="combo-value">0</span>
@@ -43,6 +48,44 @@
                     Word targets now drift through the stage.
                 </p>
             </div>
+
+            <section id="results-screen" class="results-screen" hidden>
+                <div class="results-card">
+                    <p class="results-kicker">Session complete</p>
+                    <h2 class="results-title">Results</h2>
+
+                    <dl class="results-grid">
+                        <div class="result-item">
+                            <dt>Score</dt>
+                            <dd id="result-score">0</dd>
+                        </div>
+
+                        <div class="result-item">
+                            <dt>Highest combo</dt>
+                            <dd id="result-highest-combo">0</dd>
+                        </div>
+
+                        <div class="result-item">
+                            <dt>Completed words</dt>
+                            <dd id="result-completed-words">0</dd>
+                        </div>
+
+                        <div class="result-item">
+                            <dt>Perfect words</dt>
+                            <dd id="result-perfect-words">0</dd>
+                        </div>
+
+                        <div class="result-item">
+                            <dt>Mistakes</dt>
+                            <dd id="result-mistakes">0</dd>
+                        </div>
+                    </dl>
+
+                    <p class="results-note">
+                        Refresh the page to play again.
+                    </p>
+                </div>
+            </section>
         </section>
     </main>
 
