@@ -1,67 +1,67 @@
-# Philosophy
+# Roadmap
 
-Software is more than code.
+## Current Milestone
 
-The architecture, documentation, commit history, comments, and design decisions are all part of the project.
+First Playable Loop
 
-This repository attempts to expose every layer of that process.
-
----
-
-## Why typing?
-
-Typing is one of the few skills that nearly every computer user performs every day.
-
-Improving typing is not only about speed.
-
-It is about rhythm.
-
-Attention.
-
-Consistency.
-
-Confidence.
+Status: In progress
 
 ---
 
-## Why open source?
+## Planned Milestones
 
-Knowledge grows when it can be examined.
-
-Every major feature should be understandable.
-
-Every important decision should be documented.
-
-Future developers should be able to understand not only *what* was built, but *why*.
-
----
-
-## Why AGPL?
-
-keystro.ke is intended to remain part of the commons.
-
-Commercial use is encouraged.
-
-Teaching is encouraged.
-
-Research is encouraged.
-
-Redistribution is encouraged.
-
-However, improvements made available through hosted web services should remain available to everyone under the same license.
-
-The goal is not to prevent businesses from succeeding.
-
-The goal is to prevent the community's work from disappearing behind closed doors.
+- Repository Initialization
+- First Playable Loop
+- Cloudflare Pages Deployment
+- First Typing Prompt
+- Typing Session Engine
+- Statistics Engine
+- WebGL Renderer
+- Particle Engine
+- Audio Engine
+- Results Screen
+- Keyboard Heatmap
+- GitHub Login
+- Cloudflare Synchronization
+- Public Beta
 
 ---
 
-## Simplicity
+## Current Task
 
-Every dependency must justify its existence.
+Spawn moving word targets.
 
-Every abstraction must justify its complexity.
+---
 
-Readable software is preferred over clever software.
+## Completed
 
-Documentation is considered part of the software.
+- Repository documentation created.
+- Initial repository structure created.
+- Static application shell created.
+
+---
+
+## Next Task
+
+Add keyboard input and target locking.
+
+---
+
+## First Playable Loop Checklist
+
+- [x] Create static application shell
+- [x] Display game HUD
+- [x] Spawn moving word targets
+- [ ] Add keyboard input
+- [ ] Lock onto selected target
+- [ ] Complete typed word targets
+- [ ] Track combo
+- [ ] Track basic score
+- [ ] Add power-up word
+- [ ] Add simple results screen
+
+---
+
+## Long-Term Vision
+
+Become the most educational open-source typing platform available.

@@ -8,12 +8,6 @@
  * License, or (at your option) any later version.
  */
 
-/*
- * Global page reset.
- *
- * The first demo is intentionally simple: one fullscreen application shell,
- * no framework, no build system, and no external dependencies.
- */
 * {
     box-sizing: border-box;
 }
@@ -34,23 +28,11 @@ body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/*
- * The application shell owns the full browser window.
- *
- * Later, this element can host either a DOM-based renderer, a canvas renderer,
- * or a WebGL renderer without changing the outer page structure.
- */
 .app-shell {
     width: 100vw;
     height: 100vh;
 }
 
-/*
- * The game viewport is the visible play area.
- *
- * Keeping this as a dedicated element gives us a stable coordinate space for
- * moving words, particles, HUD elements, and future canvas/WebGL layers.
- */
 .game-viewport {
     position: relative;
     width: 100%;
@@ -58,14 +40,9 @@ body {
     overflow: hidden;
 }
 
-/*
- * The HUD should stay readable but quiet.
- *
- * keystro.ke should feel like a game world first and a dashboard second.
- */
 .hud {
     position: absolute;
-    z-index: 10;
+    z-index: 20;
     top: 1.5rem;
     left: 1.5rem;
     right: 1.5rem;
@@ -110,13 +87,56 @@ body {
 }
 
 /*
- * Temporary center stage copy.
+ * The word layer is the first real gameplay layer.
  *
- * This text gives the first deployed page a deliberate look while we build the
- * actual game loop underneath it.
+ * For now, words are simple DOM nodes. This lets us prove the game loop before
+ * replacing or augmenting the renderer with canvas/WebGL.
  */
+.word-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.word-target {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 0.42rem 0.85rem 0.48rem;
+    border: 1px solid rgba(127, 235, 255, 0.48);
+    border-radius: 999px;
+    color: #ffffff;
+    background: rgba(7, 13, 30, 0.62);
+    box-shadow:
+        0 0 1.4rem rgba(87, 214, 255, 0.18),
+        inset 0 0 1rem rgba(127, 235, 255, 0.08);
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 0.75rem rgba(127, 235, 255, 0.58);
+    white-space: nowrap;
+    transform: translate3d(0, 0, 0);
+}
+
+.word-target.is-fast {
+    border-color: rgba(255, 203, 87, 0.72);
+    box-shadow:
+        0 0 1.6rem rgba(255, 203, 87, 0.2),
+        inset 0 0 1rem rgba(255, 203, 87, 0.08);
+}
+
+.word-target.is-slow {
+    border-color: rgba(190, 125, 255, 0.64);
+    box-shadow:
+        0 0 1.6rem rgba(190, 125, 255, 0.2),
+        inset 0 0 1rem rgba(190, 125, 255, 0.08);
+}
+
 .stage {
     position: absolute;
+    z-index: 5;
     left: 50%;
     top: 50%;
     max-width: 42rem;
