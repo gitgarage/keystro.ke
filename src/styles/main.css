@@ -86,12 +86,6 @@ body {
     text-shadow: 0 0 1.25rem rgba(87, 214, 255, 0.5);
 }
 
-/*
- * The word layer is the first real gameplay layer.
- *
- * For now, words are simple DOM nodes. This lets us prove the game loop before
- * replacing or augmenting the renderer with canvas/WebGL.
- */
 .word-layer {
     position: absolute;
     inset: 0;
@@ -118,6 +112,10 @@ body {
     text-shadow: 0 0 0.75rem rgba(127, 235, 255, 0.58);
     white-space: nowrap;
     transform: translate3d(0, 0, 0);
+    transition:
+        border-color 120ms ease,
+        box-shadow 120ms ease,
+        opacity 120ms ease;
 }
 
 .word-target.is-fast {
@@ -134,6 +132,33 @@ body {
         inset 0 0 1rem rgba(190, 125, 255, 0.08);
 }
 
+.word-target.is-active {
+    border-color: rgba(255, 255, 255, 0.95);
+    box-shadow:
+        0 0 2.2rem rgba(127, 235, 255, 0.46),
+        0 0 0.85rem rgba(255, 255, 255, 0.36),
+        inset 0 0 1.1rem rgba(127, 235, 255, 0.14);
+}
+
+.word-target.is-muted {
+    opacity: 0.38;
+}
+
+.word-target.has-error {
+    border-color: rgba(255, 88, 122, 0.95);
+    box-shadow:
+        0 0 2rem rgba(255, 88, 122, 0.52),
+        inset 0 0 1rem rgba(255, 88, 122, 0.16);
+}
+
+.word-typed {
+    color: rgba(127, 235, 255, 0.98);
+}
+
+.word-remaining {
+    color: rgba(255, 255, 255, 0.92);
+}
+
 .stage {
     position: absolute;
     z-index: 5;
@@ -142,7 +167,10 @@ body {
     max-width: 42rem;
     padding: 2rem;
     text-align: center;
+    opacity: 0.18;
     transform: translate(-50%, -50%);
+    pointer-events: none;
+    user-select: none;
 }
 
 .stage-kicker {
@@ -161,9 +189,5 @@ body {
 }
 
 .stage-copy {
-    max-width: 32rem;
-    margin: 1.25rem auto 0;
-    color: rgba(243, 247, 255, 0.72);
-    font-size: clamp(1rem, 2vw, 1.2rem);
-    line-height: 1.6;
+    display: none;
 }

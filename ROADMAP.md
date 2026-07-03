@@ -29,7 +29,7 @@ Status: In progress
 
 ## Current Task
 
-Spawn moving word targets.
+Add keyboard input, target locking, and unambiguous word spawning.
 
 ---
 
@@ -38,12 +38,14 @@ Spawn moving word targets.
 - Repository documentation created.
 - Initial repository structure created.
 - Static application shell created.
+- Moving word targets created.
+- First playable loop architecture documented.
 
 ---
 
 ## Next Task
 
-Add keyboard input and target locking.
+Track combo and basic score.
 
 ---
 
@@ -52,9 +54,10 @@ Add keyboard input and target locking.
 - [x] Create static application shell
 - [x] Display game HUD
 - [x] Spawn moving word targets
-- [ ] Add keyboard input
-- [ ] Lock onto selected target
-- [ ] Complete typed word targets
+- [x] Prevent duplicate starting letters
+- [x] Add keyboard input
+- [x] Lock onto selected target
+- [x] Complete typed word targets
 - [ ] Track combo
 - [ ] Track basic score
 - [ ] Add power-up word

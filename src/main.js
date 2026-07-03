@@ -13,16 +13,15 @@
  * keystro.ke application entry point
  *
  * Purpose:
- *     Starts the first visible gameplay loop.
+ *     Starts the first playable typing loop.
  *
  * Why it exists:
- *     The project should grow from a working loop instead of a pile of detached
- *     systems. This first loop only moves word targets across the screen. Typing,
- *     scoring, power-ups, audio, and particles will be added in later commits.
+ *     This version adds keyboard input, target locking, word completion, and
+ *     first-letter reservation so visible targets stay unambiguous.
  *
  * Design goals:
  *     - Keep the loop readable.
- *     - Keep the data model obvious.
+ *     - Keep targeting predictable.
  *     - Avoid dependencies.
  *     - Keep every commit playable.
  * -----------------------------------------------------------------------------
@@ -44,35 +43,36 @@ const WORD_POOL = [
 const MAX_ACTIVE_WORDS = 6;
 const SPAWN_INTERVAL_MS = 1400;
 
-/**
- * Active word targets currently visible on the stage.
- *
- * Each target owns:
- * - the text shown to the player
- * - its current x/y position
- * - its horizontal speed
- * - the DOM element that renders it
- */
 const activeWords = [];
 
+let activeTarget = null;
 let lastFrameTime = 0;
 let lastSpawnTime = 0;
 
-/**
- * Selects a word from the current demo word pool.
- *
- * This will eventually become a real word-selection system that understands
- * difficulty, theme, stage, keyboard layout, and power-up rules.
- */
-function chooseWord() {
-    const index = Math.floor(Math.random() * WORD_POOL.length);
-
-    return WORD_POOL[index];
+function getReservedStartingLetters() {
+    return new Set(
+        activeWords
+            .filter((word) => word.progress === 0)
+            .map((word) => word.text[0])
+    );
 }
 
-/**
- * Creates the DOM element used to render one moving word.
- */
+function chooseWord() {
+    const reservedLetters = getReservedStartingLetters();
+
+    const availableWords = WORD_POOL.filter((word) => {
+        return !reservedLetters.has(word[0]);
+    });
+
+    if (availableWords.length === 0) {
+        return null;
+    }
+
+    const index = Math.floor(Math.random() * availableWords.length);
+
+    return availableWords[index];
+}
+
 function createWordElement(wordText, speed) {
     const element = document.createElement("span");
 
@@ -88,23 +88,22 @@ function createWordElement(wordText, speed) {
     return element;
 }
 
-/**
- * Spawns one word just beyond the right side of the viewport.
- *
- * Words begin offscreen so they drift naturally into view instead of popping
- * into existence inside the play area.
- */
 function spawnWord(wordLayer) {
     if (activeWords.length >= MAX_ACTIVE_WORDS) {
+        return;
+    }
+
+    const wordText = chooseWord();
+
+    if (!wordText) {
         return;
     }
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    const wordText = chooseWord();
     const speed = 65 + Math.random() * 85;
-    const y = viewportHeight * (0.22 + Math.random() * 0.58);
+    const y = viewportHeight * (0.18 + Math.random() * 0.68);
     const x = viewportWidth + 80;
 
     const element = createWordElement(wordText, speed);
@@ -113,6 +112,7 @@ function spawnWord(wordLayer) {
 
     activeWords.push({
         text: wordText,
+        progress: 0,
         x,
         y,
         speed,
@@ -120,9 +120,89 @@ function spawnWord(wordLayer) {
     });
 }
 
-/**
- * Moves all active words and removes words that have crossed offscreen.
- */
+function renderWordProgress(word) {
+    const typedText = word.text.slice(0, word.progress);
+    const remainingText = word.text.slice(word.progress);
+
+    word.element.innerHTML = `
+        <span class="word-typed">${typedText}</span><span class="word-remaining">${remainingText}</span>
+    `;
+}
+
+function setActiveTarget(word) {
+    activeTarget = word;
+    word.element.classList.add("is-active");
+    renderWordProgress(word);
+
+    for (const otherWord of activeWords) {
+        if (otherWord !== word) {
+            otherWord.element.classList.add("is-muted");
+        }
+    }
+}
+
+function clearActiveTarget() {
+    activeTarget = null;
+
+    for (const word of activeWords) {
+        word.element.classList.remove("is-active", "is-muted");
+    }
+}
+
+function removeWord(word) {
+    const index = activeWords.indexOf(word);
+
+    if (index !== -1) {
+        activeWords.splice(index, 1);
+    }
+
+    word.element.remove();
+
+    if (activeTarget === word) {
+        clearActiveTarget();
+    }
+}
+
+function findTargetForLetter(letter) {
+    return activeWords.find((word) => {
+        return word.progress === 0 && word.text.startsWith(letter);
+    });
+}
+
+function flashWordError(word) {
+    word.element.classList.add("has-error");
+
+    window.setTimeout(() => {
+        word.element.classList.remove("has-error");
+    }, 120);
+}
+
+function handleTypedLetter(letter) {
+    if (!activeTarget) {
+        const target = findTargetForLetter(letter);
+
+        if (!target) {
+            return;
+        }
+
+        setActiveTarget(target);
+    }
+
+    const expectedLetter = activeTarget.text[activeTarget.progress];
+
+    if (letter !== expectedLetter) {
+        flashWordError(activeTarget);
+        return;
+    }
+
+    activeTarget.progress += 1;
+    renderWordProgress(activeTarget);
+
+    if (activeTarget.progress >= activeTarget.text.length) {
+        removeWord(activeTarget);
+    }
+}
+
 function updateWords(deltaSeconds) {
     for (let index = activeWords.length - 1; index >= 0; index -= 1) {
         const word = activeWords[index];
@@ -131,18 +211,11 @@ function updateWords(deltaSeconds) {
         word.element.style.transform = `translate3d(${word.x}px, ${word.y}px, 0)`;
 
         if (word.x < -220) {
-            word.element.remove();
-            activeWords.splice(index, 1);
+            removeWord(word);
         }
     }
 }
 
-/**
- * Runs one animation frame.
- *
- * requestAnimationFrame provides smoother movement than setInterval because it
- * synchronizes the update loop with the browser's rendering cycle.
- */
 function runFrame(currentTime) {
     const wordLayer = document.querySelector("#word-layer");
 
@@ -169,6 +242,24 @@ function runFrame(currentTime) {
     window.requestAnimationFrame(runFrame);
 }
 
+function handleKeyDown(event) {
+    if (event.ctrlKey || event.altKey || event.metaKey) {
+        return;
+    }
+
+    if (event.key.length !== 1) {
+        return;
+    }
+
+    const letter = event.key.toLowerCase();
+
+    if (!letter.match(/^[a-z]$/)) {
+        return;
+    }
+
+    handleTypedLetter(letter);
+}
+
 function startApplication() {
     const comboValue = document.querySelector("#combo-value");
 
@@ -179,7 +270,9 @@ function startApplication() {
 
     comboValue.textContent = "0";
 
-    console.info("keystro.ke moving word target demo loaded.");
+    window.addEventListener("keydown", handleKeyDown);
+
+    console.info("keystro.ke typing input demo loaded.");
 
     window.requestAnimationFrame(runFrame);
 }
