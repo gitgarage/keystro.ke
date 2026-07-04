@@ -1,0 +1,110 @@
+/*
+ * keystro.ke
+ * Copyright (C) 2026 Mike O'Riley
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ */
+
+.results-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background:
+        radial-gradient(
+            circle at 50% 30%,
+            rgba(127, 235, 255, 0.14),
+            transparent 28rem
+        ),
+        rgba(3, 6, 16, 0.82);
+    backdrop-filter: blur(0.8rem);
+}
+
+.results-screen[hidden] {
+    display: none;
+}
+
+.results-card {
+    width: min(42rem, 100%);
+    padding: clamp(1.5rem, 4vw, 3rem);
+    border: 1px solid rgba(127, 235, 255, 0.24);
+    border-radius: 1.4rem;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(16, 24, 54, 0.88),
+            rgba(7, 10, 24, 0.92)
+        );
+    box-shadow:
+        0 0 4rem rgba(87, 214, 255, 0.14),
+        inset 0 0 2rem rgba(127, 235, 255, 0.04);
+    text-align: center;
+}
+
+.results-kicker {
+    margin: 0 0 0.7rem;
+    color: rgba(127, 235, 255, 0.86);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+.results-title {
+    margin: 0 0 1.8rem;
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    line-height: 0.95;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.result-item {
+    padding: 1rem 0.7rem;
+    border: 1px solid rgba(243, 247, 255, 0.12);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.result-item dt {
+    margin: 0 0 0.45rem;
+    color: rgba(243, 247, 255, 0.58);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.result-item dd {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(1.4rem, 3vw, 2.3rem);
+    font-weight: 800;
+    line-height: 1;
+    text-shadow:
+        0 0 1rem rgba(87, 214, 255, 0.26);
+}
+
+.results-note {
+    margin: 1.6rem 0 0;
+    color: rgba(243, 247, 255, 0.56);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 760px) {
+    .results-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .result-item:first-child {
+        grid-column: 1 / -1;
+    }
+}

@@ -1,0 +1,87 @@
+/*
+ * keystro.ke
+ * Copyright (C) 2026 Mike O'Riley
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    overflow: hidden;
+    color: #f3f7ff;
+    background:
+        radial-gradient(
+            circle at 70% 20%,
+            rgba(92, 126, 255, 0.22),
+            transparent 32rem
+        ),
+        radial-gradient(
+            circle at 20% 80%,
+            rgba(0, 255, 210, 0.12),
+            transparent 28rem
+        ),
+        #070914;
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+.app-shell {
+    width: 100vw;
+    height: 100vh;
+}
+
+.game-viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.stage {
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    top: 50%;
+    max-width: 42rem;
+    padding: 2rem;
+    text-align: center;
+    opacity: 0.18;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    user-select: none;
+}
+
+.stage-kicker {
+    margin: 0 0 0.75rem;
+    color: rgba(127, 235, 255, 0.84);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+.stage-title {
+    margin: 0;
+    font-size: clamp(2.2rem, 7vw, 5.8rem);
+    line-height: 0.95;
+}
+
+.stage-copy {
+    display: none;
+}

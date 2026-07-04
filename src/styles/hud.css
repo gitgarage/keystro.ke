@@ -1,0 +1,88 @@
+/*
+ * keystro.ke
+ * Copyright (C) 2026 Mike O'Riley
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ */
+
+.hud {
+    position: absolute;
+    z-index: 20;
+    top: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto auto 1fr;
+    gap: 2rem;
+    align-items: start;
+    pointer-events: none;
+}
+
+.brand,
+.score-panel,
+.timer-panel,
+.combo-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.brand-mark {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.build-label,
+.score-label,
+.timer-label,
+.combo-label {
+    color: rgba(243, 247, 255, 0.58);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.score-panel,
+.timer-panel {
+    align-items: center;
+}
+
+.combo-panel {
+    align-items: flex-end;
+}
+
+.score-value,
+.timer-value {
+    color: rgba(243, 247, 255, 0.82);
+    font-size: clamp(1.4rem, 3vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1;
+    text-shadow:
+        0 0 1rem rgba(87, 214, 255, 0.28);
+}
+
+.combo-value {
+    color: #ffffff;
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    font-weight: 800;
+    line-height: 0.9;
+    text-shadow:
+        0 0 1.25rem rgba(87, 214, 255, 0.5);
+}
+
+@media (max-width: 760px) {
+    .hud {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+    }
+
+    .score-panel,
+    .timer-panel {
+        align-items: flex-end;
+    }
+}
