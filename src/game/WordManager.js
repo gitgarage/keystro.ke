@@ -202,6 +202,8 @@ export class WordManager {
             type: wordTarget.type,
             progress: 0,
             isPerfect: true,
+            progressionPhaseIndex:
+                progressionPhase.phaseIndex ?? 0,
             x,
             baseY: y,
             speed,
@@ -338,7 +340,7 @@ export class WordManager {
         if (letter !== expectedLetter) {
             this.activeTarget.isPerfect = false;
             this.flashWordError(this.activeTarget);
-            this.onIncorrectLetter();
+            this.onIncorrectLetter(this.activeTarget);
 
             return;
         }

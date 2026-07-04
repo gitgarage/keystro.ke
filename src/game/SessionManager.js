@@ -15,7 +15,8 @@
  *
  * Responsibility
  * --------------
- * Owns the lifecycle and statistics of one playable typing session.
+ * Owns the lifecycle, statistics, and internal telemetry of one playable
+ * typing session.
  *
  * Responsibilities include:
  *
@@ -26,6 +27,7 @@
  * - tracking completed words
  * - tracking perfect words
  * - tracking incorrect typed letters
+ * - tracking phase-aware gameplay outcomes
  * - requesting session completion when time expires
  *
  * This class intentionally does NOT:
@@ -45,10 +47,12 @@ export class SessionManager {
     constructor({
         timerValue,
         durationSeconds,
+        progressionPhaseCount,
         onSessionEnded
     }) {
         this.timerValue = timerValue;
         this.durationSeconds = durationSeconds;
+        this.progressionPhaseCount = progressionPhaseCount;
         this.onSessionEnded = onSessionEnded;
 
         this.isActive = false;
@@ -56,6 +60,7 @@ export class SessionManager {
         this.completedWords = 0;
         this.perfectWords = 0;
         this.mistakes = 0;
+        this.phaseTelemetry = [];
 
         this.lastRenderedSecond = null;
     }
@@ -69,9 +74,39 @@ export class SessionManager {
         this.completedWords = 0;
         this.perfectWords = 0;
         this.mistakes = 0;
+        this.phaseTelemetry = this.createPhaseTelemetry();
         this.lastRenderedSecond = null;
 
         this.renderTime();
+    }
+
+    /**
+     * Creates one telemetry record for each configured progression phase.
+     */
+    createPhaseTelemetry() {
+        return Array.from(
+            {
+                length: this.progressionPhaseCount
+            },
+            (_, phaseIndex) => {
+                return {
+                    phaseIndex,
+                    completedWords: 0,
+                    perfectWords: 0,
+                    mistakes: 0,
+                    escapedWords: 0
+                };
+            }
+        );
+    }
+
+    /**
+     * Returns the telemetry record associated with a word's spawn phase.
+     */
+    getPhaseTelemetry(word) {
+        return this.phaseTelemetry[
+            word.progressionPhaseIndex
+        ] ?? null;
     }
 
     /**
@@ -124,23 +159,54 @@ export class SessionManager {
 
         this.completedWords += 1;
 
+        const phaseTelemetry = this.getPhaseTelemetry(word);
+
+        if (phaseTelemetry) {
+            phaseTelemetry.completedWords += 1;
+        }
+
         if (word.isPerfect) {
             this.perfectWords += 1;
+
+            if (phaseTelemetry) {
+                phaseTelemetry.perfectWords += 1;
+            }
         }
     }
 
     /**
-     * Records one incorrect typed letter.
+     * Records one incorrect typed letter against the affected word.
      *
      * Multiple incorrect letters inside the same word count as separate
      * mistakes because each represents an individual typing error.
      */
-    handleIncorrectLetter() {
+    handleIncorrectLetter(word) {
         if (!this.isActive) {
             return;
         }
 
         this.mistakes += 1;
+
+        const phaseTelemetry = this.getPhaseTelemetry(word);
+
+        if (phaseTelemetry) {
+            phaseTelemetry.mistakes += 1;
+        }
+    }
+
+    /**
+     * Records one escaped word against the phase that spawned it.
+     */
+    handleWordEscaped(word) {
+        if (!this.isActive) {
+            return;
+        }
+
+        const phaseTelemetry = this.getPhaseTelemetry(word);
+
+        if (phaseTelemetry) {
+            phaseTelemetry.escapedWords += 1;
+        }
     }
 
     /**
@@ -155,6 +221,21 @@ export class SessionManager {
             perfectWords: this.perfectWords,
             mistakes: this.mistakes
         };
+    }
+
+    /**
+     * Returns a detached copy of internal progression telemetry.
+     */
+    getTelemetrySummary() {
+        return this.phaseTelemetry.map((phaseTelemetry) => {
+            return {
+                phaseIndex: phaseTelemetry.phaseIndex,
+                completedWords: phaseTelemetry.completedWords,
+                perfectWords: phaseTelemetry.perfectWords,
+                mistakes: phaseTelemetry.mistakes,
+                escapedWords: phaseTelemetry.escapedWords
+            };
+        });
     }
 
     /**

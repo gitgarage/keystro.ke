@@ -67,6 +67,8 @@ export class Game {
             timerValue,
             durationSeconds:
                 this.currentStage.tuning.sessionDurationSeconds,
+            progressionPhaseCount:
+                this.currentStage.progression?.length ?? 1,
 
             onSessionEnded: () => {
                 this.endSession();
@@ -82,13 +84,14 @@ export class Game {
                 this.sessionManager.handleWordCompleted(word);
             },
 
-            onIncorrectLetter: () => {
+            onIncorrectLetter: (word) => {
                 this.scoreManager.handleIncorrectLetter();
-                this.sessionManager.handleIncorrectLetter();
+                this.sessionManager.handleIncorrectLetter(word);
             },
 
-            onWordEscaped: () => {
+            onWordEscaped: (word) => {
                 this.scoreManager.handleWordEscaped();
+                this.sessionManager.handleWordEscaped(word);
             }
         });
 
@@ -111,6 +114,7 @@ export class Game {
 
         if (!progression || progression.length === 0) {
             return {
+                phaseIndex: 0,
                 startProgress: 0,
                 spawnIntervalMultiplier: 1,
                 speedMultiplier: 1
@@ -119,16 +123,27 @@ export class Game {
 
         const sessionProgress = this.sessionManager.getProgress();
         let currentPhase = progression[0];
+        let currentPhaseIndex = 0;
 
-        for (const phase of progression) {
+        for (
+            let phaseIndex = 0;
+            phaseIndex < progression.length;
+            phaseIndex += 1
+        ) {
+            const phase = progression[phaseIndex];
+
             if (sessionProgress < phase.startProgress) {
                 break;
             }
 
             currentPhase = phase;
+            currentPhaseIndex = phaseIndex;
         }
 
-        return currentPhase;
+        return {
+            ...currentPhase,
+            phaseIndex: currentPhaseIndex
+        };
     }
 
     start() {
@@ -156,6 +171,8 @@ export class Game {
 
         const scoreSummary = this.scoreManager.getSummary();
         const sessionSummary = this.sessionManager.getSummary();
+        const telemetrySummary =
+            this.sessionManager.getTelemetrySummary();
 
         this.resultScore.textContent = String(scoreSummary.score);
 
@@ -175,7 +192,43 @@ export class Game {
             sessionSummary.mistakes
         );
 
+        this.logSessionTelemetry(telemetrySummary);
+
         this.resultsScreen.hidden = false;
+    }
+
+    logSessionTelemetry(telemetrySummary) {
+        console.group("Stage One Session Telemetry");
+
+        for (const phaseTelemetry of telemetrySummary) {
+            console.group(
+                `phase-${phaseTelemetry.phaseIndex + 1}`
+            );
+
+            console.log(
+                "completed:",
+                phaseTelemetry.completedWords
+            );
+
+            console.log(
+                "perfect:",
+                phaseTelemetry.perfectWords
+            );
+
+            console.log(
+                "mistakes:",
+                phaseTelemetry.mistakes
+            );
+
+            console.log(
+                "escaped:",
+                phaseTelemetry.escapedWords
+            );
+
+            console.groupEnd();
+        }
+
+        console.groupEnd();
     }
 
     runFrame(currentTime) {
