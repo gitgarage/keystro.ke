@@ -295,6 +295,16 @@ export class WordManager {
         }
     }
 
+    /**
+     * Returns a detached array containing the currently active word objects.
+     *
+     * The array is copied so callers cannot replace or reorder WordManager's
+     * internal active-word collection.
+     */
+    getActiveWords() {
+        return [...this.activeWords];
+    }
+
     clearWords() {
         for (const word of this.activeWords) {
             word.element.remove();

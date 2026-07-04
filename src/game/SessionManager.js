@@ -28,6 +28,7 @@
  * - tracking perfect words
  * - tracking incorrect typed letters
  * - tracking phase-aware gameplay outcomes
+ * - tracking unresolved words remaining when the session ends
  * - requesting session completion when time expires
  *
  * This class intentionally does NOT:
@@ -94,7 +95,8 @@ export class SessionManager {
                     completedWords: 0,
                     perfectWords: 0,
                     mistakes: 0,
-                    escapedWords: 0
+                    escapedWords: 0,
+                    remainingWords: 0
                 };
             }
         );
@@ -210,6 +212,23 @@ export class SessionManager {
     }
 
     /**
+     * Records unresolved words still active when the session ends.
+     *
+     * Remaining words are grouped by the progression phase that spawned them.
+     * This preserves the same attribution model used by completed, mistaken,
+     * and escaped targets.
+     */
+    handleRemainingWords(words) {
+        for (const word of words) {
+            const phaseTelemetry = this.getPhaseTelemetry(word);
+
+            if (phaseTelemetry) {
+                phaseTelemetry.remainingWords += 1;
+            }
+        }
+    }
+
+    /**
      * Returns the session statistics needed by the results screen.
      *
      * Score and highest combo belong to ScoreManager and are combined with
@@ -233,7 +252,8 @@ export class SessionManager {
                 completedWords: phaseTelemetry.completedWords,
                 perfectWords: phaseTelemetry.perfectWords,
                 mistakes: phaseTelemetry.mistakes,
-                escapedWords: phaseTelemetry.escapedWords
+                escapedWords: phaseTelemetry.escapedWords,
+                remainingWords: phaseTelemetry.remainingWords
             };
         });
     }

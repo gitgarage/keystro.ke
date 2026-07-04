@@ -167,6 +167,11 @@ export class Game {
 
     endSession() {
         this.inputManager.stop();
+
+        this.sessionManager.handleRemainingWords(
+            this.wordManager.getActiveWords()
+        );
+
         this.wordManager.clearWords();
 
         const scoreSummary = this.scoreManager.getSummary();
@@ -223,6 +228,11 @@ export class Game {
             console.log(
                 "escaped:",
                 phaseTelemetry.escapedWords
+            );
+
+            console.log(
+                "remaining:",
+                phaseTelemetry.remainingWords
             );
 
             console.groupEnd();
