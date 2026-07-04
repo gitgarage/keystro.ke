@@ -39,7 +39,15 @@ The project is currently in early development.
 - Stable per-target membrane animation timing and phase.
 - Slow organic vertical movement for amoeba targets.
 - Per-target movement amplitude, frequency, and phase variation.
-- Reduced-motion handling for amoeba target animation.
+- Multiple drifting organelle-like details inside individual amoeba targets.
+- Per-organelle size, position, opacity, drift, timing, and phase variation.
+- Microscopic environmental presentation system.
+- Layered microscopic fluid particulate.
+- Independent far, middle, and near environmental particle layers.
+- Reduced-motion handling for amoeba and environmental animation.
+- Dedicated organism profile generation system.
+- Dedicated organism DOM rendering system.
+- Responsibility-based stylesheet modules.
 
 ### Changed
 
@@ -58,6 +66,14 @@ The project is currently in early development.
 - Added slow membrane deformation without moving decorative animation into the gameplay loop.
 - Added smooth vertical wandering while preserving the primary leftward target movement.
 - Preserved speed, power-up, active-target, mistake, muted, and typed-progress feedback in the amoeba presentation.
+- Expanded amoeba interiors from a fixed decorative detail to multiple independently drifting organelle-like elements.
+- Kept microscopic environmental movement independent from word target gameplay.
+- Extracted stable organism profile generation from `WordManager`.
+- Extracted organism DOM creation and presentation updates from `WordManager`.
+- Reduced `WordManager` to target selection, gameplay state, movement calculation, typing behavior, and lifecycle responsibilities.
+- Split the monolithic stylesheet into layout, environment, HUD, word, results, and footer presentation modules.
+- Moved responsive and reduced-motion rules beside the presentation systems they affect.
+- Preserved the existing visual presentation while modularizing JavaScript and CSS responsibilities.
 
 ---
 
@@ -65,4 +81,4 @@ The project is currently in early development.
 
 The first public development version of keystro.ke.
 
-The current goal is to establish the first themed stage prototype while preserving the reusable typing, scoring, and session systems proven by the first playable loop.
+The current goal is to establish the first themed stage prototype while preserving the reusable typing, scoring, session, rendering, and presentation boundaries proven by the first playable loop.

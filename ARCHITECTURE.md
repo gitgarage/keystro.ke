@@ -2,7 +2,7 @@
 
 keystro.ke is designed as a local-first browser game with a small, understandable codebase.
 
-The early project intentionally avoids frameworks, build tools, and external dependencies so the first playable loop can be understood directly from the source files.
+The early project intentionally avoids frameworks, build tools, and external dependencies so the playable game can be understood directly from the source files.
 
 ---
 
@@ -25,10 +25,16 @@ Game
     +---- InputManager
     |
     +---- WordManager
+    |         |
+    |         +---- OrganismProfileFactory
+    |         |
+    |         +---- OrganismRenderer
     |
     +---- ScoreManager
     |
     +---- SessionManager
+    |
+    +---- MicroscopicEnvironment
 ```
 
 `Game` coordinates systems through gameplay events.
@@ -74,6 +80,24 @@ Game
     +---- render results
 ```
 
+Organism targets are divided into gameplay state, stable generated profiles, and DOM presentation.
+
+```text
+OrganismProfileFactory
+    |
+    | stable target profile
+    v
+WordManager
+    |
+    | target state
+    v
+OrganismRenderer
+    |
+    | DOM presentation
+    v
+word target element
+```
+
 ---
 
 ## Source Layout
@@ -86,13 +110,22 @@ src/
 │   │   └── amoebaStage.js
 │   ├── Game.js
 │   ├── InputManager.js
+│   ├── MicroscopicEnvironment.js
+│   ├── OrganismProfileFactory.js
+│   ├── OrganismRenderer.js
 │   ├── ScoreManager.js
 │   ├── SessionManager.js
 │   ├── StageManager.js
 │   ├── WordManager.js
 │   └── constants.js
 └── styles/
-    └── main.css
+    ├── main.css
+    ├── environment.css
+    ├── footer.css
+    ├── hud.css
+    ├── layout.css
+    ├── results.css
+    └── words.css
 ```
 
 ---
@@ -153,6 +186,8 @@ It is responsible for:
 - presenting final results
 
 `Game` receives the active stage configuration and supplies stage-specific values to the systems that need them.
+
+`Game` also starts presentation systems that belong to the active game environment.
 
 `Game` should coordinate systems, not absorb their internal rules.
 
@@ -225,7 +260,7 @@ It should not know about words, score, combo, session timing, stages, or renderi
 
 ## Word System
 
-`src/game/WordManager.js` owns moving word targets.
+`src/game/WordManager.js` owns the lifecycle and gameplay state of moving word targets.
 
 It is responsible for:
 
@@ -240,7 +275,11 @@ It is responsible for:
 - clearing remaining targets at session completion
 - reporting meaningful word events
 
-Each active word is represented as a plain JavaScript object:
+`WordManager` delegates stable organism profile generation to `OrganismProfileFactory`.
+
+`WordManager` delegates organism DOM creation and presentation updates to `OrganismRenderer`.
+
+Each active word is represented as a plain JavaScript object containing gameplay, movement, presentation, and DOM references.
 
 ```text
 {
@@ -249,19 +288,95 @@ Each active word is represented as a plain JavaScript object:
     progress,
     isPerfect,
     x,
-    y,
+    baseY,
     speed,
+    presentationProfile,
+    movementProfile,
+    organelleProfiles,
     element
 }
 ```
 
-The object stores game state.
+The object stores target state.
 
-The DOM element renders that state.
+`OrganismRenderer` renders that state.
 
 Session cleanup removes active targets without reporting escape events.
 
-`WordManager` owns word behavior but should not own the thematic vocabulary of a stage.
+`WordManager` owns word behavior but should not own thematic vocabulary or organism DOM structure.
+
+---
+
+## Organism Profile System
+
+`src/game/OrganismProfileFactory.js` creates stable per-target organism profiles.
+
+It is responsible for generating:
+
+- organism scale variation
+- organism rotation
+- membrane radius variation
+- membrane opacity
+- membrane animation duration and phase
+- vertical movement amplitude
+- vertical movement frequency
+- vertical movement phase
+- organelle count
+- organelle size
+- organelle position
+- organelle opacity
+- organelle drift
+- organelle animation duration and phase
+
+Profiles are created once when a target spawns.
+
+The profile factory should not create DOM elements or update target positions.
+
+Stable profiles prevent visual properties from being randomized during every animation frame.
+
+---
+
+## Organism Rendering System
+
+`src/game/OrganismRenderer.js` owns the DOM presentation of organism word targets.
+
+It is responsible for:
+
+- creating target elements
+- applying organism presentation CSS variables
+- creating organelle elements
+- applying organelle CSS variables
+- creating word text elements
+- rendering typed and remaining word progress
+- preserving organelles when typed progress changes
+- applying rendered target position transforms
+
+`OrganismRenderer` does not choose words, validate typed letters, calculate movement, update score, or track session state.
+
+The renderer receives target state from `WordManager` and translates it into DOM presentation.
+
+This boundary allows organism presentation to evolve without placing presentation-specific DOM logic inside the word lifecycle system.
+
+---
+
+## Microscopic Environment
+
+`src/game/MicroscopicEnvironment.js` owns the current Stage One environmental particulate presentation.
+
+It is responsible for:
+
+- creating the environmental presentation container
+- creating far, middle, and near particle layers
+- creating stable particle presentation values
+- inserting the environment behind gameplay targets
+
+Environmental particles move through CSS animation.
+
+They are independent of word target movement and typing gameplay.
+
+The environmental system should not affect score, input, target selection, or session statistics.
+
+Future stage-specific environment architecture should be introduced only when additional stages demonstrate the required boundary.
 
 ---
 
@@ -419,10 +534,10 @@ Stage-specific configuration belongs in an individual stage definition.
 
 Shared configuration may include:
 
-- viewport ratios
 - visual threshold values
 - base score per letter
 - power-up score multiplier
+- error feedback duration
 
 Stage configuration may include:
 
@@ -431,6 +546,8 @@ Stage configuration may include:
 - power-up spawn probability
 - movement speeds
 - session duration
+- target viewport ratios
+- target spawn and exit positions
 
 Configuration should be named instead of hidden as unexplained numbers inside gameplay code.
 
@@ -440,26 +557,71 @@ Stage definitions should contain themed values without implementing the systems 
 
 ## Styling
 
-`src/styles/main.css` owns the current visual presentation.
+`src/styles/main.css` is the stylesheet entry point.
 
-CSS currently handles:
+It imports presentation styles by responsibility.
 
-- full-screen layout
-- background atmosphere
-- HUD placement
+```text
+main.css
+    |
+    +---- layout.css
+    +---- environment.css
+    +---- hud.css
+    +---- words.css
+    +---- results.css
+    +---- footer.css
+```
+
+`layout.css` owns:
+
+- global box sizing
+- page and viewport layout
+- application background
+- stage title presentation
+
+`environment.css` owns:
+
+- microscopic environment layers
+- environmental particulate presentation
+- particulate drift animation
+
+`hud.css` owns:
+
+- brand presentation
 - score presentation
 - timer presentation
 - combo presentation
-- normal word target appearance
-- power-up word target appearance
-- active target feedback
+- HUD responsive behavior
+
+`words.css` owns:
+
+- word target presentation
+- amoeba membrane presentation
+- organelle presentation
+- membrane deformation
+- organelle drift
+- speed-state presentation
+- power-up presentation
+- active and muted target feedback
 - incorrect letter feedback
+- typed progress presentation
+
+`results.css` owns:
+
 - results screen presentation
-- basic responsive layout
+- results card layout
+- result statistics
+- results responsive behavior
 
-The current visual design is intentionally provisional.
+`footer.css` owns:
 
-The first playable loop uses enough presentation to evaluate gameplay behavior without establishing the final stage or renderer design.
+- public source and license footer
+- footer interaction states
+- footer responsive behavior
+
+Reduced-motion rules should live beside the animation system they affect.
+
+Presentation styles should be added to the stylesheet that owns the affected system rather than returning unrelated rules to `main.css`.
 
 ---
 
@@ -482,15 +644,30 @@ results presentation
 
 The current development phase is establishing themed stages while preserving the reusable typing systems.
 
-The Stage One amoeba prototype is the first test of the stage boundary.
+The Stage One amoeba prototype now includes:
+
+```text
+stage-specific vocabulary and tuning
+irregular organism silhouettes
+stable per-target morphology
+animated membrane deformation
+drifting internal organelles
+organic vertical movement
+microscopic environmental particulate
+```
+
+The current Stage One presentation is still implemented with DOM and CSS.
+
+This is intentional.
+
+WebGL should be introduced only when the visual requirements demonstrate that DOM and CSS are no longer an appropriate presentation layer.
 
 Deferred systems include:
 
 ```text
 stage progression
-themed rendering
+additional themed stages
 WebGL
-particles
 generated audio
 letter tone mapping
 melodic typing patterns
