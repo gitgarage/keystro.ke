@@ -2,7 +2,7 @@
 
 ## Current Milestone
 
-Stage One / Amoeba Prototype
+Stage One / Microscopic Stage Environment
 
 ---
 
@@ -21,30 +21,32 @@ Stage One / Amoeba Prototype
 - Cloudflare Pages Deployment
 - Custom Domain Deployment
 - Initial Stage System
+- Amoeba Target Presentation
 
 ---
 
 ## Current Task
 
-Give Stage One its first amoeba-like target presentation.
+Give Stage One its first microscopic environment.
 
-The first visual pass uses the existing DOM word targets and CSS to establish a living microscopic silhouette without changing gameplay behavior.
+The target population now has irregular amoeba-like silhouettes, per-target morphology variation, slow membrane deformation, and organic vertical wandering.
+
+The next visual pass should make the surrounding playfield feel like a microscopic environment rather than an abstract dark background.
 
 ---
 
 ## Next Task
 
-Evaluate the amoeba target presentation and decide whether individual targets need randomized shape data.
+Evaluate the first microscopic environment with the existing amoeba population.
 
-If CSS-only targets establish the correct direction, continue into the microscopic stage environment.
+The environment should add depth and biological atmosphere without reducing word readability or making the playfield visually noisy.
 
-If the targets feel too uniform, introduce small per-target visual variables without coupling those values to typing behavior.
+Once the environment direction is established, continue into Stage One gameplay tuning.
 
 ---
 
 ## Planned Milestones
 
-- Amoeba Target Presentation
 - Microscopic Stage Environment
 - Stage One Gameplay Tuning
 - Stage Progression
@@ -128,9 +130,9 @@ More significant targets and mini-boss-like entities may use longer and more dif
 
 ## Amoeba Presentation Direction
 
-Stage One should first read as microscopic life before the project invests in a final renderer.
+Stage One targets should read as microscopic life while remaining easy to type.
 
-The initial target presentation should preserve:
+The current amoeba presentation preserves:
 
 - readable words
 - clear typed progress
@@ -139,17 +141,45 @@ The initial target presentation should preserve:
 - speed distinctions
 - power-up distinction
 
-The first visual prototype uses:
+The current visual prototype uses:
 
 - irregular cell silhouettes
 - a translucent body
 - an outer membrane
 - subtle internal organelle-like details
+- per-target morphology variation
 - slow organic shape changes
+- smooth vertical wandering
+- per-target movement timing variation
 
-The visual layer should remain replaceable.
+Amoeba movement preserves the primary leftward gameplay direction.
+
+Organic motion is layered around a stable travel lane so target movement remains predictable enough for focused typing.
+
+The visual layer remains replaceable.
 
 Gameplay systems should not depend on the current CSS representation of an amoeba.
+
+---
+
+## Microscopic Environment Direction
+
+The Stage One playfield should feel like a microscopic environment rather than a generic game background.
+
+The environment should establish:
+
+- depth
+- fluid atmosphere
+- biological scale
+- subtle environmental movement
+
+Environmental presentation must remain secondary to the word targets.
+
+The player should always be able to identify, lock onto, and type a target without fighting visual noise.
+
+The first environment prototype should remain lightweight and compatible with the current DOM and CSS renderer.
+
+The project should not move to WebGL solely to create the first microscopic background.
 
 ---
 

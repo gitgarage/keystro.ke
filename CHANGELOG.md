@@ -34,7 +34,11 @@ The project is currently in early development.
 - Stage One amoeba prototype configuration.
 - Stage-specific word pools and gameplay timing.
 - CSS-driven amoeba target presentation.
+- Per-target amoeba morphology variation.
 - Animated amoeba membrane and internal organelle-like details.
+- Stable per-target membrane animation timing and phase.
+- Slow organic vertical movement for amoeba targets.
+- Per-target movement amplitude, frequency, and phase variation.
 - Reduced-motion handling for amoeba target animation.
 
 ### Changed
@@ -50,6 +54,9 @@ The project is currently in early development.
 - Separated reusable typing mechanics from stage-specific gameplay configuration.
 - Updated `Game` and `WordManager` to consume active stage values.
 - Replaced the pill-like Stage One target silhouette with an irregular microscopic cell presentation.
+- Added stable visual variation so individual amoeba targets no longer share an identical silhouette.
+- Added slow membrane deformation without moving decorative animation into the gameplay loop.
+- Added smooth vertical wandering while preserving the primary leftward target movement.
 - Preserved speed, power-up, active-target, mistake, muted, and typed-progress feedback in the amoeba presentation.
 
 ---
