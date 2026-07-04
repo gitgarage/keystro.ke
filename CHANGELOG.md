@@ -2,66 +2,50 @@
 
 All notable changes to keystro.ke will be documented in this file.
 
-The project follows semantic versioning where practical during early development.
+The project is currently in early development.
 
 ---
 
-## [Unreleased]
+## Unreleased
 
 ### Added
 
-- Initial repository documentation and project structure.
-- Static full-screen application shell.
+- Initial repository structure.
+- Public project documentation.
+- First playable browser shell.
 - Moving word targets.
-- Keyboard typing input.
-- First-letter target locking.
-- Unambiguous starting-letter reservation.
-- Typed word progress rendering.
-- Completed word removal.
-- Modular game loop architecture.
-- Dedicated input management.
-- Dedicated word target management.
-- Dedicated score management.
-- Dedicated session management.
+- Unique active starting-letter selection.
+- Keyboard input handling.
+- Target locking.
+- Typed progress feedback.
+- Mistake detection.
 - Combo tracking.
-- Highest combo tracking.
-- Basic score tracking.
-- Perfect and imperfect word state.
+- Score calculation.
 - Power-up word targets.
-- Distinct power-up target presentation.
-- Power-up-specific movement speeds.
-- Perfect power-up score multiplier.
-- Sixty-second timed typing sessions.
-- Visible session countdown.
-- Completed word statistics.
-- Perfect word statistics.
-- Incorrect letter statistics.
-- Session completion behavior.
-- Final results screen.
-- Final score summary.
-- Highest combo summary.
-- Application shell validation.
-- Subtle open-source project footer.
-- GitHub source link.
-- AGPL-3.0 license identification in the application UI.
-- Canonical production URL metadata.
+- Timed typing sessions.
+- Session statistics.
+- Results screen.
+- Responsive public demo presentation.
+- Open-source source link and license footer.
 - SVG application favicon.
+- Cloudflare Pages deployment.
+- Public deployment at `https://keystro.ke`.
 
 ### Changed
 
-- Split the original application loop into dedicated game systems.
-- Replaced direct HTML word-progress rendering with DOM element construction.
-- Updated scoring so imperfect completed words receive base score without increasing combo.
-- Generalized word selection to support multiple target pools and target types.
-- Extended score tracking to preserve the highest combo reached during a session.
-- Stopped gameplay input when a session ends.
-- Clear remaining word targets when session time expires.
-- Use animation-frame delta time for session timing.
-- Expanded the HUD to display remaining session time.
-- Prepared the application shell for public deployment.
+- Modularized the initial game loop into dedicated game systems.
+- Separated keyboard input from gameplay coordination.
+- Separated word target management from the main game loop.
+- Moved shared gameplay values into named configuration constants.
+- Updated combo rules so a word containing a mistake cannot increase the combo when completed.
+- Expanded the public demo shell for live deployment.
+- Set the `dev` branch as the automatic Cloudflare Pages deployment branch.
+- Advanced the current development milestone to the Stage One amoeba prototype.
 
-### Fixed
+---
 
-- Prevented multiple untargeted visible words from sharing the same starting letter.
-- Prevented delayed error feedback from referencing a different active target.
-- Prevented session cleanup from treating remaining targets as escaped words.
+## 0.1.0 - In Development
+
+The first public development version of keystro.ke.
+
+The current goal is to establish the complete foundation of the first playable loop before expanding into themed stages, richer rendering, audio, and deeper statistics.
