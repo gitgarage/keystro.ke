@@ -122,6 +122,8 @@ body {
     --organism-radius-three: 50%;
     --organism-radius-four: 50%;
     --organism-membrane-opacity: 0.48;
+    --organism-membrane-duration: 10s;
+    --organism-membrane-delay: 0s;
 
     position: absolute;
     left: 0;
@@ -159,6 +161,13 @@ body {
         rotate(var(--organism-rotation))
         scaleX(var(--organism-scale-x))
         scaleY(var(--organism-scale-y));
+    animation:
+        organism-membrane-deformation
+        var(--organism-membrane-duration)
+        ease-in-out
+        var(--organism-membrane-delay)
+        infinite
+        alternate;
     transition:
         border-color 120ms ease,
         box-shadow 120ms ease,
@@ -188,6 +197,48 @@ body {
         -0.7rem 0.5rem 0 -0.08rem rgba(127, 235, 255, 0.18),
         0.25rem 0.75rem 0 -0.12rem rgba(127, 235, 255, 0.24);
     pointer-events: none;
+}
+
+@keyframes organism-membrane-deformation {
+    0% {
+        border-radius:
+            var(--organism-radius-one)
+            var(--organism-radius-two)
+            var(--organism-radius-three)
+            var(--organism-radius-four);
+    }
+
+    28% {
+        border-radius:
+            calc(var(--organism-radius-one) + 6%)
+            calc(var(--organism-radius-two) - 5%)
+            calc(var(--organism-radius-three) + 3%)
+            calc(var(--organism-radius-four) - 4%);
+    }
+
+    57% {
+        border-radius:
+            calc(var(--organism-radius-one) - 4%)
+            calc(var(--organism-radius-two) + 6%)
+            calc(var(--organism-radius-three) - 5%)
+            calc(var(--organism-radius-four) + 5%);
+    }
+
+    79% {
+        border-radius:
+            calc(var(--organism-radius-one) + 3%)
+            calc(var(--organism-radius-two) + 2%)
+            calc(var(--organism-radius-three) + 6%)
+            calc(var(--organism-radius-four) - 6%);
+    }
+
+    100% {
+        border-radius:
+            calc(var(--organism-radius-one) - 5%)
+            calc(var(--organism-radius-two) + 4%)
+            calc(var(--organism-radius-three) + 2%)
+            calc(var(--organism-radius-four) + 6%);
+    }
 }
 
 .word-target.is-fast {
@@ -461,6 +512,12 @@ body {
     content: "·";
     margin-left: 0.45rem;
     color: rgba(243, 247, 255, 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .word-target {
+        animation: none;
+    }
 }
 
 @media (max-width: 760px) {

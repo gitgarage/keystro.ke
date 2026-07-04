@@ -26,6 +26,10 @@ import { ERROR_FLASH_DURATION_MS } from "./constants.js";
  * Each spawned target also receives a small set of stable presentation values.
  * These values allow themed CSS to make a population feel varied without
  * changing gameplay behavior or introducing per-frame visual randomness.
+ *
+ * Amoeba targets also receive a stable membrane animation duration and phase.
+ * CSS owns the deformation itself so the game loop remains focused on gameplay
+ * movement rather than decorative animation.
  * ============================================================================
  */
 
@@ -106,6 +110,8 @@ export class WordManager {
     }
 
     createPresentationProfile() {
+        const membraneDurationSeconds = 7 + Math.random() * 7;
+
         return {
             scaleX: 0.9 + Math.random() * 0.24,
             scaleY: 0.88 + Math.random() * 0.26,
@@ -114,7 +120,10 @@ export class WordManager {
             radiusTwo: 42 + Math.random() * 16,
             radiusThree: 42 + Math.random() * 16,
             radiusFour: 42 + Math.random() * 16,
-            membraneOpacity: 0.38 + Math.random() * 0.24
+            membraneOpacity: 0.38 + Math.random() * 0.24,
+            membraneDurationSeconds,
+            membraneDelaySeconds:
+                -Math.random() * membraneDurationSeconds
         };
     }
 
@@ -157,6 +166,16 @@ export class WordManager {
         element.style.setProperty(
             "--organism-membrane-opacity",
             profile.membraneOpacity.toFixed(3)
+        );
+
+        element.style.setProperty(
+            "--organism-membrane-duration",
+            `${profile.membraneDurationSeconds.toFixed(2)}s`
+        );
+
+        element.style.setProperty(
+            "--organism-membrane-delay",
+            `${profile.membraneDelaySeconds.toFixed(2)}s`
         );
     }
 
