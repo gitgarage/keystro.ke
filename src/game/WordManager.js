@@ -27,9 +27,9 @@ import { ERROR_FLASH_DURATION_MS } from "./constants.js";
  * These values allow themed CSS to make a population feel varied without
  * changing gameplay behavior or introducing per-frame visual randomness.
  *
- * Amoeba targets also receive a stable membrane animation duration and phase.
- * CSS owns the deformation itself so the game loop remains focused on gameplay
- * movement rather than decorative animation.
+ * Amoeba targets receive stable membrane animation and internal organelle
+ * profiles. CSS owns the decorative deformation and organelle movement so the
+ * game loop remains focused on gameplay movement.
  *
  * Each target receives an organic movement profile at spawn. The movement
  * profile adds slow vertical wandering around the target's original travel
@@ -141,6 +141,28 @@ export class WordManager {
         };
     }
 
+    createOrganelleProfiles() {
+        const organelleCount = 3 + Math.floor(Math.random() * 3);
+        const profiles = [];
+
+        for (let index = 0; index < organelleCount; index += 1) {
+            const durationSeconds = 7 + Math.random() * 9;
+
+            profiles.push({
+                sizeRem: 0.12 + Math.random() * 0.3,
+                leftPercent: 16 + Math.random() * 68,
+                topPercent: 20 + Math.random() * 58,
+                opacity: 0.14 + Math.random() * 0.34,
+                driftXRem: -0.45 + Math.random() * 0.9,
+                driftYRem: -0.3 + Math.random() * 0.6,
+                durationSeconds,
+                delaySeconds: -Math.random() * durationSeconds
+            });
+        }
+
+        return profiles;
+    }
+
     applyPresentationProfile(element, profile) {
         element.style.setProperty(
             "--organism-scale-x",
@@ -193,11 +215,72 @@ export class WordManager {
         );
     }
 
-    createWordElement(wordTarget, speed, presentationProfile) {
+    createOrganelleElement(profile) {
+        const organelle = document.createElement("span");
+
+        organelle.className = "word-organelle";
+        organelle.setAttribute("aria-hidden", "true");
+
+        organelle.style.setProperty(
+            "--organelle-size",
+            `${profile.sizeRem.toFixed(3)}rem`
+        );
+
+        organelle.style.setProperty(
+            "--organelle-left",
+            `${profile.leftPercent.toFixed(2)}%`
+        );
+
+        organelle.style.setProperty(
+            "--organelle-top",
+            `${profile.topPercent.toFixed(2)}%`
+        );
+
+        organelle.style.setProperty(
+            "--organelle-opacity",
+            profile.opacity.toFixed(3)
+        );
+
+        organelle.style.setProperty(
+            "--organelle-drift-x",
+            `${profile.driftXRem.toFixed(3)}rem`
+        );
+
+        organelle.style.setProperty(
+            "--organelle-drift-y",
+            `${profile.driftYRem.toFixed(3)}rem`
+        );
+
+        organelle.style.setProperty(
+            "--organelle-duration",
+            `${profile.durationSeconds.toFixed(2)}s`
+        );
+
+        organelle.style.setProperty(
+            "--organelle-delay",
+            `${profile.delaySeconds.toFixed(2)}s`
+        );
+
+        return organelle;
+    }
+
+    appendOrganelles(element, organelleProfiles) {
+        for (const profile of organelleProfiles) {
+            element.appendChild(
+                this.createOrganelleElement(profile)
+            );
+        }
+    }
+
+    createWordElement(
+        wordTarget,
+        speed,
+        presentationProfile,
+        organelleProfiles
+    ) {
         const element = document.createElement("span");
 
         element.className = "word-target";
-        element.textContent = wordTarget.text;
 
         this.applyPresentationProfile(element, presentationProfile);
 
@@ -210,6 +293,14 @@ export class WordManager {
         } else if (speed < this.tuning.slowWordSpeed) {
             element.classList.add("is-slow");
         }
+
+        const textElement = document.createElement("span");
+
+        textElement.className = "word-text";
+        textElement.textContent = wordTarget.text;
+
+        element.appendChild(textElement);
+        this.appendOrganelles(element, organelleProfiles);
 
         return element;
     }
@@ -250,6 +341,7 @@ export class WordManager {
         const speed = this.chooseSpeedForTarget(wordTarget);
         const presentationProfile = this.createPresentationProfile();
         const movementProfile = this.createMovementProfile();
+        const organelleProfiles = this.createOrganelleProfiles();
 
         const y =
             viewportHeight *
@@ -267,7 +359,8 @@ export class WordManager {
         const element = this.createWordElement(
             wordTarget,
             speed,
-            presentationProfile
+            presentationProfile,
+            organelleProfiles
         );
 
         this.wordLayer.appendChild(element);
@@ -282,6 +375,7 @@ export class WordManager {
             speed,
             presentationProfile,
             movementProfile,
+            organelleProfiles,
             element
         });
     }
@@ -292,8 +386,11 @@ export class WordManager {
 
         word.element.replaceChildren();
 
+        const textElement = document.createElement("span");
         const typedElement = document.createElement("span");
         const remainingElement = document.createElement("span");
+
+        textElement.className = "word-text";
 
         typedElement.className = "word-typed";
         typedElement.textContent = typedText;
@@ -301,7 +398,13 @@ export class WordManager {
         remainingElement.className = "word-remaining";
         remainingElement.textContent = remainingText;
 
-        word.element.append(typedElement, remainingElement);
+        textElement.append(typedElement, remainingElement);
+        word.element.appendChild(textElement);
+
+        this.appendOrganelles(
+            word.element,
+            word.organelleProfiles
+        );
     }
 
     setActiveTarget(word) {

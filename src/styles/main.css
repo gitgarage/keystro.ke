@@ -178,24 +178,47 @@ body {
     content: "";
     position: absolute;
     inset: 0.18rem;
+    z-index: 0;
     border: 1px solid rgba(127, 235, 255, 0.12);
     border-radius: inherit;
     opacity: 0.72;
     pointer-events: none;
 }
 
-.word-target::after {
-    content: "";
+.word-text {
+    position: relative;
+    z-index: 2;
+}
+
+.word-organelle {
+    --organelle-size: 0.24rem;
+    --organelle-left: 50%;
+    --organelle-top: 50%;
+    --organelle-opacity: 0.3;
+    --organelle-drift-x: 0.3rem;
+    --organelle-drift-y: 0.2rem;
+    --organelle-duration: 10s;
+    --organelle-delay: 0s;
+
     position: absolute;
-    width: 0.34rem;
-    height: 0.34rem;
-    top: 24%;
-    right: 18%;
+    z-index: 1;
+    left: var(--organelle-left);
+    top: var(--organelle-top);
+    width: var(--organelle-size);
+    height: var(--organelle-size);
     border-radius: 50%;
-    background: rgba(127, 235, 255, 0.44);
+    background: rgba(127, 235, 255, var(--organelle-opacity));
     box-shadow:
-        -0.7rem 0.5rem 0 -0.08rem rgba(127, 235, 255, 0.18),
-        0.25rem 0.75rem 0 -0.12rem rgba(127, 235, 255, 0.24);
+        0 0 0.3rem rgba(127, 235, 255, 0.12),
+        inset 0 0 0.12rem rgba(255, 255, 255, 0.16);
+    transform: translate(-50%, -50%);
+    animation:
+        organelle-drift
+        var(--organelle-duration)
+        ease-in-out
+        var(--organelle-delay)
+        infinite
+        alternate;
     pointer-events: none;
 }
 
@@ -241,6 +264,59 @@ body {
     }
 }
 
+@keyframes organelle-drift {
+    0% {
+        transform:
+            translate(-50%, -50%)
+            translate3d(0, 0, 0)
+            scale(0.9);
+    }
+
+    24% {
+        transform:
+            translate(-50%, -50%)
+            translate3d(
+                calc(var(--organelle-drift-x) * 0.55),
+                calc(var(--organelle-drift-y) * -0.4),
+                0
+            )
+            scale(1.06);
+    }
+
+    53% {
+        transform:
+            translate(-50%, -50%)
+            translate3d(
+                calc(var(--organelle-drift-x) * -0.35),
+                calc(var(--organelle-drift-y) * 0.7),
+                0
+            )
+            scale(0.96);
+    }
+
+    76% {
+        transform:
+            translate(-50%, -50%)
+            translate3d(
+                calc(var(--organelle-drift-x) * 0.25),
+                calc(var(--organelle-drift-y) * -0.8),
+                0
+            )
+            scale(1.1);
+    }
+
+    100% {
+        transform:
+            translate(-50%, -50%)
+            translate3d(
+                var(--organelle-drift-x),
+                var(--organelle-drift-y),
+                0
+            )
+            scale(0.92);
+    }
+}
+
 .word-target.is-fast {
     border-color: rgba(
         255,
@@ -257,11 +333,11 @@ body {
     border-color: rgba(255, 203, 87, 0.14);
 }
 
-.word-target.is-fast::after {
-    background: rgba(255, 203, 87, 0.48);
+.word-target.is-fast .word-organelle {
+    background: rgba(255, 203, 87, var(--organelle-opacity));
     box-shadow:
-        -0.7rem 0.5rem 0 -0.08rem rgba(255, 203, 87, 0.18),
-        0.25rem 0.75rem 0 -0.12rem rgba(255, 203, 87, 0.24);
+        0 0 0.3rem rgba(255, 203, 87, 0.14),
+        inset 0 0 0.12rem rgba(255, 255, 255, 0.16);
 }
 
 .word-target.is-slow {
@@ -280,11 +356,11 @@ body {
     border-color: rgba(190, 125, 255, 0.14);
 }
 
-.word-target.is-slow::after {
-    background: rgba(190, 125, 255, 0.48);
+.word-target.is-slow .word-organelle {
+    background: rgba(190, 125, 255, var(--organelle-opacity));
     box-shadow:
-        -0.7rem 0.5rem 0 -0.08rem rgba(190, 125, 255, 0.18),
-        0.25rem 0.75rem 0 -0.12rem rgba(190, 125, 255, 0.24);
+        0 0 0.3rem rgba(190, 125, 255, 0.14),
+        inset 0 0 0.12rem rgba(255, 255, 255, 0.16);
 }
 
 .word-target.is-power-up {
@@ -312,11 +388,11 @@ body {
     border-color: rgba(255, 231, 120, 0.22);
 }
 
-.word-target.is-power-up::after {
-    background: rgba(255, 231, 120, 0.72);
+.word-target.is-power-up .word-organelle {
+    background: rgba(255, 231, 120, var(--organelle-opacity));
     box-shadow:
-        -0.7rem 0.5rem 0 -0.08rem rgba(255, 231, 120, 0.3),
-        0.25rem 0.75rem 0 -0.12rem rgba(190, 125, 255, 0.4);
+        0 0 0.4rem rgba(255, 231, 120, 0.22),
+        inset 0 0 0.14rem rgba(255, 255, 255, 0.22);
 }
 
 .word-target.is-active {
@@ -515,7 +591,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .word-target {
+    .word-target,
+    .word-organelle {
         animation: none;
     }
 }
