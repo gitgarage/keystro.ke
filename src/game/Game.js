@@ -11,8 +11,8 @@
 import { InputManager } from "./InputManager.js";
 import { ScoreManager } from "./ScoreManager.js";
 import { SessionManager } from "./SessionManager.js";
+import { StageManager } from "./StageManager.js";
 import { WordManager } from "./WordManager.js";
-import { SPAWN_INTERVAL_MS } from "./constants.js";
 
 /**
  * ============================================================================
@@ -23,21 +23,14 @@ import { SPAWN_INTERVAL_MS } from "./constants.js";
  * --------------
  * Coordinates the top-level keystro.ke gameplay loop.
  *
- * Responsibilities include:
- *
- * - owning the animation frame lifecycle
- * - calculating elapsed frame time
- * - scheduling word spawning
- * - connecting gameplay systems through meaningful events
- * - coordinating session completion
- * - presenting final session results
- *
- * Game coordinates systems. It should not absorb their internal rules.
+ * Game now receives stage configuration from StageManager and passes that data
+ * to systems that need it.
  * ============================================================================
  */
 
 export class Game {
     constructor({
+        gameViewport,
         wordLayer,
         comboValue,
         scoreValue,
@@ -49,12 +42,16 @@ export class Game {
         resultPerfectWords,
         resultMistakes
     }) {
+        this.gameViewport = gameViewport;
         this.resultsScreen = resultsScreen;
         this.resultScore = resultScore;
         this.resultHighestCombo = resultHighestCombo;
         this.resultCompletedWords = resultCompletedWords;
         this.resultPerfectWords = resultPerfectWords;
         this.resultMistakes = resultMistakes;
+
+        this.stageManager = new StageManager();
+        this.currentStage = this.stageManager.getCurrentStage();
 
         this.scoreManager = new ScoreManager({
             comboValue,
@@ -71,6 +68,7 @@ export class Game {
 
         this.wordManager = new WordManager({
             wordLayer,
+            stage: this.currentStage,
 
             onWordCompleted: (word) => {
                 this.scoreManager.handleWordCompleted(word);
@@ -101,11 +99,9 @@ export class Game {
         this.runFrame = this.runFrame.bind(this);
     }
 
-    /**
-     * Starts the current game session.
-     */
     start() {
         this.resultsScreen.hidden = true;
+        this.gameViewport.classList.add(this.stageManager.getStageClassName());
 
         this.scoreManager.start();
         this.sessionManager.start();
@@ -114,9 +110,6 @@ export class Game {
         window.requestAnimationFrame(this.runFrame);
     }
 
-    /**
-     * Ends gameplay and renders the final session summary.
-     */
     endSession() {
         this.inputManager.stop();
         this.wordManager.clearWords();
@@ -141,9 +134,6 @@ export class Game {
         this.resultsScreen.hidden = false;
     }
 
-    /**
-     * Runs one frame of the game loop.
-     */
     runFrame(currentTime) {
         if (this.lastFrameTime === 0) {
             this.lastFrameTime = currentTime;
@@ -159,7 +149,8 @@ export class Game {
         }
 
         if (
-            currentTime - this.lastSpawnTime >= SPAWN_INTERVAL_MS
+            currentTime - this.lastSpawnTime >=
+            this.currentStage.tuning.spawnIntervalMs
         ) {
             this.wordManager.spawnWord();
             this.lastSpawnTime = currentTime;

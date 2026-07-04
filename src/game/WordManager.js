@@ -8,23 +8,7 @@
  * License, or (at your option) any later version.
  */
 
-import {
-    ERROR_FLASH_DURATION_MS,
-    FAST_WORD_SPEED,
-    MAX_ACTIVE_WORDS,
-    MAX_POWER_UP_SPEED,
-    MAX_WORD_SPEED,
-    MAX_WORD_Y_RATIO,
-    MIN_POWER_UP_SPEED,
-    MIN_WORD_SPEED,
-    MIN_WORD_Y_RATIO,
-    POWER_UP_SPAWN_CHANCE,
-    POWER_UP_WORD_POOL,
-    SLOW_WORD_SPEED,
-    WORD_EXIT_X,
-    WORD_POOL,
-    WORD_SPAWN_OFFSET_X
-} from "./constants.js";
+import { ERROR_FLASH_DURATION_MS } from "./constants.js";
 
 /**
  * ============================================================================
@@ -35,22 +19,22 @@ import {
  * --------------
  * Owns the lifecycle of moving word targets.
  *
- * Power-up words are still word targets. They use the same typing rules, but
- * carry a different target type so scoring and styling can treat them specially.
- *
- * WordManager also exposes a clear operation for removing all targets when a
- * session ends.
+ * WordManager now receives stage configuration instead of owning global word
+ * pools directly. This keeps themed vocabulary and stage tuning out of the core
+ * word lifecycle code.
  * ============================================================================
  */
 
 export class WordManager {
     constructor({
         wordLayer,
+        stage,
         onWordCompleted,
         onIncorrectLetter,
         onWordEscaped
     }) {
         this.wordLayer = wordLayer;
+        this.stage = stage;
 
         this.onWordCompleted = onWordCompleted;
         this.onIncorrectLetter = onIncorrectLetter;
@@ -58,6 +42,10 @@ export class WordManager {
 
         this.activeWords = [];
         this.activeTarget = null;
+    }
+
+    get tuning() {
+        return this.stage.tuning;
     }
 
     getReservedStartingLetters() {
@@ -85,10 +73,13 @@ export class WordManager {
     }
 
     chooseWordTarget() {
-        const shouldTryPowerUp = Math.random() < POWER_UP_SPAWN_CHANCE;
+        const shouldTryPowerUp =
+            Math.random() < this.tuning.powerUpSpawnChance;
 
         if (shouldTryPowerUp) {
-            const powerUpText = this.chooseWordFromPool(POWER_UP_WORD_POOL);
+            const powerUpText = this.chooseWordFromPool(
+                this.stage.powerUpWordPool
+            );
 
             if (powerUpText) {
                 return {
@@ -98,7 +89,7 @@ export class WordManager {
             }
         }
 
-        const normalText = this.chooseWordFromPool(WORD_POOL);
+        const normalText = this.chooseWordFromPool(this.stage.wordPool);
 
         if (!normalText) {
             return null;
@@ -120,9 +111,9 @@ export class WordManager {
             element.classList.add("is-power-up");
         }
 
-        if (speed > FAST_WORD_SPEED) {
+        if (speed > this.tuning.fastWordSpeed) {
             element.classList.add("is-fast");
-        } else if (speed < SLOW_WORD_SPEED) {
+        } else if (speed < this.tuning.slowWordSpeed) {
             element.classList.add("is-slow");
         }
 
@@ -132,19 +123,24 @@ export class WordManager {
     chooseSpeedForTarget(wordTarget) {
         if (wordTarget.type === "power-up") {
             return (
-                MIN_POWER_UP_SPEED +
-                Math.random() * (MAX_POWER_UP_SPEED - MIN_POWER_UP_SPEED)
+                this.tuning.minPowerUpSpeed +
+                Math.random() *
+                    (
+                        this.tuning.maxPowerUpSpeed -
+                        this.tuning.minPowerUpSpeed
+                    )
             );
         }
 
         return (
-            MIN_WORD_SPEED +
-            Math.random() * (MAX_WORD_SPEED - MIN_WORD_SPEED)
+            this.tuning.minWordSpeed +
+            Math.random() *
+                (this.tuning.maxWordSpeed - this.tuning.minWordSpeed)
         );
     }
 
     spawnWord() {
-        if (this.activeWords.length >= MAX_ACTIVE_WORDS) {
+        if (this.activeWords.length >= this.tuning.maxActiveWords) {
             return;
         }
 
@@ -162,11 +158,15 @@ export class WordManager {
         const y =
             viewportHeight *
             (
-                MIN_WORD_Y_RATIO +
-                Math.random() * (MAX_WORD_Y_RATIO - MIN_WORD_Y_RATIO)
+                this.tuning.minWordYRatio +
+                Math.random() *
+                    (
+                        this.tuning.maxWordYRatio -
+                        this.tuning.minWordYRatio
+                    )
             );
 
-        const x = viewportWidth + WORD_SPAWN_OFFSET_X;
+        const x = viewportWidth + this.tuning.wordSpawnOffsetX;
 
         const element = this.createWordElement(wordTarget, speed);
 
@@ -238,12 +238,6 @@ export class WordManager {
         }
     }
 
-    /**
-     * Removes every active word without reporting escape events.
-     *
-     * Session cleanup is not gameplay failure. Remaining targets disappear when
-     * time expires without breaking combo or altering final statistics.
-     */
     clearWords() {
         for (const word of this.activeWords) {
             word.element.remove();
@@ -314,7 +308,7 @@ export class WordManager {
             word.element.style.transform =
                 `translate3d(${word.x}px, ${word.y}px, 0)`;
 
-            if (word.x < WORD_EXIT_X) {
+            if (word.x < this.tuning.wordExitX) {
                 this.onWordEscaped(word);
                 this.removeWord(word);
             }

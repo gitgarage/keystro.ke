@@ -25,6 +25,7 @@ import { Game } from "./game/Game.js";
 
 function startApplication() {
     const elements = {
+        gameViewport: document.querySelector(".game-viewport"),
         wordLayer: document.querySelector("#word-layer"),
         comboValue: document.querySelector("#combo-value"),
         scoreValue: document.querySelector("#score-value"),
@@ -57,7 +58,7 @@ function startApplication() {
 
     game.start();
 
-    console.info("keystro.ke timed session demo loaded.");
+    console.info("keystro.ke amoeba stage foundation loaded.");
 }
 
 window.addEventListener("DOMContentLoaded", startApplication);

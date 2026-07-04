@@ -14,6 +14,11 @@ index.html
     v
 src/main.js
     |
+    +---- StageManager
+    |         |
+    |         v
+    |   stages/amoebaStage.js
+    |
     v
 Game
     |
@@ -24,16 +29,14 @@ Game
     +---- ScoreManager
     |
     +---- SessionManager
-    |
-    +---- Stage
 ```
 
 `Game` coordinates systems through gameplay events.
 
 ```text
-Stage
+StageManager
     |
-    | stage configuration
+    | active stage configuration
     v
 Game
     |
@@ -79,11 +82,13 @@ Game
 src/
 ├── main.js
 ├── game/
+│   ├── stages/
+│   │   └── amoebaStage.js
 │   ├── Game.js
 │   ├── InputManager.js
 │   ├── ScoreManager.js
 │   ├── SessionManager.js
-│   ├── Stage.js
+│   ├── StageManager.js
 │   ├── WordManager.js
 │   └── constants.js
 └── styles/
@@ -121,6 +126,8 @@ It is responsible for:
 
 - finding required DOM elements
 - validating the application shell
+- creating the stage manager
+- selecting the active stage
 - creating the top-level `Game`
 - starting the game
 
@@ -155,11 +162,31 @@ Systems communicate through meaningful events rather than directly controlling o
 
 ## Stage System
 
-`src/game/Stage.js` defines the active stage configuration.
+The stage system is divided between the stage manager and individual stage definitions.
 
-A stage describes the themed gameplay environment without implementing the game loop itself.
+```text
+StageManager
+    |
+    +---- stage definitions
+              |
+              +---- amoebaStage
+```
 
-Stage configuration may define:
+`src/game/StageManager.js` owns stage selection.
+
+It is responsible for:
+
+- storing available stage definitions
+- selecting a stage by identifier
+- exposing the active stage configuration
+
+`StageManager` should not implement gameplay rules.
+
+Individual stage definitions live under `src/game/stages/`.
+
+`src/game/stages/amoebaStage.js` defines the current Stage One configuration.
+
+A stage definition may provide:
 
 - stage identity
 - stage name
@@ -170,9 +197,7 @@ Stage configuration may define:
 - movement speeds
 - session duration
 
-The current stage is the Stage One amoeba prototype.
-
-Stage-specific values should enter gameplay through the stage configuration rather than being embedded directly inside `Game` or `WordManager`.
+Stage-specific values should enter gameplay through the active stage configuration rather than being embedded directly inside `Game` or `WordManager`.
 
 This creates a boundary between reusable typing mechanics and themed stage content.
 
@@ -390,7 +415,7 @@ Session cleanup should not change final score, combo, or mistake statistics.
 
 `src/game/constants.js` owns gameplay values shared across stages and systems.
 
-Stage-specific configuration belongs in the stage definition.
+Stage-specific configuration belongs in an individual stage definition.
 
 Shared configuration may include:
 
@@ -408,6 +433,8 @@ Stage configuration may include:
 - session duration
 
 Configuration should be named instead of hidden as unexplained numbers inside gameplay code.
+
+Stage definitions should contain themed values without implementing the systems that consume them.
 
 ---
 
