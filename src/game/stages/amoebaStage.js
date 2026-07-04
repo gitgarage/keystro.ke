@@ -30,37 +30,43 @@ export const amoebaStage = {
 
     wordPool: [
         "cell",
-        "glow",
+        "flow",
         "drift",
-        "focus",
-        "rhythm",
-        "signal",
-        "current",
-        "horizon",
-        "cascade",
-        "resonance"
+        "pulse",
+        "membrane",
+        "nucleus",
+        "plasma",
+        "divide",
+        "absorb",
+        "spore",
+        "fluid",
+        "colony",
+        "microbe",
+        "vacuole",
+        "enzyme",
+        "cytoplasm"
     ],
 
     powerUpWordPool: [
-        "overdrive",
-        "radiance",
-        "harmony",
-        "zenith"
+        "mitosis",
+        "mutation",
+        "symbiosis",
+        "evolution"
     ],
 
     tuning: {
         maxActiveWords: 6,
-        spawnIntervalMs: 1400,
-        powerUpSpawnChance: 0.16,
+        spawnIntervalMs: 1450,
+        powerUpSpawnChance: 0.08,
 
-        minWordSpeed: 65,
-        maxWordSpeed: 150,
+        minWordSpeed: 62,
+        maxWordSpeed: 132,
 
-        minPowerUpSpeed: 52,
-        maxPowerUpSpeed: 88,
+        minPowerUpSpeed: 50,
+        maxPowerUpSpeed: 78,
 
-        slowWordSpeed: 85,
-        fastWordSpeed: 120,
+        slowWordSpeed: 82,
+        fastWordSpeed: 112,
 
         wordExitX: -220,
         wordSpawnOffsetX: 80,
