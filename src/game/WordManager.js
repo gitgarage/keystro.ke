@@ -10,6 +10,7 @@
 
 import { ERROR_FLASH_DURATION_MS } from "./constants.js";
 import { OrganismProfileFactory } from "./OrganismProfileFactory.js";
+import { OrganismRenderer } from "./OrganismRenderer.js";
 
 /**
  * ============================================================================
@@ -18,7 +19,7 @@ import { OrganismProfileFactory } from "./OrganismProfileFactory.js";
  *
  * Responsibility
  * --------------
- * Owns the lifecycle of moving word targets.
+ * Owns the lifecycle and gameplay state of moving word targets.
  *
  * WordManager receives stage configuration instead of owning global word pools
  * directly. This keeps themed vocabulary and stage tuning out of the core word
@@ -27,8 +28,11 @@ import { OrganismProfileFactory } from "./OrganismProfileFactory.js";
  * Stable organism presentation, movement, and organelle profiles are created
  * by OrganismProfileFactory when targets spawn.
  *
+ * OrganismRenderer owns the DOM structure and presentation updates for organism
+ * targets.
+ *
  * WordManager remains responsible for target selection, spawning, gameplay
- * state, typed progress, movement updates, and target removal.
+ * state, typed progress, movement calculation, and target removal.
  * ============================================================================
  */
 
@@ -48,6 +52,10 @@ export class WordManager {
         this.onWordEscaped = onWordEscaped;
 
         this.organismProfileFactory = new OrganismProfileFactory();
+
+        this.organismRenderer = new OrganismRenderer({
+            tuning: this.tuning
+        });
 
         this.activeWords = [];
         this.activeTarget = null;
@@ -110,148 +118,6 @@ export class WordManager {
         };
     }
 
-    applyPresentationProfile(element, profile) {
-        element.style.setProperty(
-            "--organism-scale-x",
-            profile.scaleX.toFixed(3)
-        );
-
-        element.style.setProperty(
-            "--organism-scale-y",
-            profile.scaleY.toFixed(3)
-        );
-
-        element.style.setProperty(
-            "--organism-rotation",
-            `${profile.rotationDegrees.toFixed(2)}deg`
-        );
-
-        element.style.setProperty(
-            "--organism-radius-one",
-            `${profile.radiusOne.toFixed(2)}%`
-        );
-
-        element.style.setProperty(
-            "--organism-radius-two",
-            `${profile.radiusTwo.toFixed(2)}%`
-        );
-
-        element.style.setProperty(
-            "--organism-radius-three",
-            `${profile.radiusThree.toFixed(2)}%`
-        );
-
-        element.style.setProperty(
-            "--organism-radius-four",
-            `${profile.radiusFour.toFixed(2)}%`
-        );
-
-        element.style.setProperty(
-            "--organism-membrane-opacity",
-            profile.membraneOpacity.toFixed(3)
-        );
-
-        element.style.setProperty(
-            "--organism-membrane-duration",
-            `${profile.membraneDurationSeconds.toFixed(2)}s`
-        );
-
-        element.style.setProperty(
-            "--organism-membrane-delay",
-            `${profile.membraneDelaySeconds.toFixed(2)}s`
-        );
-    }
-
-    createOrganelleElement(profile) {
-        const organelle = document.createElement("span");
-
-        organelle.className = "word-organelle";
-        organelle.setAttribute("aria-hidden", "true");
-
-        organelle.style.setProperty(
-            "--organelle-size",
-            `${profile.sizeRem.toFixed(3)}rem`
-        );
-
-        organelle.style.setProperty(
-            "--organelle-left",
-            `${profile.leftPercent.toFixed(2)}%`
-        );
-
-        organelle.style.setProperty(
-            "--organelle-top",
-            `${profile.topPercent.toFixed(2)}%`
-        );
-
-        organelle.style.setProperty(
-            "--organelle-opacity",
-            profile.opacity.toFixed(3)
-        );
-
-        organelle.style.setProperty(
-            "--organelle-drift-x",
-            `${profile.driftXRem.toFixed(3)}rem`
-        );
-
-        organelle.style.setProperty(
-            "--organelle-drift-y",
-            `${profile.driftYRem.toFixed(3)}rem`
-        );
-
-        organelle.style.setProperty(
-            "--organelle-duration",
-            `${profile.durationSeconds.toFixed(2)}s`
-        );
-
-        organelle.style.setProperty(
-            "--organelle-delay",
-            `${profile.delaySeconds.toFixed(2)}s`
-        );
-
-        return organelle;
-    }
-
-    appendOrganelles(element, organelleProfiles) {
-        for (const profile of organelleProfiles) {
-            element.appendChild(
-                this.createOrganelleElement(profile)
-            );
-        }
-    }
-
-    createWordElement(
-        wordTarget,
-        speed,
-        presentationProfile,
-        organelleProfiles
-    ) {
-        const element = document.createElement("span");
-
-        element.className = "word-target";
-
-        this.applyPresentationProfile(element, presentationProfile);
-
-        if (wordTarget.type === "power-up") {
-            element.classList.add("is-power-up");
-        }
-
-        if (speed > this.tuning.fastWordSpeed) {
-            element.classList.add("is-fast");
-        } else if (speed < this.tuning.slowWordSpeed) {
-            element.classList.add("is-slow");
-        }
-
-        const textElement = document.createElement("span");
-
-        textElement.className = "word-text";
-        textElement.textContent = wordTarget.text;
-
-        element.appendChild(textElement);
-        this.appendOrganelles(element, organelleProfiles);
-
-        return element;
-    }
-
     chooseSpeedForTarget(wordTarget) {
         if (wordTarget.type === "power-up") {
             return (
@@ -306,12 +172,12 @@ export class WordManager {
 
         const x = viewportWidth + this.tuning.wordSpawnOffsetX;
 
-        const element = this.createWordElement(
+        const element = this.organismRenderer.createElement({
             wordTarget,
             speed,
             presentationProfile,
             organelleProfiles
-        );
+        });
 
         this.wordLayer.appendChild(element);
 
@@ -330,39 +196,12 @@ export class WordManager {
         });
     }
 
-    renderWordProgress(word) {
-        const typedText = word.text.slice(0, word.progress);
-        const remainingText = word.text.slice(word.progress);
-
-        word.element.replaceChildren();
-
-        const textElement = document.createElement("span");
-        const typedElement = document.createElement("span");
-        const remainingElement = document.createElement("span");
-
-        textElement.className = "word-text";
-
-        typedElement.className = "word-typed";
-        typedElement.textContent = typedText;
-
-        remainingElement.className = "word-remaining";
-        remainingElement.textContent = remainingText;
-
-        textElement.append(typedElement, remainingElement);
-        word.element.appendChild(textElement);
-
-        this.appendOrganelles(
-            word.element,
-            word.organelleProfiles
-        );
-    }
-
     setActiveTarget(word) {
         this.activeTarget = word;
 
         word.element.classList.add("is-active");
 
-        this.renderWordProgress(word);
+        this.organismRenderer.renderProgress(word);
 
         for (const otherWord of this.activeWords) {
             if (otherWord !== word) {
@@ -440,7 +279,7 @@ export class WordManager {
 
         this.activeTarget.progress += 1;
 
-        this.renderWordProgress(this.activeTarget);
+        this.organismRenderer.renderProgress(this.activeTarget);
 
         if (this.activeTarget.progress >= this.activeTarget.text.length) {
             const completedWord = this.activeTarget;
@@ -471,11 +310,10 @@ export class WordManager {
 
             const renderedY = word.baseY + verticalOffset;
 
-            word.element.style.transform =
-                `translate3d(${word.x}px, ${renderedY}px, 0) ` +
-                `rotate(${word.presentationProfile.rotationDegrees}deg) ` +
-                `scaleX(${word.presentationProfile.scaleX}) ` +
-                `scaleY(${word.presentationProfile.scaleY})`;
+            this.organismRenderer.renderPosition(
+                word,
+                renderedY
+            );
 
             if (word.x < this.tuning.wordExitX) {
                 this.onWordEscaped(word);
