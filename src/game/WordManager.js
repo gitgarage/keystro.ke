@@ -9,6 +9,7 @@
  */
 
 import { ERROR_FLASH_DURATION_MS } from "./constants.js";
+import { OrganismProfileFactory } from "./OrganismProfileFactory.js";
 
 /**
  * ============================================================================
@@ -23,18 +24,11 @@ import { ERROR_FLASH_DURATION_MS } from "./constants.js";
  * directly. This keeps themed vocabulary and stage tuning out of the core word
  * lifecycle code.
  *
- * Each spawned target also receives a small set of stable presentation values.
- * These values allow themed CSS to make a population feel varied without
- * changing gameplay behavior or introducing per-frame visual randomness.
+ * Stable organism presentation, movement, and organelle profiles are created
+ * by OrganismProfileFactory when targets spawn.
  *
- * Amoeba targets receive stable membrane animation and internal organelle
- * profiles. CSS owns the decorative deformation and organelle movement so the
- * game loop remains focused on gameplay movement.
- *
- * Each target receives an organic movement profile at spawn. The movement
- * profile adds slow vertical wandering around the target's original travel
- * lane while preserving its primary movement toward the left side of the
- * viewport.
+ * WordManager remains responsible for target selection, spawning, gameplay
+ * state, typed progress, movement updates, and target removal.
  * ============================================================================
  */
 
@@ -52,6 +46,8 @@ export class WordManager {
         this.onWordCompleted = onWordCompleted;
         this.onIncorrectLetter = onIncorrectLetter;
         this.onWordEscaped = onWordEscaped;
+
+        this.organismProfileFactory = new OrganismProfileFactory();
 
         this.activeWords = [];
         this.activeTarget = null;
@@ -112,55 +108,6 @@ export class WordManager {
             text: normalText,
             type: "normal"
         };
-    }
-
-    createPresentationProfile() {
-        const membraneDurationSeconds = 7 + Math.random() * 7;
-
-        return {
-            scaleX: 0.9 + Math.random() * 0.24,
-            scaleY: 0.88 + Math.random() * 0.26,
-            rotationDegrees: -4 + Math.random() * 8,
-            radiusOne: 42 + Math.random() * 16,
-            radiusTwo: 42 + Math.random() * 16,
-            radiusThree: 42 + Math.random() * 16,
-            radiusFour: 42 + Math.random() * 16,
-            membraneOpacity: 0.38 + Math.random() * 0.24,
-            membraneDurationSeconds,
-            membraneDelaySeconds:
-                -Math.random() * membraneDurationSeconds
-        };
-    }
-
-    createMovementProfile() {
-        return {
-            elapsedSeconds: 0,
-            verticalAmplitude: 10 + Math.random() * 24,
-            verticalFrequency: 0.45 + Math.random() * 0.5,
-            verticalPhase: Math.random() * Math.PI * 2
-        };
-    }
-
-    createOrganelleProfiles() {
-        const organelleCount = 3 + Math.floor(Math.random() * 3);
-        const profiles = [];
-
-        for (let index = 0; index < organelleCount; index += 1) {
-            const durationSeconds = 7 + Math.random() * 9;
-
-            profiles.push({
-                sizeRem: 0.12 + Math.random() * 0.3,
-                leftPercent: 16 + Math.random() * 68,
-                topPercent: 20 + Math.random() * 58,
-                opacity: 0.14 + Math.random() * 0.34,
-                driftXRem: -0.45 + Math.random() * 0.9,
-                driftYRem: -0.3 + Math.random() * 0.6,
-                durationSeconds,
-                delaySeconds: -Math.random() * durationSeconds
-            });
-        }
-
-        return profiles;
     }
 
     applyPresentationProfile(element, profile) {
@@ -339,9 +286,12 @@ export class WordManager {
         const viewportHeight = window.innerHeight;
 
         const speed = this.chooseSpeedForTarget(wordTarget);
-        const presentationProfile = this.createPresentationProfile();
-        const movementProfile = this.createMovementProfile();
-        const organelleProfiles = this.createOrganelleProfiles();
+        const organismProfile =
+            this.organismProfileFactory.createProfile();
+
+        const presentationProfile = organismProfile.presentation;
+        const movementProfile = organismProfile.movement;
+        const organelleProfiles = organismProfile.organelles;
 
         const y =
             viewportHeight *
