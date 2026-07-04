@@ -40,6 +40,78 @@ body {
     overflow: hidden;
 }
 
+.microscopic-environment {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.environment-particle-layer {
+    position: absolute;
+    inset: -8%;
+}
+
+.environment-particle-layer.is-far {
+    opacity: 0.45;
+    filter: blur(0.08rem);
+}
+
+.environment-particle-layer.is-mid {
+    opacity: 0.58;
+    filter: blur(0.04rem);
+}
+
+.environment-particle-layer.is-near {
+    opacity: 0.38;
+    filter: blur(0.14rem);
+}
+
+.environment-particle {
+    position: absolute;
+    left: var(--particle-left);
+    top: var(--particle-top);
+    width: var(--particle-size);
+    height: var(--particle-size);
+    border-radius: 50%;
+    background: rgba(180, 245, 255, var(--particle-opacity));
+    box-shadow: 0 0 0.45rem rgba(127, 235, 255, 0.08);
+    animation:
+        microscopic-particle-drift
+        var(--particle-duration)
+        ease-in-out
+        var(--particle-delay)
+        infinite
+        alternate;
+}
+
+@keyframes microscopic-particle-drift {
+    0% {
+        transform: translate3d(0, 0, 0) scale(0.82);
+    }
+
+    50% {
+        transform:
+            translate3d(
+                calc(var(--particle-drift-x) * -0.45),
+                calc(var(--particle-drift-y) * 0.65),
+                0
+            )
+            scale(1.08);
+    }
+
+    100% {
+        transform:
+            translate3d(
+                var(--particle-drift-x),
+                var(--particle-drift-y),
+                0
+            )
+            scale(0.94);
+    }
+}
+
 .hud {
     position: absolute;
     z-index: 20;
@@ -592,7 +664,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
     .word-target,
-    .word-organelle {
+    .word-organelle,
+    .environment-particle {
         animation: none;
     }
 }

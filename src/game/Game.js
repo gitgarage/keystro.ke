@@ -9,6 +9,7 @@
  */
 
 import { InputManager } from "./InputManager.js";
+import { MicroscopicEnvironment } from "./MicroscopicEnvironment.js";
 import { ScoreManager } from "./ScoreManager.js";
 import { SessionManager } from "./SessionManager.js";
 import { StageManager } from "./StageManager.js";
@@ -52,6 +53,9 @@ export class Game {
 
         this.stageManager = new StageManager();
         this.currentStage = this.stageManager.getCurrentStage();
+        this.microscopicEnvironment = new MicroscopicEnvironment({
+            gameViewport
+        });
 
         this.scoreManager = new ScoreManager({
             comboValue,
@@ -103,6 +107,7 @@ export class Game {
         this.resultsScreen.hidden = true;
         this.gameViewport.classList.add(this.stageManager.getStageClassName());
 
+        this.microscopicEnvironment.start();
         this.scoreManager.start();
         this.sessionManager.start();
         this.inputManager.start();
