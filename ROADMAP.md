@@ -26,19 +26,19 @@ Stage One / Amoeba Prototype
 
 ## Current Task
 
-Build the first themed gameplay environment on top of the new stage configuration boundary.
+Give Stage One its first amoeba-like target presentation.
 
-Stage One will present amoeba-like word targets moving through a microscopic environment.
-
-The typing, score, combo, and session systems should remain reusable while the stage gains its own vocabulary, pacing, and visual identity.
+The first visual pass uses the existing DOM word targets and CSS to establish a living microscopic silhouette without changing gameplay behavior.
 
 ---
 
 ## Next Task
 
-Give Stage One its first amoeba-like target presentation.
+Evaluate the amoeba target presentation and decide whether individual targets need randomized shape data.
 
-The initial visual prototype should prove that a word target can read as a living microscopic entity without committing the project to its final renderer.
+If CSS-only targets establish the correct direction, continue into the microscopic stage environment.
+
+If the targets feel too uniform, introduce small per-target visual variables without coupling those values to typing behavior.
 
 ---
 
@@ -123,6 +123,33 @@ Stage vocabulary should be thematically connected to the environment.
 Common targets should use shorter words.
 
 More significant targets and mini-boss-like entities may use longer and more difficult words.
+
+---
+
+## Amoeba Presentation Direction
+
+Stage One should first read as microscopic life before the project invests in a final renderer.
+
+The initial target presentation should preserve:
+
+- readable words
+- clear typed progress
+- visible active targeting
+- mistake feedback
+- speed distinctions
+- power-up distinction
+
+The first visual prototype uses:
+
+- irregular cell silhouettes
+- a translucent body
+- an outer membrane
+- subtle internal organelle-like details
+- slow organic shape changes
+
+The visual layer should remain replaceable.
+
+Gameplay systems should not depend on the current CSS representation of an amoeba.
 
 ---
 

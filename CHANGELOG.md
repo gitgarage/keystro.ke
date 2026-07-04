@@ -33,6 +33,9 @@ The project is currently in early development.
 - Initial stage configuration system.
 - Stage One amoeba prototype configuration.
 - Stage-specific word pools and gameplay timing.
+- CSS-driven amoeba target presentation.
+- Animated amoeba membrane and internal organelle-like details.
+- Reduced-motion handling for amoeba target animation.
 
 ### Changed
 
@@ -45,7 +48,9 @@ The project is currently in early development.
 - Set the `dev` branch as the automatic Cloudflare Pages deployment branch.
 - Advanced the current development milestone to the Stage One amoeba prototype.
 - Separated reusable typing mechanics from stage-specific gameplay configuration.
-- Updated `Game`, `WordManager`, and `SessionManager` to consume active stage values.
+- Updated `Game` and `WordManager` to consume active stage values.
+- Replaced the pill-like Stage One target silhouette with an irregular microscopic cell presentation.
+- Preserved speed, power-up, active-target, mistake, muted, and typed-progress feedback in the amoeba presentation.
 
 ---
 
