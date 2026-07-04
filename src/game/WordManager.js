@@ -30,6 +30,11 @@ import { ERROR_FLASH_DURATION_MS } from "./constants.js";
  * Amoeba targets also receive a stable membrane animation duration and phase.
  * CSS owns the deformation itself so the game loop remains focused on gameplay
  * movement rather than decorative animation.
+ *
+ * Each target receives an organic movement profile at spawn. The movement
+ * profile adds slow vertical wandering around the target's original travel
+ * lane while preserving its primary movement toward the left side of the
+ * viewport.
  * ============================================================================
  */
 
@@ -124,6 +129,15 @@ export class WordManager {
             membraneDurationSeconds,
             membraneDelaySeconds:
                 -Math.random() * membraneDurationSeconds
+        };
+    }
+
+    createMovementProfile() {
+        return {
+            elapsedSeconds: 0,
+            verticalAmplitude: 10 + Math.random() * 24,
+            verticalFrequency: 0.45 + Math.random() * 0.5,
+            verticalPhase: Math.random() * Math.PI * 2
         };
     }
 
@@ -235,6 +249,7 @@ export class WordManager {
 
         const speed = this.chooseSpeedForTarget(wordTarget);
         const presentationProfile = this.createPresentationProfile();
+        const movementProfile = this.createMovementProfile();
 
         const y =
             viewportHeight *
@@ -263,9 +278,10 @@ export class WordManager {
             progress: 0,
             isPerfect: true,
             x,
-            y,
+            baseY: y,
             speed,
             presentationProfile,
+            movementProfile,
             element
         });
     }
@@ -388,11 +404,22 @@ export class WordManager {
             index -= 1
         ) {
             const word = this.activeWords[index];
+            const movement = word.movementProfile;
 
             word.x -= word.speed * deltaSeconds;
+            movement.elapsedSeconds += deltaSeconds;
+
+            const verticalOffset =
+                Math.sin(
+                    movement.verticalPhase +
+                    movement.elapsedSeconds * movement.verticalFrequency
+                ) *
+                movement.verticalAmplitude;
+
+            const renderedY = word.baseY + verticalOffset;
 
             word.element.style.transform =
-                `translate3d(${word.x}px, ${word.y}px, 0) ` +
+                `translate3d(${word.x}px, ${renderedY}px, 0) ` +
                 `rotate(${word.presentationProfile.rotationDegrees}deg) ` +
                 `scaleX(${word.presentationProfile.scaleX}) ` +
                 `scaleY(${word.presentationProfile.scaleY})`;
