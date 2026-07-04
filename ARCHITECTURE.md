@@ -24,11 +24,25 @@ Game
     +---- ScoreManager
     |
     +---- SessionManager
+    |
+    +---- Stage
 ```
 
 `Game` coordinates systems through gameplay events.
 
 ```text
+Stage
+    |
+    | stage configuration
+    v
+Game
+    |
+    +---- WordManager
+    |
+    +---- ScoreManager
+    |
+    +---- SessionManager
+
 InputManager
     |
     | typed letter
@@ -69,6 +83,7 @@ src/
 │   ├── InputManager.js
 │   ├── ScoreManager.js
 │   ├── SessionManager.js
+│   ├── Stage.js
 │   ├── WordManager.js
 │   └── constants.js
 └── styles/
@@ -130,9 +145,40 @@ It is responsible for:
 - collecting system summaries
 - presenting final results
 
+`Game` receives the active stage configuration and supplies stage-specific values to the systems that need them.
+
 `Game` should coordinate systems, not absorb their internal rules.
 
 Systems communicate through meaningful events rather than directly controlling one another.
+
+---
+
+## Stage System
+
+`src/game/Stage.js` defines the active stage configuration.
+
+A stage describes the themed gameplay environment without implementing the game loop itself.
+
+Stage configuration may define:
+
+- stage identity
+- stage name
+- normal word pool
+- power-up word pool
+- spawn timing
+- power-up spawn probability
+- movement speeds
+- session duration
+
+The current stage is the Stage One amoeba prototype.
+
+Stage-specific values should enter gameplay through the stage configuration rather than being embedded directly inside `Game` or `WordManager`.
+
+This creates a boundary between reusable typing mechanics and themed stage content.
+
+The first stage implementation is intentionally small.
+
+The stage system should grow only when additional stages prove that more abstraction is necessary.
 
 ---
 
@@ -148,7 +194,7 @@ It is responsible for:
 - forwarding normalized letters
 - stopping keyboard capture when requested
 
-It should not know about words, score, combo, session timing, or rendering.
+It should not know about words, score, combo, session timing, stages, or rendering.
 
 ---
 
@@ -158,7 +204,7 @@ It should not know about words, score, combo, session timing, or rendering.
 
 It is responsible for:
 
-- selecting words
+- selecting words from the active stage configuration
 - preventing duplicate starting letters
 - spawning word targets
 - moving active words
@@ -189,6 +235,8 @@ The object stores game state.
 The DOM element renders that state.
 
 Session cleanup removes active targets without reporting escape events.
+
+`WordManager` owns word behavior but should not own the thematic vocabulary of a stage.
 
 ---
 
@@ -291,7 +339,7 @@ It is responsible for:
 - tracking incorrect typed letters
 - reporting session completion
 
-The current session duration is 60 seconds.
+Session duration is supplied by the active stage configuration.
 
 Session time advances using animation-frame delta time supplied by `Game`.
 
@@ -340,20 +388,23 @@ Session cleanup should not change final score, combo, or mistake statistics.
 
 ## Configuration
 
-`src/game/constants.js` owns shared gameplay configuration.
+`src/game/constants.js` owns gameplay values shared across stages and systems.
 
-It currently stores:
+Stage-specific configuration belongs in the stage definition.
 
-- normal word pool
-- power-up word pool
-- spawn timing
-- power-up spawn probability
-- normal movement speeds
-- power-up movement speeds
+Shared configuration may include:
+
 - viewport ratios
 - visual threshold values
 - base score per letter
 - power-up score multiplier
+
+Stage configuration may include:
+
+- word pools
+- spawn timing
+- power-up spawn probability
+- movement speeds
 - session duration
 
 Configuration should be named instead of hidden as unexplained numbers inside gameplay code.
@@ -402,13 +453,15 @@ session statistics
 results presentation
 ```
 
-The next development phase should establish the broader game design before heavily refining visual presentation.
+The current development phase is establishing themed stages while preserving the reusable typing systems.
+
+The Stage One amoeba prototype is the first test of the stage boundary.
 
 Deferred systems include:
 
 ```text
 stage progression
-themed word pools
+themed rendering
 WebGL
 particles
 generated audio

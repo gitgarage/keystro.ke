@@ -1,7 +1,3 @@
-
-### `ROADMAP.md`
-
-```markdown
 # Roadmap
 
 ## Current Milestone
@@ -24,29 +20,35 @@ Stage One / Amoeba Prototype
 - Public Demo Shell
 - Cloudflare Pages Deployment
 - Custom Domain Deployment
+- Initial Stage System
 
 ---
 
 ## Current Task
 
-Design and implement the first themed stage prototype.
+Build the first themed gameplay environment on top of the new stage configuration boundary.
 
-The first stage will replace abstract word targets with amoeba-like entities moving through a microscopic environment.
+Stage One will present amoeba-like word targets moving through a microscopic environment.
+
+The typing, score, combo, and session systems should remain reusable while the stage gains its own vocabulary, pacing, and visual identity.
 
 ---
 
 ## Next Task
 
-Define the Stage system and create the Stage One amoeba prototype.
+Give Stage One its first amoeba-like target presentation.
+
+The initial visual prototype should prove that a word target can read as a living microscopic entity without committing the project to its final renderer.
 
 ---
 
 ## Planned Milestones
 
-- Stage System
-- Amoeba Stage Prototype
+- Amoeba Target Presentation
+- Microscopic Stage Environment
+- Stage One Gameplay Tuning
 - Stage Progression
-- Themed Word Pools
+- Additional Themed Word Pools
 - Difficulty Progression
 - Electronic Stage Music
 - WebGL Renderer
@@ -77,7 +79,30 @@ The first playable loop now supports:
 
 The first public playable demo is available at:
 
-https://keystro.ke
+`https://keystro.ke`
+
+---
+
+## Stage System
+
+The game now has an initial stage configuration boundary.
+
+Stage-specific configuration may define:
+
+- stage identity
+- stage name
+- normal word pool
+- power-up word pool
+- spawn timing
+- power-up probability
+- movement speeds
+- session duration
+
+The stage system is intentionally small.
+
+The project should avoid designing a large generalized stage framework before multiple stages demonstrate what abstractions are actually shared.
+
+Stage One is the first test of this architecture.
 
 ---
 
@@ -111,7 +136,7 @@ Pushes to `dev` automatically trigger a new deployment.
 
 The custom domain is:
 
-https://keystro.ke
+`https://keystro.ke`
 
 The `main` branch remains reserved for stable release checkpoints.
 

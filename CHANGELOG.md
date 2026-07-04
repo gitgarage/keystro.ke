@@ -30,6 +30,9 @@ The project is currently in early development.
 - SVG application favicon.
 - Cloudflare Pages deployment.
 - Public deployment at `https://keystro.ke`.
+- Initial stage configuration system.
+- Stage One amoeba prototype configuration.
+- Stage-specific word pools and gameplay timing.
 
 ### Changed
 
@@ -41,6 +44,8 @@ The project is currently in early development.
 - Expanded the public demo shell for live deployment.
 - Set the `dev` branch as the automatic Cloudflare Pages deployment branch.
 - Advanced the current development milestone to the Stage One amoeba prototype.
+- Separated reusable typing mechanics from stage-specific gameplay configuration.
+- Updated `Game`, `WordManager`, and `SessionManager` to consume active stage values.
 
 ---
 
@@ -48,4 +53,4 @@ The project is currently in early development.
 
 The first public development version of keystro.ke.
 
-The current goal is to establish the complete foundation of the first playable loop before expanding into themed stages, richer rendering, audio, and deeper statistics.
+The current goal is to establish the first themed stage prototype while preserving the reusable typing, scoring, and session systems proven by the first playable loop.

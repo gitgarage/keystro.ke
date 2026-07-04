@@ -1,191 +1,34 @@
-# Decisions
-
-This document records important technical and product decisions for keystro.ke.
-
-The purpose is to preserve the reasoning behind the project so future changes do not repeatedly revisit already considered questions.
 
 ---
 
-## 2026-07-02 — Use the GNU Affero General Public License v3
+## 2026-07-03 — Separate stage configuration from reusable typing systems
 
 ### Decision
 
-License keystro.ke under the GNU Affero General Public License v3.0 or later.
+Represent the active game stage as a dedicated stage configuration.
+
+Stage-specific values may include:
+
+- stage identity
+- stage name
+- word pools
+- spawn timing
+- power-up probability
+- movement speeds
+- session duration
+
+Reusable systems such as `WordManager`, `ScoreManager`, and `SessionManager` should not define the thematic content of a stage.
 
 ### Reason
 
-The project is intended to remain open source, including when modified software is operated as a network service.
+The first playable loop proved the core typing mechanic using globally shared configuration.
 
-Commercial redistribution is acceptable when the corresponding source obligations of the license are followed.
+The planned game progression moves through environments with different vocabulary, pacing, target behavior, and presentation.
 
----
+Keeping those values inside reusable gameplay systems would gradually couple the typing engine to Stage One.
 
-## 2026-07-03 — Keep the early browser game dependency-free
+A stage boundary allows the same typing systems to operate across different environments without requiring a separate game loop for every stage.
 
-### Decision
+The stage abstraction is intentionally configuration-focused.
 
-Build the first playable loop with browser-native HTML, CSS, and JavaScript modules.
-
-Do not introduce a frontend framework or build system yet.
-
-### Reason
-
-The first demo should remain directly understandable from the source code.
-
-Dependencies should be introduced only when a specific project requirement justifies them.
-
----
-
-## 2026-07-03 — Use a coordinator with focused game systems
-
-### Decision
-
-Use `Game` as the top-level coordinator and move focused responsibilities into dedicated manager classes.
-
-Current systems include:
-
-- `InputManager`
-- `WordManager`
-- `ScoreManager`
-- `SessionManager`
-
-### Reason
-
-The original single-file game loop proved the mechanic, but continued feature development inside one source file would make responsibilities difficult to separate.
-
-`Game` should connect systems through meaningful gameplay events instead of implementing every feature directly.
-
----
-
-## 2026-07-03 — Reserve starting letters for visible word targets
-
-### Decision
-
-Do not allow multiple available visible word targets to share the same starting letter.
-
-### Reason
-
-The first typed letter selects a target.
-
-Allowing two available targets with the same starting letter would make selection visually ambiguous even if the program selected one deterministically.
-
----
-
-## 2026-07-03 — Define combo as consecutive perfect words
-
-### Decision
-
-Combo measures consecutive words completed without an incorrect letter or escaped word.
-
-An incorrect letter marks the active word as imperfect and immediately resets combo.
-
-Completing that imperfect word does not increase combo.
-
-### Reason
-
-Combo should measure clean typing streaks rather than persistence alone.
-
-The player still receives base score for completing an imperfect word, so a mistake removes the streak reward without removing all credit for finishing the target.
-
----
-
-## 2026-07-03 — Represent power-ups as typed word targets
-
-### Decision
-
-Represent power-ups as word targets with a distinct `type` value rather than creating a separate power-up gameplay system.
-
-Current target types are:
-
-```text
-normal
-power-up
-```
-
-### Reason
-
-Power-ups currently share the fundamental behavior of normal targets:
-
-- they spawn into the play area
-- they move across the screen
-- they reserve a starting letter
-- the player locks onto them through typing
-- they track typed progress
-- they may be completed perfectly or imperfectly
-- they may escape
-
-Creating a separate system would duplicate this behavior.
-
-The target type gives scoring and presentation systems enough information to apply specialized behavior without duplicating the core word lifecycle.
-
----
-
-## 2026-07-03 — Reward only perfect power-up completion
-
-### Decision
-
-Apply the power-up score multiplier only when a power-up word is completed perfectly.
-
-An imperfect power-up receives normal base score.
-
-### Reason
-
-The visually distinct target presents a higher-value opportunity.
-
-The special reward should require clean execution.
-
-Allowing a player to make mistakes and retain the full power-up multiplier would weaken the meaning of both perfect words and combo streaks.
-
----
-
-## 2026-07-03 — Use animation-frame delta time for session timing
-
-### Decision
-
-Advance session time using the animation-frame delta time calculated by `Game`.
-
-Do not create a separate `setInterval` timer for the gameplay session.
-
-### Reason
-
-The game already owns a frame lifecycle and calculates elapsed time between frames.
-
-Supplying that elapsed time to `SessionManager` keeps gameplay timing inside one coordinated loop.
-
-This avoids maintaining a separate timer lifecycle that could drift independently from gameplay state.
-
----
-
-## 2026-07-03 — Define mistakes as incorrect typed letters
-
-### Decision
-
-Count each incorrect typed letter as one mistake.
-
-Escaped words break combo but do not count as mistakes.
-
-### Reason
-
-The results screen should distinguish typing accuracy from missed gameplay opportunities.
-
-An incorrect letter is a direct typing error.
-
-An escaped word may occur because the player chose another target, could not reach a target in time, or made a strategic decision.
-
-These events should not be represented by the same statistic.
-
----
-
-## 2026-07-03 — Clear remaining targets without escape events when a session ends
-
-### Decision
-
-Remove all active word targets when session time expires without reporting them as escaped words.
-
-### Reason
-
-Session completion is cleanup, not gameplay failure.
-
-Treating every remaining target as escaped would alter combo state at the exact moment gameplay ends and would make final statistics depend on arbitrary targets still visible when the timer reaches zero.
-
-Final session results should represent gameplay events that occurred while the session was active.
+Additional stage architecture should be introduced only when future stages demonstrate a concrete need for it.
