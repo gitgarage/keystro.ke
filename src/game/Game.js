@@ -24,8 +24,8 @@ import { WordManager } from "./WordManager.js";
  * --------------
  * Coordinates the top-level keystro.ke gameplay loop.
  *
- * Game now receives stage configuration from StageManager and passes that data
- * to systems that need it.
+ * Game receives stage configuration from StageManager and passes stage data
+ * and current progression state to the systems that need them.
  * ============================================================================
  */
 
@@ -53,6 +53,7 @@ export class Game {
 
         this.stageManager = new StageManager();
         this.currentStage = this.stageManager.getCurrentStage();
+
         this.microscopicEnvironment = new MicroscopicEnvironment({
             gameViewport
         });
@@ -64,6 +65,8 @@ export class Game {
 
         this.sessionManager = new SessionManager({
             timerValue,
+            durationSeconds:
+                this.currentStage.tuning.sessionDurationSeconds,
 
             onSessionEnded: () => {
                 this.endSession();
@@ -103,13 +106,45 @@ export class Game {
         this.runFrame = this.runFrame.bind(this);
     }
 
+    getCurrentProgressionPhase() {
+        const progression = this.currentStage.progression;
+
+        if (!progression || progression.length === 0) {
+            return {
+                startProgress: 0,
+                spawnIntervalMultiplier: 1,
+                speedMultiplier: 1
+            };
+        }
+
+        const sessionProgress = this.sessionManager.getProgress();
+        let currentPhase = progression[0];
+
+        for (const phase of progression) {
+            if (sessionProgress < phase.startProgress) {
+                break;
+            }
+
+            currentPhase = phase;
+        }
+
+        return currentPhase;
+    }
+
     start() {
         this.resultsScreen.hidden = true;
-        this.gameViewport.classList.add(this.stageManager.getStageClassName());
+        this.gameViewport.classList.add(
+            this.stageManager.getStageClassName()
+        );
 
         this.microscopicEnvironment.start();
         this.scoreManager.start();
         this.sessionManager.start();
+
+        this.wordManager.seedInitialWords(
+            this.getCurrentProgressionPhase()
+        );
+
         this.inputManager.start();
 
         window.requestAnimationFrame(this.runFrame);
@@ -123,15 +158,19 @@ export class Game {
         const sessionSummary = this.sessionManager.getSummary();
 
         this.resultScore.textContent = String(scoreSummary.score);
+
         this.resultHighestCombo.textContent = String(
             scoreSummary.highestCombo
         );
+
         this.resultCompletedWords.textContent = String(
             sessionSummary.completedWords
         );
+
         this.resultPerfectWords.textContent = String(
             sessionSummary.perfectWords
         );
+
         this.resultMistakes.textContent = String(
             sessionSummary.mistakes
         );
@@ -153,11 +192,18 @@ export class Game {
             return;
         }
 
+        const progressionPhase =
+            this.getCurrentProgressionPhase();
+
+        const spawnIntervalMs =
+            this.currentStage.tuning.spawnIntervalMs *
+            progressionPhase.spawnIntervalMultiplier;
+
         if (
             currentTime - this.lastSpawnTime >=
-            this.currentStage.tuning.spawnIntervalMs
+            spawnIntervalMs
         ) {
-            this.wordManager.spawnWord();
+            this.wordManager.spawnWord(progressionPhase);
             this.lastSpawnTime = currentTime;
         }
 

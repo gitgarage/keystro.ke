@@ -106,7 +106,9 @@ export class WordManager {
             }
         }
 
-        const normalText = this.chooseWordFromPool(this.stage.wordPool);
+        const normalText = this.chooseWordFromPool(
+            this.stage.wordPool
+        );
 
         if (!normalText) {
             return null;
@@ -133,25 +135,34 @@ export class WordManager {
         return (
             this.tuning.minWordSpeed +
             Math.random() *
-                (this.tuning.maxWordSpeed - this.tuning.minWordSpeed)
+                (
+                    this.tuning.maxWordSpeed -
+                    this.tuning.minWordSpeed
+                )
         );
     }
 
-    spawnWord() {
+    createWord(progressionPhase = {}, initialX = null) {
         if (this.activeWords.length >= this.tuning.maxActiveWords) {
-            return;
+            return null;
         }
 
         const wordTarget = this.chooseWordTarget();
 
         if (!wordTarget) {
-            return;
+            return null;
         }
 
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const speed = this.chooseSpeedForTarget(wordTarget);
+        const speedMultiplier =
+            progressionPhase.speedMultiplier ?? 1;
+
+        const speed =
+            this.chooseSpeedForTarget(wordTarget) *
+            speedMultiplier;
+
         const organismProfile =
             this.organismProfileFactory.createProfile();
 
@@ -170,7 +181,12 @@ export class WordManager {
                     )
             );
 
-        const x = viewportWidth + this.tuning.wordSpawnOffsetX;
+        const x =
+            initialX ??
+            (
+                viewportWidth +
+                this.tuning.wordSpawnOffsetX
+            );
 
         const element = this.organismRenderer.createElement({
             wordTarget,
@@ -181,7 +197,7 @@ export class WordManager {
 
         this.wordLayer.appendChild(element);
 
-        this.activeWords.push({
+        const word = {
             text: wordTarget.text,
             type: wordTarget.type,
             progress: 0,
@@ -193,7 +209,49 @@ export class WordManager {
             movementProfile,
             organelleProfiles,
             element
-        });
+        };
+
+        this.activeWords.push(word);
+
+        return word;
+    }
+
+    spawnWord(progressionPhase = {}) {
+        this.createWord(progressionPhase);
+    }
+
+    seedInitialWords(progressionPhase = {}) {
+        const viewportWidth = window.innerWidth;
+
+        for (
+            let index = 0;
+            index < this.tuning.initialSpawnCount;
+            index += 1
+        ) {
+            const xRatio =
+                this.tuning.initialSpawnMinXRatio +
+                Math.random() *
+                    (
+                        this.tuning.initialSpawnMaxXRatio -
+                        this.tuning.initialSpawnMinXRatio
+                    );
+
+            const initialX = viewportWidth * xRatio;
+
+            const word = this.createWord(
+                progressionPhase,
+                initialX
+            );
+
+            if (!word) {
+                break;
+            }
+
+            this.organismRenderer.renderPosition(
+                word,
+                word.baseY
+            );
+        }
     }
 
     setActiveTarget(word) {
@@ -214,7 +272,10 @@ export class WordManager {
         this.activeTarget = null;
 
         for (const word of this.activeWords) {
-            word.element.classList.remove("is-active", "is-muted");
+            word.element.classList.remove(
+                "is-active",
+                "is-muted"
+            );
         }
     }
 
@@ -243,7 +304,10 @@ export class WordManager {
 
     findTargetForLetter(letter) {
         return this.activeWords.find((word) => {
-            return word.progress === 0 && word.text.startsWith(letter);
+            return (
+                word.progress === 0 &&
+                word.text.startsWith(letter)
+            );
         });
     }
 
@@ -267,7 +331,9 @@ export class WordManager {
         }
 
         const expectedLetter =
-            this.activeTarget.text[this.activeTarget.progress];
+            this.activeTarget.text[
+                this.activeTarget.progress
+            ];
 
         if (letter !== expectedLetter) {
             this.activeTarget.isPerfect = false;
@@ -279,9 +345,14 @@ export class WordManager {
 
         this.activeTarget.progress += 1;
 
-        this.organismRenderer.renderProgress(this.activeTarget);
+        this.organismRenderer.renderProgress(
+            this.activeTarget
+        );
 
-        if (this.activeTarget.progress >= this.activeTarget.text.length) {
+        if (
+            this.activeTarget.progress >=
+            this.activeTarget.text.length
+        ) {
             const completedWord = this.activeTarget;
 
             this.onWordCompleted(completedWord);
@@ -304,11 +375,13 @@ export class WordManager {
             const verticalOffset =
                 Math.sin(
                     movement.verticalPhase +
-                    movement.elapsedSeconds * movement.verticalFrequency
+                    movement.elapsedSeconds *
+                        movement.verticalFrequency
                 ) *
                 movement.verticalAmplitude;
 
-            const renderedY = word.baseY + verticalOffset;
+            const renderedY =
+                word.baseY + verticalOffset;
 
             this.organismRenderer.renderPosition(
                 word,

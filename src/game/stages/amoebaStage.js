@@ -59,6 +59,10 @@ export const amoebaStage = {
         spawnIntervalMs: 1450,
         powerUpSpawnChance: 0.08,
 
+        initialSpawnCount: 3,
+        initialSpawnMinXRatio: 0.58,
+        initialSpawnMaxXRatio: 0.92,
+
         minWordSpeed: 62,
         maxWordSpeed: 132,
 
@@ -72,6 +76,26 @@ export const amoebaStage = {
         wordSpawnOffsetX: 80,
 
         minWordYRatio: 0.18,
-        maxWordYRatio: 0.86
-    }
+        maxWordYRatio: 0.86,
+
+        sessionDurationSeconds: 60
+    },
+
+    progression: [
+        {
+            startProgress: 0,
+            spawnIntervalMultiplier: 1,
+            speedMultiplier: 1
+        },
+        {
+            startProgress: 0.333,
+            spawnIntervalMultiplier: 0.88,
+            speedMultiplier: 1.08
+        },
+        {
+            startProgress: 0.667,
+            spawnIntervalMultiplier: 0.76,
+            speedMultiplier: 1.18
+        }
+    ]
 };

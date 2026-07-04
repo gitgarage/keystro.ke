@@ -8,8 +8,6 @@
  * License, or (at your option) any later version.
  */
 
-import { SESSION_DURATION_SECONDS } from "./constants.js";
-
 /**
  * ============================================================================
  * SessionManager
@@ -23,6 +21,7 @@ import { SESSION_DURATION_SECONDS } from "./constants.js";
  *
  * - tracking whether a session is active
  * - tracking elapsed session time
+ * - calculating normalized session progress
  * - calculating visible remaining time
  * - tracking completed words
  * - tracking perfect words
@@ -35,6 +34,7 @@ import { SESSION_DURATION_SECONDS } from "./constants.js";
  * - spawn or move word targets
  * - calculate score
  * - interpret keyboard events
+ * - interpret stage progression
  * - render the final results screen
  *
  * Game coordinates the session with the other gameplay systems.
@@ -42,8 +42,13 @@ import { SESSION_DURATION_SECONDS } from "./constants.js";
  */
 
 export class SessionManager {
-    constructor({ timerValue, onSessionEnded }) {
+    constructor({
+        timerValue,
+        durationSeconds,
+        onSessionEnded
+    }) {
         this.timerValue = timerValue;
+        this.durationSeconds = durationSeconds;
         this.onSessionEnded = onSessionEnded;
 
         this.isActive = false;
@@ -82,8 +87,8 @@ export class SessionManager {
 
         this.elapsedSeconds += deltaSeconds;
 
-        if (this.elapsedSeconds >= SESSION_DURATION_SECONDS) {
-            this.elapsedSeconds = SESSION_DURATION_SECONDS;
+        if (this.elapsedSeconds >= this.durationSeconds) {
+            this.elapsedSeconds = this.durationSeconds;
             this.isActive = false;
 
             this.renderTime();
@@ -93,6 +98,20 @@ export class SessionManager {
         }
 
         this.renderTime();
+    }
+
+    /**
+     * Returns normalized session progress between zero and one.
+     */
+    getProgress() {
+        if (this.durationSeconds <= 0) {
+            return 1;
+        }
+
+        return Math.min(
+            1,
+            this.elapsedSeconds / this.durationSeconds
+        );
     }
 
     /**
@@ -144,7 +163,9 @@ export class SessionManager {
     renderTime() {
         const remainingSeconds = Math.max(
             0,
-            Math.ceil(SESSION_DURATION_SECONDS - this.elapsedSeconds)
+            Math.ceil(
+                this.durationSeconds - this.elapsedSeconds
+            )
         );
 
         if (remainingSeconds === this.lastRenderedSecond) {
