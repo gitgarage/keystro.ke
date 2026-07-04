@@ -19,9 +19,13 @@ import { ERROR_FLASH_DURATION_MS } from "./constants.js";
  * --------------
  * Owns the lifecycle of moving word targets.
  *
- * WordManager now receives stage configuration instead of owning global word
- * pools directly. This keeps themed vocabulary and stage tuning out of the core
- * word lifecycle code.
+ * WordManager receives stage configuration instead of owning global word pools
+ * directly. This keeps themed vocabulary and stage tuning out of the core word
+ * lifecycle code.
+ *
+ * Each spawned target also receives a small set of stable presentation values.
+ * These values allow themed CSS to make a population feel varied without
+ * changing gameplay behavior or introducing per-frame visual randomness.
  * ============================================================================
  */
 
@@ -101,11 +105,68 @@ export class WordManager {
         };
     }
 
-    createWordElement(wordTarget, speed) {
+    createPresentationProfile() {
+        return {
+            scaleX: 0.9 + Math.random() * 0.24,
+            scaleY: 0.88 + Math.random() * 0.26,
+            rotationDegrees: -4 + Math.random() * 8,
+            radiusOne: 42 + Math.random() * 16,
+            radiusTwo: 42 + Math.random() * 16,
+            radiusThree: 42 + Math.random() * 16,
+            radiusFour: 42 + Math.random() * 16,
+            membraneOpacity: 0.38 + Math.random() * 0.24
+        };
+    }
+
+    applyPresentationProfile(element, profile) {
+        element.style.setProperty(
+            "--organism-scale-x",
+            profile.scaleX.toFixed(3)
+        );
+
+        element.style.setProperty(
+            "--organism-scale-y",
+            profile.scaleY.toFixed(3)
+        );
+
+        element.style.setProperty(
+            "--organism-rotation",
+            `${profile.rotationDegrees.toFixed(2)}deg`
+        );
+
+        element.style.setProperty(
+            "--organism-radius-one",
+            `${profile.radiusOne.toFixed(2)}%`
+        );
+
+        element.style.setProperty(
+            "--organism-radius-two",
+            `${profile.radiusTwo.toFixed(2)}%`
+        );
+
+        element.style.setProperty(
+            "--organism-radius-three",
+            `${profile.radiusThree.toFixed(2)}%`
+        );
+
+        element.style.setProperty(
+            "--organism-radius-four",
+            `${profile.radiusFour.toFixed(2)}%`
+        );
+
+        element.style.setProperty(
+            "--organism-membrane-opacity",
+            profile.membraneOpacity.toFixed(3)
+        );
+    }
+
+    createWordElement(wordTarget, speed, presentationProfile) {
         const element = document.createElement("span");
 
         element.className = "word-target";
         element.textContent = wordTarget.text;
+
+        this.applyPresentationProfile(element, presentationProfile);
 
         if (wordTarget.type === "power-up") {
             element.classList.add("is-power-up");
@@ -154,6 +215,7 @@ export class WordManager {
         const viewportHeight = window.innerHeight;
 
         const speed = this.chooseSpeedForTarget(wordTarget);
+        const presentationProfile = this.createPresentationProfile();
 
         const y =
             viewportHeight *
@@ -168,7 +230,11 @@ export class WordManager {
 
         const x = viewportWidth + this.tuning.wordSpawnOffsetX;
 
-        const element = this.createWordElement(wordTarget, speed);
+        const element = this.createWordElement(
+            wordTarget,
+            speed,
+            presentationProfile
+        );
 
         this.wordLayer.appendChild(element);
 
@@ -180,6 +246,7 @@ export class WordManager {
             x,
             y,
             speed,
+            presentationProfile,
             element
         });
     }
@@ -306,7 +373,10 @@ export class WordManager {
             word.x -= word.speed * deltaSeconds;
 
             word.element.style.transform =
-                `translate3d(${word.x}px, ${word.y}px, 0)`;
+                `translate3d(${word.x}px, ${word.y}px, 0) ` +
+                `rotate(${word.presentationProfile.rotationDegrees}deg) ` +
+                `scaleX(${word.presentationProfile.scaleX}) ` +
+                `scaleY(${word.presentationProfile.scaleY})`;
 
             if (word.x < this.tuning.wordExitX) {
                 this.onWordEscaped(word);
