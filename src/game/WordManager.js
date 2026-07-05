@@ -45,6 +45,7 @@ export class WordManager {
     constructor({
         wordLayer,
         stage,
+        onCorrectLetter,
         onWordCompleted,
         onIncorrectLetter,
         onWordEscaped
@@ -52,6 +53,7 @@ export class WordManager {
         this.wordLayer = wordLayer;
         this.stage = stage;
 
+        this.onCorrectLetter = onCorrectLetter;
         this.onWordCompleted = onWordCompleted;
         this.onIncorrectLetter = onIncorrectLetter;
         this.onWordEscaped = onWordEscaped;
@@ -301,12 +303,6 @@ export class WordManager {
         }
     }
 
-    /**
-     * Returns a detached array containing the currently active word objects.
-     *
-     * The array is copied so callers cannot replace or reorder WordManager's
-     * internal active-word collection.
-     */
     getActiveWords() {
         return [...this.activeWords];
     }
@@ -378,6 +374,8 @@ export class WordManager {
         }
 
         this.activeTarget.progress += 1;
+
+        this.onCorrectLetter();
 
         this.organismRenderer.renderProgress(
             this.activeTarget
