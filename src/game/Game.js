@@ -26,7 +26,8 @@ import { WordManager } from "./WordManager.js";
  *
  * Game receives stage configuration from StageManager and interprets current
  * stage progression. The active progression phase is applied consistently to
- * spawning, organism movement, and phase-aware session telemetry.
+ * spawning, organism movement, active target density, and phase-aware session
+ * telemetry.
  * ============================================================================
  */
 
@@ -175,7 +176,11 @@ export class Game {
         this.microscopicEnvironment.start();
         this.scoreManager.start();
         this.sessionManager.start();
-        this.wordManager.seedInitialWords();
+
+        this.wordManager.seedInitialWords(
+            this.getCurrentProgressionPhase()
+        );
+
         this.inputManager.start();
 
         window.requestAnimationFrame(this.runFrame);
@@ -286,7 +291,7 @@ export class Game {
             currentTime - this.lastSpawnTime >=
             spawnIntervalMs
         ) {
-            this.wordManager.spawnWord();
+            this.wordManager.spawnWord(progressionPhase);
             this.lastSpawnTime = currentTime;
         }
 

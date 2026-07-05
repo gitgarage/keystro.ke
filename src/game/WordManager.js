@@ -35,8 +35,8 @@ import { OrganismRenderer } from "./OrganismRenderer.js";
  * state, typed progress, movement calculation, and target removal.
  *
  * Each target stores its natural base speed. The current stage progression
- * phase supplies a live speed multiplier during movement updates so every
- * organism responds to changing stage pressure together.
+ * phase supplies live pressure values during gameplay so every organism
+ * responds to changing stage pressure together.
  * ============================================================================
  */
 
@@ -146,8 +146,15 @@ export class WordManager {
         );
     }
 
-    createWord(initialX = null) {
-        if (this.activeWords.length >= this.tuning.maxActiveWords) {
+    createWord(
+        progressionPhase = {},
+        initialX = null
+    ) {
+        const maxActiveWords =
+            progressionPhase.maxActiveWords ??
+            this.tuning.maxActiveWords;
+
+        if (this.activeWords.length >= maxActiveWords) {
             return null;
         }
 
@@ -216,11 +223,11 @@ export class WordManager {
         return word;
     }
 
-    spawnWord() {
-        this.createWord();
+    spawnWord(progressionPhase = {}) {
+        this.createWord(progressionPhase);
     }
 
-    seedInitialWords() {
+    seedInitialWords(progressionPhase = {}) {
         const viewportWidth = window.innerWidth;
 
         for (
@@ -237,7 +244,11 @@ export class WordManager {
                     );
 
             const initialX = viewportWidth * xRatio;
-            const word = this.createWord(initialX);
+
+            const word = this.createWord(
+                progressionPhase,
+                initialX
+            );
 
             if (!word) {
                 break;

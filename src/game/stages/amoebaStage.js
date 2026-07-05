@@ -94,8 +94,9 @@ export const amoebaStage = {
         },
         {
             startProgress: 0.667,
-            spawnIntervalMultiplier: 0.76,
-            speedMultiplier: 1.18
+            maxActiveWords: 8,
+            spawnIntervalMultiplier: 0.7,
+            speedMultiplier: 1.4
         }
     ]
 };
