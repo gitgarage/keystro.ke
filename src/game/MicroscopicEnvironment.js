@@ -8,10 +8,27 @@
  * License, or (at your option) any later version.
  */
 
+/**
+ * ============================================================================
+ * Microscopic Environment
+ * ============================================================================
+ *
+ * Responsibility
+ * --------------
+ * Creates and manages the particulate fluid environment behind gameplay.
+ *
+ * The environment persists for the full stage. Progression pressure changes
+ * the behavior of the existing sample rather than replacing particle layers.
+ * This preserves visual continuity while allowing the microscopic field to
+ * become increasingly unstable as the stage advances.
+ * ============================================================================
+ */
+
 export class MicroscopicEnvironment {
     constructor({ gameViewport }) {
         this.gameViewport = gameViewport;
         this.element = null;
+        this.currentPhaseIndex = null;
     }
 
     start() {
@@ -28,12 +45,47 @@ export class MicroscopicEnvironment {
         this.createParticleLayer("is-near", 14);
 
         this.gameViewport.prepend(this.element);
+
+        this.setProgressionPhase(0);
+    }
+
+    setProgressionPhase(phaseIndex) {
+        if (!this.element) {
+            return;
+        }
+
+        if (this.currentPhaseIndex === phaseIndex) {
+            return;
+        }
+
+        this.element.classList.remove(
+            "is-pressure-calm",
+            "is-pressure-agitated",
+            "is-pressure-unstable"
+        );
+
+        if (phaseIndex >= 2) {
+            this.element.classList.add(
+                "is-pressure-unstable"
+            );
+        } else if (phaseIndex === 1) {
+            this.element.classList.add(
+                "is-pressure-agitated"
+            );
+        } else {
+            this.element.classList.add(
+                "is-pressure-calm"
+            );
+        }
+
+        this.currentPhaseIndex = phaseIndex;
     }
 
     createParticleLayer(className, count) {
         const layer = document.createElement("div");
 
-        layer.className = `environment-particle-layer ${className}`;
+        layer.className =
+            `environment-particle-layer ${className}`;
 
         for (let index = 0; index < count; index += 1) {
             layer.appendChild(this.createParticle());
@@ -54,16 +106,63 @@ export class MicroscopicEnvironment {
         const driftX = -2 + Math.random() * 4;
         const driftY = -1.5 + Math.random() * 3;
 
+        const agitationX =
+            -0.75 + Math.random() * 1.5;
+
+        const agitationY =
+            -0.6 + Math.random() * 1.2;
+
         particle.className = "environment-particle";
 
-        particle.style.setProperty("--particle-size", `${size.toFixed(3)}rem`);
-        particle.style.setProperty("--particle-left", `${left.toFixed(2)}%`);
-        particle.style.setProperty("--particle-top", `${top.toFixed(2)}%`);
-        particle.style.setProperty("--particle-opacity", opacity.toFixed(3));
-        particle.style.setProperty("--particle-duration", `${duration.toFixed(2)}s`);
-        particle.style.setProperty("--particle-delay", `${delay.toFixed(2)}s`);
-        particle.style.setProperty("--particle-drift-x", `${driftX.toFixed(3)}rem`);
-        particle.style.setProperty("--particle-drift-y", `${driftY.toFixed(3)}rem`);
+        particle.style.setProperty(
+            "--particle-size",
+            `${size.toFixed(3)}rem`
+        );
+
+        particle.style.setProperty(
+            "--particle-left",
+            `${left.toFixed(2)}%`
+        );
+
+        particle.style.setProperty(
+            "--particle-top",
+            `${top.toFixed(2)}%`
+        );
+
+        particle.style.setProperty(
+            "--particle-opacity",
+            opacity.toFixed(3)
+        );
+
+        particle.style.setProperty(
+            "--particle-duration",
+            `${duration.toFixed(2)}s`
+        );
+
+        particle.style.setProperty(
+            "--particle-delay",
+            `${delay.toFixed(2)}s`
+        );
+
+        particle.style.setProperty(
+            "--particle-drift-x",
+            `${driftX.toFixed(3)}rem`
+        );
+
+        particle.style.setProperty(
+            "--particle-drift-y",
+            `${driftY.toFixed(3)}rem`
+        );
+
+        particle.style.setProperty(
+            "--particle-agitation-x",
+            `${agitationX.toFixed(3)}rem`
+        );
+
+        particle.style.setProperty(
+            "--particle-agitation-y",
+            `${agitationY.toFixed(3)}rem`
+        );
 
         return particle;
     }

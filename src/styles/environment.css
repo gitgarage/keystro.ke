@@ -8,88 +8,428 @@
  * License, or (at your option) any later version.
  */
 
+/**
+ * ============================================================================
+ * Microscopic Environment
+ * ============================================================================
+ *
+ * Responsibility
+ * --------------
+ * Presents the particulate fluid field behind gameplay.
+ *
+ * Stage pressure changes the movement of the existing sample. The field begins
+ * with slow microscopic drift, gains agitation during the middle phase, and
+ * becomes visibly unstable during the final phase.
+ * ============================================================================
+ */
+
 .microscopic-environment {
     position: absolute;
     inset: 0;
     z-index: 1;
+
     overflow: hidden;
+
     pointer-events: none;
+
+    --environment-duration-scale: 1;
+    --environment-drift-scale: 1;
+    --environment-agitation-scale: 0;
+    --environment-layer-scale: 1;
+    --environment-particle-brightness: 1;
+    --environment-particle-glow: 1;
+}
+
+.microscopic-environment.is-pressure-calm {
+    --environment-duration-scale: 1;
+    --environment-drift-scale: 1;
+    --environment-agitation-scale: 0;
+    --environment-layer-scale: 1;
+    --environment-particle-brightness: 1;
+    --environment-particle-glow: 1;
+}
+
+.microscopic-environment.is-pressure-agitated {
+    --environment-duration-scale: 0.52;
+    --environment-drift-scale: 1.5;
+    --environment-agitation-scale: 0.68;
+    --environment-layer-scale: 1.1;
+    --environment-particle-brightness: 1.28;
+    --environment-particle-glow: 1.35;
+}
+
+.microscopic-environment.is-pressure-unstable {
+    --environment-duration-scale: 0.25;
+    --environment-drift-scale: 2.15;
+    --environment-agitation-scale: 1.2;
+    --environment-layer-scale: 1.22;
+    --environment-particle-brightness: 1.58;
+    --environment-particle-glow: 1.75;
 }
 
 .environment-particle-layer {
     position: absolute;
     inset: -8%;
+
+    transform:
+        scale(var(--environment-layer-scale));
+
+    transition:
+        transform
+        4s
+        ease-in-out;
 }
 
 .environment-particle-layer.is-far {
     opacity: 0.45;
+
     filter: blur(0.08rem);
 }
 
 .environment-particle-layer.is-mid {
     opacity: 0.58;
+
     filter: blur(0.04rem);
 }
 
 .environment-particle-layer.is-near {
     opacity: 0.38;
+
     filter: blur(0.14rem);
 }
 
 .environment-particle {
     position: absolute;
+
     left: var(--particle-left);
     top: var(--particle-top);
+
     width: var(--particle-size);
     height: var(--particle-size);
+
     border-radius: 50%;
-    background: rgba(
-        180,
-        245,
-        255,
-        var(--particle-opacity)
-    );
+
+    background:
+        rgba(
+            180,
+            245,
+            255,
+            var(--particle-opacity)
+        );
+
     box-shadow:
-        0 0 0.45rem rgba(127, 235, 255, 0.08);
-    animation:
-        microscopic-particle-drift
-        var(--particle-duration)
-        ease-in-out
-        var(--particle-delay)
-        infinite
+        0 0
+        calc(
+            0.45rem *
+            var(--environment-particle-glow)
+        )
+        rgba(127, 235, 255, 0.12);
+
+    filter:
+        brightness(
+            var(--environment-particle-brightness)
+        );
+
+    animation-name:
+        microscopic-particle-drift;
+
+    animation-duration:
+        calc(
+            var(--particle-duration) *
+            var(--environment-duration-scale)
+        );
+
+    animation-timing-function:
+        ease-in-out;
+
+    animation-delay:
+        var(--particle-delay);
+
+    animation-iteration-count:
+        infinite;
+
+    animation-direction:
         alternate;
+
+    transition:
+        filter
+        3s
+        ease-in-out,
+        box-shadow
+        3s
+        ease-in-out;
+}
+
+.environment-particle-layer.is-mid
+.environment-particle {
+    animation-name:
+        microscopic-particle-drift-mid;
+}
+
+.environment-particle-layer.is-near
+.environment-particle {
+    animation-name:
+        microscopic-particle-drift-near;
 }
 
 @keyframes microscopic-particle-drift {
     0% {
         transform:
-            translate3d(0, 0, 0)
+            translate3d(
+                calc(
+                    var(--particle-agitation-x) *
+                    var(--environment-agitation-scale) *
+                    -0.45
+                ),
+                calc(
+                    var(--particle-agitation-y) *
+                    var(--environment-agitation-scale) *
+                    0.35
+                ),
+                0
+            )
             scale(0.82);
     }
 
-    50% {
+    34% {
         transform:
             translate3d(
-                calc(var(--particle-drift-x) * -0.45),
-                calc(var(--particle-drift-y) * 0.65),
+                calc(
+                    var(--particle-drift-x) *
+                    var(--environment-drift-scale) *
+                    -0.35
+                ),
+                calc(
+                    var(--particle-drift-y) *
+                    var(--environment-drift-scale) *
+                    0.5
+                ),
                 0
             )
-            scale(1.08);
+            scale(1.04);
+    }
+
+    67% {
+        transform:
+            translate3d(
+                calc(
+                    (
+                        var(--particle-drift-x) *
+                        var(--environment-drift-scale) *
+                        0.45
+                    ) +
+                    (
+                        var(--particle-agitation-x) *
+                        var(--environment-agitation-scale)
+                    )
+                ),
+                calc(
+                    (
+                        var(--particle-drift-y) *
+                        var(--environment-drift-scale) *
+                        -0.3
+                    ) +
+                    (
+                        var(--particle-agitation-y) *
+                        var(--environment-agitation-scale)
+                    )
+                ),
+                0
+            )
+            scale(1.1);
     }
 
     100% {
         transform:
             translate3d(
-                var(--particle-drift-x),
-                var(--particle-drift-y),
+                calc(
+                    var(--particle-drift-x) *
+                    var(--environment-drift-scale)
+                ),
+                calc(
+                    var(--particle-drift-y) *
+                    var(--environment-drift-scale)
+                ),
                 0
             )
             scale(0.94);
     }
 }
 
+@keyframes microscopic-particle-drift-mid {
+    0% {
+        transform:
+            translate3d(
+                calc(
+                    var(--particle-agitation-x) *
+                    var(--environment-agitation-scale)
+                ),
+                calc(
+                    var(--particle-agitation-y) *
+                    var(--environment-agitation-scale) *
+                    -0.5
+                ),
+                0
+            )
+            scale(0.86);
+    }
+
+    29% {
+        transform:
+            translate3d(
+                calc(
+                    var(--particle-drift-x) *
+                    var(--environment-drift-scale) *
+                    -0.4
+                ),
+                calc(
+                    (
+                        var(--particle-drift-y) *
+                        var(--environment-drift-scale) *
+                        0.65
+                    ) +
+                    (
+                        var(--particle-agitation-y) *
+                        var(--environment-agitation-scale)
+                    )
+                ),
+                0
+            )
+            scale(1.12);
+    }
+
+    71% {
+        transform:
+            translate3d(
+                calc(
+                    (
+                        var(--particle-drift-x) *
+                        var(--environment-drift-scale) *
+                        0.55
+                    ) -
+                    (
+                        var(--particle-agitation-x) *
+                        var(--environment-agitation-scale)
+                    )
+                ),
+                calc(
+                    var(--particle-drift-y) *
+                    var(--environment-drift-scale) *
+                    -0.4
+                ),
+                0
+            )
+            scale(0.92);
+    }
+
+    100% {
+        transform:
+            translate3d(
+                calc(
+                    var(--particle-drift-x) *
+                    var(--environment-drift-scale)
+                ),
+                calc(
+                    var(--particle-drift-y) *
+                    var(--environment-drift-scale)
+                ),
+                0
+            )
+            scale(1.04);
+    }
+}
+
+@keyframes microscopic-particle-drift-near {
+    0% {
+        transform:
+            translate3d(
+                calc(
+                    var(--particle-agitation-x) *
+                    var(--environment-agitation-scale) *
+                    -1
+                ),
+                calc(
+                    var(--particle-agitation-y) *
+                    var(--environment-agitation-scale)
+                ),
+                0
+            )
+            scale(0.76);
+    }
+
+    38% {
+        transform:
+            translate3d(
+                calc(
+                    (
+                        var(--particle-drift-x) *
+                        var(--environment-drift-scale) *
+                        -0.3
+                    ) +
+                    (
+                        var(--particle-agitation-x) *
+                        var(--environment-agitation-scale)
+                    )
+                ),
+                calc(
+                    var(--particle-drift-y) *
+                    var(--environment-drift-scale) *
+                    0.75
+                ),
+                0
+            )
+            scale(1.18);
+    }
+
+    64% {
+        transform:
+            translate3d(
+                calc(
+                    var(--particle-drift-x) *
+                    var(--environment-drift-scale) *
+                    0.65
+                ),
+                calc(
+                    (
+                        var(--particle-drift-y) *
+                        var(--environment-drift-scale) *
+                        -0.45
+                    ) -
+                    (
+                        var(--particle-agitation-y) *
+                        var(--environment-agitation-scale)
+                    )
+                ),
+                0
+            )
+            scale(0.88);
+    }
+
+    100% {
+        transform:
+            translate3d(
+                calc(
+                    var(--particle-drift-x) *
+                    var(--environment-drift-scale)
+                ),
+                calc(
+                    var(--particle-drift-y) *
+                    var(--environment-drift-scale)
+                ),
+                0
+            )
+            scale(1.02);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
+    .environment-particle-layer {
+        transform: none;
+        transition: none;
+    }
+
     .environment-particle {
         animation: none;
+        transition: none;
     }
 }

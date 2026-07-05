@@ -26,8 +26,8 @@ import { WordManager } from "./WordManager.js";
  *
  * Game receives stage configuration from StageManager and interprets current
  * stage progression. The active progression phase is applied consistently to
- * spawning, organism movement, active target density, and phase-aware session
- * telemetry.
+ * spawning, organism movement, active target density, environmental pressure,
+ * and phase-aware session telemetry.
  *
  * Game also coordinates stage-level presentation moments such as the opening
  * stage introduction.
@@ -175,6 +175,7 @@ export class Game {
 
     start() {
         this.resultsScreen.hidden = true;
+
         this.gameViewport.classList.add(
             this.stageManager.getStageClassName()
         );
@@ -185,8 +186,15 @@ export class Game {
         this.scoreManager.start();
         this.sessionManager.start();
 
+        const progressionPhase =
+            this.getCurrentProgressionPhase();
+
+        this.microscopicEnvironment.setProgressionPhase(
+            progressionPhase.phaseIndex
+        );
+
         this.wordManager.seedInitialWords(
-            this.getCurrentProgressionPhase()
+            progressionPhase
         );
 
         this.inputManager.start();
@@ -221,26 +229,24 @@ export class Game {
 
         const scoreSummary = this.scoreManager.getSummary();
         const sessionSummary = this.sessionManager.getSummary();
+
         const telemetrySummary =
             this.sessionManager.getTelemetrySummary();
 
-        this.resultScore.textContent = String(scoreSummary.score);
+        this.resultScore.textContent =
+            String(scoreSummary.score);
 
-        this.resultHighestCombo.textContent = String(
-            scoreSummary.highestCombo
-        );
+        this.resultHighestCombo.textContent =
+            String(scoreSummary.highestCombo);
 
-        this.resultCompletedWords.textContent = String(
-            sessionSummary.completedWords
-        );
+        this.resultCompletedWords.textContent =
+            String(sessionSummary.completedWords);
 
-        this.resultPerfectWords.textContent = String(
-            sessionSummary.perfectWords
-        );
+        this.resultPerfectWords.textContent =
+            String(sessionSummary.perfectWords);
 
-        this.resultMistakes.textContent = String(
-            sessionSummary.mistakes
-        );
+        this.resultMistakes.textContent =
+            String(sessionSummary.mistakes);
 
         this.logSessionTelemetry(telemetrySummary);
 
@@ -302,6 +308,10 @@ export class Game {
 
         const progressionPhase =
             this.getCurrentProgressionPhase();
+
+        this.microscopicEnvironment.setProgressionPhase(
+            progressionPhase.phaseIndex
+        );
 
         const spawnIntervalMs =
             this.currentStage.tuning.spawnIntervalMs *
