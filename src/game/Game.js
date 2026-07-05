@@ -13,6 +13,7 @@ import { MicroscopicEnvironment } from "./MicroscopicEnvironment.js";
 import { ScoreManager } from "./ScoreManager.js";
 import { SessionManager } from "./SessionManager.js";
 import { StageManager } from "./StageManager.js";
+import { StagePresentationManager } from "./StagePresentationManager.js";
 import { WordManager } from "./WordManager.js";
 
 /**
@@ -26,11 +27,11 @@ import { WordManager } from "./WordManager.js";
  *
  * Game receives stage configuration from StageManager and interprets current
  * stage progression. The active progression phase is applied consistently to
- * spawning, organism movement, active target density, environmental pressure,
+ * spawning, organism movement, active target density, presentation pressure,
  * and phase-aware session telemetry.
  *
- * Game also coordinates stage-level presentation moments such as the opening
- * stage introduction and the transition from active play into results.
+ * Stage-level presentation lifecycle is delegated to
+ * StagePresentationManager.
  * ============================================================================
  */
 
@@ -48,17 +49,6 @@ export class Game {
         resultPerfectWords,
         resultMistakes
     }) {
-        this.gameViewport = gameViewport;
-        this.resultsScreen = resultsScreen;
-        this.resultScore = resultScore;
-        this.resultHighestCombo = resultHighestCombo;
-        this.resultCompletedWords = resultCompletedWords;
-        this.resultPerfectWords = resultPerfectWords;
-        this.resultMistakes = resultMistakes;
-
-        this.stageIntro =
-            this.gameViewport.querySelector("[data-stage-intro]");
-
         this.stageManager = new StageManager();
         this.currentStage = this.stageManager.getCurrentStage();
 
@@ -122,6 +112,20 @@ export class Game {
             }
         });
 
+        this.stagePresentationManager =
+            new StagePresentationManager({
+                gameViewport,
+                resultsScreen,
+                microscopicEnvironment:
+                    this.microscopicEnvironment,
+                wordManager: this.wordManager,
+                resultScore,
+                resultHighestCombo,
+                resultCompletedWords,
+                resultPerfectWords,
+                resultMistakes
+            });
+
         this.inputManager = new InputManager((letter) => {
             if (!this.sessionManager.isActive) {
                 return;
@@ -175,23 +179,14 @@ export class Game {
     }
 
     start() {
-        this.resultsScreen.hidden = true;
-        this.resultsScreen.classList.remove("is-visible");
-
-        this.gameViewport.classList.add(
-            this.stageManager.getStageClassName()
-        );
-
-        this.showStageIntro();
-
-        this.microscopicEnvironment.start();
         this.scoreManager.start();
         this.sessionManager.start();
 
         const progressionPhase =
             this.getCurrentProgressionPhase();
 
-        this.microscopicEnvironment.setProgressionPhase(
+        this.stagePresentationManager.start(
+            this.stageManager.getStageClassName(),
             progressionPhase.phaseIndex
         );
 
@@ -202,18 +197,6 @@ export class Game {
         this.inputManager.start();
 
         window.requestAnimationFrame(this.runFrame);
-    }
-
-    showStageIntro() {
-        if (!this.stageIntro) {
-            return;
-        }
-
-        this.stageIntro.classList.remove("is-visible");
-
-        window.requestAnimationFrame(() => {
-            this.stageIntro.classList.add("is-visible");
-        });
     }
 
     endSession() {
@@ -238,36 +221,11 @@ export class Game {
         const telemetrySummary =
             this.sessionManager.getTelemetrySummary();
 
-        this.resultScore.textContent =
-            String(scoreSummary.score);
-
-        this.resultHighestCombo.textContent =
-            String(scoreSummary.highestCombo);
-
-        this.resultCompletedWords.textContent =
-            String(sessionSummary.completedWords);
-
-        this.resultPerfectWords.textContent =
-            String(sessionSummary.perfectWords);
-
-        this.resultMistakes.textContent =
-            String(sessionSummary.mistakes);
-
         this.logSessionTelemetry(telemetrySummary);
 
-        this.wordManager.settleWords();
-
-        window.setTimeout(() => {
-            this.wordManager.clearWords();
-            this.showResults();
-        }, 1100);
-    }
-
-    showResults() {
-        this.resultsScreen.hidden = false;
-
-        window.requestAnimationFrame(() => {
-            this.resultsScreen.classList.add("is-visible");
+        this.stagePresentationManager.complete({
+            scoreSummary,
+            sessionSummary
         });
     }
 
@@ -327,7 +285,7 @@ export class Game {
         const progressionPhase =
             this.getCurrentProgressionPhase();
 
-        this.microscopicEnvironment.setProgressionPhase(
+        this.stagePresentationManager.applyProgressionPhase(
             progressionPhase.phaseIndex
         );
 
