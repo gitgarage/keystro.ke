@@ -56,17 +56,11 @@ Divide organism word target responsibilities between:
 
 ### Reason
 
-The Stage One amoeba prototype introduced morphology variation, membrane animation profiles, movement profiles, organelle profiles, CSS variable application, and additional DOM structure.
+The generated characteristics of an organism are separate from the DOM used to display it.
 
-Keeping all of these responsibilities inside `WordManager` caused the word lifecycle system to grow around Stage One presentation details.
-
-The generated characteristics of an organism are conceptually separate from the DOM used to display it.
-
-Both are also separate from the typing rules and lifecycle of the word target.
+Both are also separate from typing rules and word lifecycle.
 
 Explicit boundaries allow the organism presentation to evolve without turning `WordManager` into a stage renderer.
-
-The split also creates a clearer future replacement point if organism presentation eventually moves from DOM and CSS to another renderer.
 
 ---
 
@@ -82,11 +76,7 @@ Do not continuously randomize organism characteristics inside the animation loop
 
 Per-frame randomness would create visual jitter and make organism movement difficult to tune.
 
-Stable profiles allow individual targets to differ while preserving coherent movement and animation behavior for the lifetime of each organism.
-
-CSS animation may continuously deform membranes and move organelles using the stable values supplied by the generated profile.
-
-The JavaScript animation loop remains responsible for gameplay movement rather than decorative visual noise.
+Stable profiles allow individual targets to differ while preserving coherent movement and animation behavior.
 
 ---
 
@@ -100,15 +90,9 @@ Environmental particulate should move independently from word targets and should
 
 ### Reason
 
-The Stage One environment needs visual motion that makes the viewport feel like a microscopic fluid sample.
-
 Placing environmental particles inside `WordManager` would incorrectly couple background presentation to the word lifecycle.
 
 A dedicated presentation system keeps environmental atmosphere independent from gameplay state.
-
-The current system remains intentionally small.
-
-A generalized stage environment framework should not be introduced until additional stages demonstrate what that abstraction needs to support.
 
 ---
 
@@ -125,6 +109,7 @@ layout.css
 environment.css
 hud.css
 words.css
+stage-intro.css
 results.css
 footer.css
 ```
@@ -133,14 +118,94 @@ Reduced-motion and responsive rules should live beside the presentation system t
 
 ### Reason
 
-The original stylesheet grew as the playable loop gained HUD, results, public footer, amoeba targets, organelle animation, and microscopic environmental presentation.
-
 A single stylesheet no longer provided a useful view of one presentation system.
 
 Splitting styles by responsibility makes it easier to locate and change one visual system without searching through unrelated rules.
 
-The split is organizational.
+The split does not introduce a CSS framework, preprocessor, bundler, or build step.
 
-It does not introduce a CSS framework, preprocessor, bundler, or build step.
+---
 
-The browser continues to load standard CSS directly.
+## 2026-07-04 — Apply progression pressure to active organisms
+
+### Decision
+
+When a stage progression phase changes, apply the current phase pressure to organisms already active in the viewport.
+
+Do not permanently bind organism movement difficulty or telemetry attribution to the phase in which the organism originally spawned.
+
+### Reason
+
+Early Stage One telemetry showed that slow organisms created during an earlier phase remained active after the stage increased difficulty.
+
+Those organisms became stragglers.
+
+The player experiences the current state of the stage, not the historical state in which an organism entered the viewport.
+
+Active organisms should therefore respond to current stage pressure.
+
+Telemetry should attribute gameplay events to the phase in which the event occurs.
+
+---
+
+## 2026-07-04 — Track unresolved targets separately from escaped targets
+
+### Decision
+
+Record organisms still active when session time reaches zero as unresolved targets in phase-aware development telemetry.
+
+Do not report those targets as escaped words.
+
+### Reason
+
+A target remaining in the viewport at the exact end of a timed session did not fail by crossing the gameplay boundary.
+
+Treating it as escaped would change score or combo semantics and misrepresent player behavior.
+
+The unresolved count is useful for tuning spawn pressure and active target limits.
+
+---
+
+## 2026-07-04 — Coordinate stage presentation outside the game loop
+
+### Decision
+
+Use `StagePresentationManager` to coordinate stage-level presentation lifecycle.
+
+The presentation coordinator owns:
+
+- stage introduction reveal
+- environment startup
+- progression pressure presentation
+- completion transition timing
+- organism settling coordination
+- result value population
+- Results reveal
+
+Individual visual systems remain responsible for implementing their own presentation.
+
+`Game` remains the top-level gameplay coordinator.
+
+### Reason
+
+As Stage One became complete, `Game` accumulated direct knowledge of introduction DOM state, environmental pressure, organism completion presentation, transition delays, result values, and Results reveal classes.
+
+These are related through stage presentation timing, but they are not game-loop mechanics.
+
+`StagePresentationManager` gives major stage moments one coordination boundary without creating a generalized rendering framework.
+
+---
+
+## 2026-07-04 — Keep detailed stage history outside top-level architecture documentation
+
+### Decision
+
+Store detailed stage design, tuning observations, and presentation history under `docs/stages/`.
+
+Keep `ARCHITECTURE.md` focused on reusable application boundaries and current system responsibilities.
+
+### Reason
+
+Stage-specific documents preserve implementation context without turning `ARCHITECTURE.md` into a chronological development journal.
+
+Future stages would make that problem worse.
