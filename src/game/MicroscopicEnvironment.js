@@ -21,6 +21,9 @@
  * the behavior of the existing sample rather than replacing particle layers.
  * This preserves visual continuity while allowing the microscopic field to
  * become increasingly unstable as the stage advances.
+ *
+ * At stage completion, the existing environment settles instead of being
+ * replaced. This gives the sample a visual endpoint before results appear.
  * ============================================================================
  */
 
@@ -61,7 +64,8 @@ export class MicroscopicEnvironment {
         this.element.classList.remove(
             "is-pressure-calm",
             "is-pressure-agitated",
-            "is-pressure-unstable"
+            "is-pressure-unstable",
+            "is-settling"
         );
 
         if (phaseIndex >= 2) {
@@ -79,6 +83,21 @@ export class MicroscopicEnvironment {
         }
 
         this.currentPhaseIndex = phaseIndex;
+    }
+
+    settle() {
+        if (!this.element) {
+            return;
+        }
+
+        this.element.classList.remove(
+            "is-pressure-calm",
+            "is-pressure-agitated",
+            "is-pressure-unstable"
+        );
+
+        this.element.classList.add("is-settling");
+        this.currentPhaseIndex = null;
     }
 
     createParticleLayer(className, count) {

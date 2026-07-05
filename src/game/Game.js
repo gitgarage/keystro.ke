@@ -30,7 +30,7 @@ import { WordManager } from "./WordManager.js";
  * and phase-aware session telemetry.
  *
  * Game also coordinates stage-level presentation moments such as the opening
- * stage introduction.
+ * stage introduction and the transition from active play into results.
  * ============================================================================
  */
 
@@ -132,6 +132,7 @@ export class Game {
 
         this.lastFrameTime = 0;
         this.lastSpawnTime = 0;
+        this.isEndingSession = false;
 
         this.runFrame = this.runFrame.bind(this);
     }
@@ -175,6 +176,7 @@ export class Game {
 
     start() {
         this.resultsScreen.hidden = true;
+        this.resultsScreen.classList.remove("is-visible");
 
         this.gameViewport.classList.add(
             this.stageManager.getStageClassName()
@@ -215,6 +217,11 @@ export class Game {
     }
 
     endSession() {
+        if (this.isEndingSession) {
+            return;
+        }
+
+        this.isEndingSession = true;
         this.inputManager.stop();
 
         const progressionPhase =
@@ -224,8 +231,6 @@ export class Game {
             this.wordManager.getActiveWords(),
             progressionPhase.phaseIndex
         );
-
-        this.wordManager.clearWords();
 
         const scoreSummary = this.scoreManager.getSummary();
         const sessionSummary = this.sessionManager.getSummary();
@@ -250,7 +255,21 @@ export class Game {
 
         this.logSessionTelemetry(telemetrySummary);
 
+        this.microscopicEnvironment.settle();
+        this.wordManager.settleWords();
+
+        window.setTimeout(() => {
+            this.wordManager.clearWords();
+            this.showResults();
+        }, 1600);
+    }
+
+    showResults() {
         this.resultsScreen.hidden = false;
+
+        window.requestAnimationFrame(() => {
+            this.resultsScreen.classList.add("is-visible");
+        });
     }
 
     logSessionTelemetry(telemetrySummary) {

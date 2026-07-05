@@ -32,7 +32,8 @@ import { OrganismRenderer } from "./OrganismRenderer.js";
  * targets.
  *
  * WordManager remains responsible for target selection, spawning, gameplay
- * state, typed progress, movement calculation, and target removal.
+ * state, typed progress, movement calculation, target removal, and stage-end
+ * organism settling.
  *
  * Each target stores its natural base speed. The current stage progression
  * phase supplies live pressure values during gameplay so every organism
@@ -308,6 +309,46 @@ export class WordManager {
      */
     getActiveWords() {
         return [...this.activeWords];
+    }
+
+    settleWords() {
+        this.activeTarget = null;
+
+        for (const word of this.activeWords) {
+            word.element.classList.remove(
+                "is-active",
+                "is-muted",
+                "has-error"
+            );
+
+            word.element.style.pointerEvents = "none";
+
+            word.element.animate(
+                [
+                    {
+                        opacity: 1,
+                        filter: "blur(0)",
+                        transform: "scale(1)"
+                    },
+                    {
+                        opacity: 0.72,
+                        filter: "blur(0.08rem)",
+                        transform: "scale(1.025)"
+                    },
+                    {
+                        opacity: 0,
+                        filter: "blur(0.32rem)",
+                        transform: "scale(0.88)"
+                    }
+                ],
+                {
+                    duration: 1500,
+                    delay: Math.random() * 180,
+                    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                    fill: "forwards"
+                }
+            );
+        }
     }
 
     clearWords() {
