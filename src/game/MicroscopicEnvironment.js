@@ -64,8 +64,7 @@ export class MicroscopicEnvironment {
         this.element.classList.remove(
             "is-pressure-calm",
             "is-pressure-agitated",
-            "is-pressure-unstable",
-            "is-settling"
+            "is-pressure-unstable"
         );
 
         if (phaseIndex >= 2) {
@@ -83,21 +82,6 @@ export class MicroscopicEnvironment {
         }
 
         this.currentPhaseIndex = phaseIndex;
-    }
-
-    settle() {
-        if (!this.element) {
-            return;
-        }
-
-        this.element.classList.remove(
-            "is-pressure-calm",
-            "is-pressure-agitated",
-            "is-pressure-unstable"
-        );
-
-        this.element.classList.add("is-settling");
-        this.currentPhaseIndex = null;
     }
 
     createParticleLayer(className, count) {
