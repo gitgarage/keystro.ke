@@ -24,6 +24,24 @@ Confidence.
 
 ---
 
+## Accessibility
+
+No player should lose because the game hid information behind a sense they cannot use.
+
+Visual information should have a non-visual path when possible.
+
+Audio feedback should support gameplay, but it should not become the only way to understand gameplay.
+
+Motion, color, sound, timing, and text should work together instead of forcing every player through the same sensory channel.
+
+keystro.ke should aim to be playable by as many people as possible, including blind, low-vision, deaf, hard-of-hearing, motor-disabled, and neurodivergent players.
+
+Accessibility is not a later polish step.
+
+It is part of the game design.
+
+---
+
 ## Why open source?
 
 Knowledge grows when it can be examined.
