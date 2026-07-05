@@ -255,13 +255,12 @@ export class Game {
 
         this.logSessionTelemetry(telemetrySummary);
 
-        this.microscopicEnvironment.settle();
         this.wordManager.settleWords();
 
         window.setTimeout(() => {
             this.wordManager.clearWords();
             this.showResults();
-        }, 1600);
+        }, 1100);
     }
 
     showResults() {

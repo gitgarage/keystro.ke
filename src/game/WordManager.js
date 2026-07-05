@@ -323,31 +323,7 @@ export class WordManager {
 
             word.element.style.pointerEvents = "none";
 
-            word.element.animate(
-                [
-                    {
-                        opacity: 1,
-                        filter: "blur(0)",
-                        transform: "scale(1)"
-                    },
-                    {
-                        opacity: 0.72,
-                        filter: "blur(0.08rem)",
-                        transform: "scale(1.025)"
-                    },
-                    {
-                        opacity: 0,
-                        filter: "blur(0.32rem)",
-                        transform: "scale(0.88)"
-                    }
-                ],
-                {
-                    duration: 1500,
-                    delay: Math.random() * 180,
-                    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-                    fill: "forwards"
-                }
-            );
+            word.element.classList.add("is-settling");
         }
     }
 
