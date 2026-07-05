@@ -28,6 +28,9 @@ import { WordManager } from "./WordManager.js";
  * stage progression. The active progression phase is applied consistently to
  * spawning, organism movement, active target density, and phase-aware session
  * telemetry.
+ *
+ * Game also coordinates stage-level presentation moments such as the opening
+ * stage introduction.
  * ============================================================================
  */
 
@@ -52,6 +55,9 @@ export class Game {
         this.resultCompletedWords = resultCompletedWords;
         this.resultPerfectWords = resultPerfectWords;
         this.resultMistakes = resultMistakes;
+
+        this.stageIntro =
+            this.gameViewport.querySelector("[data-stage-intro]");
 
         this.stageManager = new StageManager();
         this.currentStage = this.stageManager.getCurrentStage();
@@ -173,6 +179,8 @@ export class Game {
             this.stageManager.getStageClassName()
         );
 
+        this.showStageIntro();
+
         this.microscopicEnvironment.start();
         this.scoreManager.start();
         this.sessionManager.start();
@@ -184,6 +192,18 @@ export class Game {
         this.inputManager.start();
 
         window.requestAnimationFrame(this.runFrame);
+    }
+
+    showStageIntro() {
+        if (!this.stageIntro) {
+            return;
+        }
+
+        this.stageIntro.classList.remove("is-visible");
+
+        window.requestAnimationFrame(() => {
+            this.stageIntro.classList.add("is-visible");
+        });
     }
 
     endSession() {

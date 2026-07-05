@@ -1,0 +1,210 @@
+/*
+ * keystro.ke
+ * Copyright (C) 2026 Mike O'Riley
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ */
+
+/**
+ * ============================================================================
+ * Stage Introduction
+ * ============================================================================
+ *
+ * Responsibility
+ * --------------
+ * Presents a brief atmospheric introduction when a stage begins.
+ *
+ * The introduction does not pause or obscure gameplay interaction. It appears
+ * inside the microscopic sample, holds briefly, and dissolves while the stage
+ * continues behind it.
+ * ============================================================================
+ */
+
+.stage-intro {
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 2rem;
+
+    pointer-events: none;
+
+    opacity: 0;
+}
+
+.stage-intro-content {
+    position: relative;
+
+    max-width: 42rem;
+
+    padding: 2rem 3rem;
+
+    text-align: center;
+
+    opacity: 0;
+    transform:
+        translateY(0.75rem)
+        scale(0.985);
+
+    filter: blur(0.25rem);
+}
+
+.stage-intro.is-visible {
+    animation:
+        stage-intro-layer
+        5.2s
+        ease-in-out
+        forwards;
+}
+
+.stage-intro.is-visible .stage-intro-content {
+    animation:
+        stage-intro-content
+        5.2s
+        ease-in-out
+        forwards;
+}
+
+.stage-intro-kicker {
+    margin: 0 0 0.65rem;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    line-height: 1.2;
+
+    text-transform: uppercase;
+
+    color: rgba(214, 255, 237, 0.58);
+}
+
+.stage-intro-title {
+    margin: 0;
+
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    font-weight: 650;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+
+    color: rgba(236, 255, 247, 0.94);
+
+    text-shadow:
+        0 0 1.5rem rgba(122, 255, 201, 0.12),
+        0 0 4rem rgba(78, 210, 160, 0.08);
+}
+
+.stage-intro-copy {
+    margin: 1.1rem 0 0;
+
+    font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+
+    color: rgba(214, 255, 237, 0.68);
+}
+
+@keyframes stage-intro-layer {
+    0% {
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    68% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+@keyframes stage-intro-content {
+    0% {
+        opacity: 0;
+
+        transform:
+            translateY(0.75rem)
+            scale(0.985);
+
+        filter: blur(0.25rem);
+    }
+
+    14% {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+
+        filter: blur(0);
+    }
+
+    68% {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+
+        filter: blur(0);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translateY(-0.4rem)
+            scale(1.01);
+
+        filter: blur(0.18rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stage-intro.is-visible {
+        animation: stage-intro-layer-reduced 4s linear forwards;
+    }
+
+    .stage-intro.is-visible .stage-intro-content {
+        animation: stage-intro-content-reduced 4s linear forwards;
+    }
+
+    @keyframes stage-intro-layer-reduced {
+        0%,
+        75% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
+    @keyframes stage-intro-content-reduced {
+        0%,
+        75% {
+            opacity: 1;
+            transform: none;
+            filter: none;
+        }
+
+        100% {
+            opacity: 0;
+            transform: none;
+            filter: none;
+        }
+    }
+}
