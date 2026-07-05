@@ -24,8 +24,9 @@ import { WordManager } from "./WordManager.js";
  * --------------
  * Coordinates the top-level keystro.ke gameplay loop.
  *
- * Game receives stage configuration from StageManager and passes stage data
- * and current progression state to the systems that need them.
+ * Game receives stage configuration from StageManager and interprets current
+ * stage progression. The active progression phase is applied consistently to
+ * spawning, organism movement, and phase-aware session telemetry.
  * ============================================================================
  */
 
@@ -80,18 +81,37 @@ export class Game {
             stage: this.currentStage,
 
             onWordCompleted: (word) => {
+                const progressionPhase =
+                    this.getCurrentProgressionPhase();
+
                 this.scoreManager.handleWordCompleted(word);
-                this.sessionManager.handleWordCompleted(word);
+
+                this.sessionManager.handleWordCompleted(
+                    word,
+                    progressionPhase.phaseIndex
+                );
             },
 
-            onIncorrectLetter: (word) => {
+            onIncorrectLetter: () => {
+                const progressionPhase =
+                    this.getCurrentProgressionPhase();
+
                 this.scoreManager.handleIncorrectLetter();
-                this.sessionManager.handleIncorrectLetter(word);
+
+                this.sessionManager.handleIncorrectLetter(
+                    progressionPhase.phaseIndex
+                );
             },
 
-            onWordEscaped: (word) => {
+            onWordEscaped: () => {
+                const progressionPhase =
+                    this.getCurrentProgressionPhase();
+
                 this.scoreManager.handleWordEscaped();
-                this.sessionManager.handleWordEscaped(word);
+
+                this.sessionManager.handleWordEscaped(
+                    progressionPhase.phaseIndex
+                );
             }
         });
 
@@ -155,11 +175,7 @@ export class Game {
         this.microscopicEnvironment.start();
         this.scoreManager.start();
         this.sessionManager.start();
-
-        this.wordManager.seedInitialWords(
-            this.getCurrentProgressionPhase()
-        );
-
+        this.wordManager.seedInitialWords();
         this.inputManager.start();
 
         window.requestAnimationFrame(this.runFrame);
@@ -168,8 +184,12 @@ export class Game {
     endSession() {
         this.inputManager.stop();
 
+        const progressionPhase =
+            this.getCurrentProgressionPhase();
+
         this.sessionManager.handleRemainingWords(
-            this.wordManager.getActiveWords()
+            this.wordManager.getActiveWords(),
+            progressionPhase.phaseIndex
         );
 
         this.wordManager.clearWords();
@@ -266,11 +286,14 @@ export class Game {
             currentTime - this.lastSpawnTime >=
             spawnIntervalMs
         ) {
-            this.wordManager.spawnWord(progressionPhase);
+            this.wordManager.spawnWord();
             this.lastSpawnTime = currentTime;
         }
 
-        this.wordManager.update(deltaSeconds);
+        this.wordManager.update(
+            deltaSeconds,
+            progressionPhase
+        );
 
         this.lastFrameTime = currentTime;
 

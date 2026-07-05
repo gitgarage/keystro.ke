@@ -33,6 +33,10 @@ import { OrganismRenderer } from "./OrganismRenderer.js";
  *
  * WordManager remains responsible for target selection, spawning, gameplay
  * state, typed progress, movement calculation, and target removal.
+ *
+ * Each target stores its natural base speed. The current stage progression
+ * phase supplies a live speed multiplier during movement updates so every
+ * organism responds to changing stage pressure together.
  * ============================================================================
  */
 
@@ -142,7 +146,7 @@ export class WordManager {
         );
     }
 
-    createWord(progressionPhase = {}, initialX = null) {
+    createWord(initialX = null) {
         if (this.activeWords.length >= this.tuning.maxActiveWords) {
             return null;
         }
@@ -156,12 +160,8 @@ export class WordManager {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const speedMultiplier =
-            progressionPhase.speedMultiplier ?? 1;
-
-        const speed =
-            this.chooseSpeedForTarget(wordTarget) *
-            speedMultiplier;
+        const baseSpeed =
+            this.chooseSpeedForTarget(wordTarget);
 
         const organismProfile =
             this.organismProfileFactory.createProfile();
@@ -190,7 +190,7 @@ export class WordManager {
 
         const element = this.organismRenderer.createElement({
             wordTarget,
-            speed,
+            speed: baseSpeed,
             presentationProfile,
             organelleProfiles
         });
@@ -202,11 +202,9 @@ export class WordManager {
             type: wordTarget.type,
             progress: 0,
             isPerfect: true,
-            progressionPhaseIndex:
-                progressionPhase.phaseIndex ?? 0,
             x,
             baseY: y,
-            speed,
+            baseSpeed,
             presentationProfile,
             movementProfile,
             organelleProfiles,
@@ -218,11 +216,11 @@ export class WordManager {
         return word;
     }
 
-    spawnWord(progressionPhase = {}) {
-        this.createWord(progressionPhase);
+    spawnWord() {
+        this.createWord();
     }
 
-    seedInitialWords(progressionPhase = {}) {
+    seedInitialWords() {
         const viewportWidth = window.innerWidth;
 
         for (
@@ -239,11 +237,7 @@ export class WordManager {
                     );
 
             const initialX = viewportWidth * xRatio;
-
-            const word = this.createWord(
-                progressionPhase,
-                initialX
-            );
+            const word = this.createWord(initialX);
 
             if (!word) {
                 break;
@@ -350,7 +344,7 @@ export class WordManager {
         if (letter !== expectedLetter) {
             this.activeTarget.isPerfect = false;
             this.flashWordError(this.activeTarget);
-            this.onIncorrectLetter(this.activeTarget);
+            this.onIncorrectLetter();
 
             return;
         }
@@ -372,7 +366,10 @@ export class WordManager {
         }
     }
 
-    update(deltaSeconds) {
+    update(deltaSeconds, progressionPhase = {}) {
+        const speedMultiplier =
+            progressionPhase.speedMultiplier ?? 1;
+
         for (
             let index = this.activeWords.length - 1;
             index >= 0;
@@ -381,7 +378,10 @@ export class WordManager {
             const word = this.activeWords[index];
             const movement = word.movementProfile;
 
-            word.x -= word.speed * deltaSeconds;
+            const currentSpeed =
+                word.baseSpeed * speedMultiplier;
+
+            word.x -= currentSpeed * deltaSeconds;
             movement.elapsedSeconds += deltaSeconds;
 
             const verticalOffset =

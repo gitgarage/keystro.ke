@@ -31,6 +31,9 @@
  * - tracking unresolved words remaining when the session ends
  * - requesting session completion when time expires
  *
+ * Phase telemetry describes the stage pressure active when an outcome occurs.
+ * Word targets do not permanently belong to the phase in which they spawned.
+ *
  * This class intentionally does NOT:
  *
  * - own the animation frame
@@ -103,12 +106,10 @@ export class SessionManager {
     }
 
     /**
-     * Returns the telemetry record associated with a word's spawn phase.
+     * Returns telemetry for the supplied current stage phase.
      */
-    getPhaseTelemetry(word) {
-        return this.phaseTelemetry[
-            word.progressionPhaseIndex
-        ] ?? null;
+    getPhaseTelemetry(phaseIndex) {
+        return this.phaseTelemetry[phaseIndex] ?? null;
     }
 
     /**
@@ -152,16 +153,17 @@ export class SessionManager {
     }
 
     /**
-     * Records one completed word and whether it was completed perfectly.
+     * Records one completed word against the currently active stage phase.
      */
-    handleWordCompleted(word) {
+    handleWordCompleted(word, phaseIndex) {
         if (!this.isActive) {
             return;
         }
 
         this.completedWords += 1;
 
-        const phaseTelemetry = this.getPhaseTelemetry(word);
+        const phaseTelemetry =
+            this.getPhaseTelemetry(phaseIndex);
 
         if (phaseTelemetry) {
             phaseTelemetry.completedWords += 1;
@@ -177,19 +179,20 @@ export class SessionManager {
     }
 
     /**
-     * Records one incorrect typed letter against the affected word.
+     * Records one incorrect typed letter against the current stage phase.
      *
      * Multiple incorrect letters inside the same word count as separate
      * mistakes because each represents an individual typing error.
      */
-    handleIncorrectLetter(word) {
+    handleIncorrectLetter(phaseIndex) {
         if (!this.isActive) {
             return;
         }
 
         this.mistakes += 1;
 
-        const phaseTelemetry = this.getPhaseTelemetry(word);
+        const phaseTelemetry =
+            this.getPhaseTelemetry(phaseIndex);
 
         if (phaseTelemetry) {
             phaseTelemetry.mistakes += 1;
@@ -197,14 +200,15 @@ export class SessionManager {
     }
 
     /**
-     * Records one escaped word against the phase that spawned it.
+     * Records one escaped word against the current stage phase.
      */
-    handleWordEscaped(word) {
+    handleWordEscaped(phaseIndex) {
         if (!this.isActive) {
             return;
         }
 
-        const phaseTelemetry = this.getPhaseTelemetry(word);
+        const phaseTelemetry =
+            this.getPhaseTelemetry(phaseIndex);
 
         if (phaseTelemetry) {
             phaseTelemetry.escapedWords += 1;
@@ -212,20 +216,17 @@ export class SessionManager {
     }
 
     /**
-     * Records unresolved words still active when the session ends.
-     *
-     * Remaining words are grouped by the progression phase that spawned them.
-     * This preserves the same attribution model used by completed, mistaken,
-     * and escaped targets.
+     * Records unresolved words against the stage phase active at session end.
      */
-    handleRemainingWords(words) {
-        for (const word of words) {
-            const phaseTelemetry = this.getPhaseTelemetry(word);
+    handleRemainingWords(words, phaseIndex) {
+        const phaseTelemetry =
+            this.getPhaseTelemetry(phaseIndex);
 
-            if (phaseTelemetry) {
-                phaseTelemetry.remainingWords += 1;
-            }
+        if (!phaseTelemetry) {
+            return;
         }
+
+        phaseTelemetry.remainingWords += words.length;
     }
 
     /**
