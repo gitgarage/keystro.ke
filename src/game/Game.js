@@ -8,6 +8,7 @@
  * License, or (at your option) any later version.
  */
 
+import { AudioManager } from "./AudioManager.js";
 import { InputManager } from "./InputManager.js";
 import { MicroscopicEnvironment } from "./MicroscopicEnvironment.js";
 import { ScoreManager } from "./ScoreManager.js";
@@ -52,6 +53,8 @@ export class Game {
         this.stageManager = new StageManager();
         this.currentStage = this.stageManager.getCurrentStage();
 
+        this.audioManager = new AudioManager();
+
         this.microscopicEnvironment = new MicroscopicEnvironment({
             gameViewport
         });
@@ -77,9 +80,15 @@ export class Game {
             wordLayer,
             stage: this.currentStage,
 
+            onCorrectLetter: () => {
+                this.audioManager.playCorrectLetter();
+            },
+
             onWordCompleted: (word) => {
                 const progressionPhase =
                     this.getCurrentProgressionPhase();
+
+                this.audioManager.playWordCompleted(word);
 
                 this.scoreManager.handleWordCompleted(word);
 
@@ -93,6 +102,8 @@ export class Game {
                 const progressionPhase =
                     this.getCurrentProgressionPhase();
 
+                this.audioManager.playIncorrectLetter();
+
                 this.scoreManager.handleIncorrectLetter();
 
                 this.sessionManager.handleIncorrectLetter(
@@ -103,6 +114,8 @@ export class Game {
             onWordEscaped: () => {
                 const progressionPhase =
                     this.getCurrentProgressionPhase();
+
+                this.audioManager.playComboBreak();
 
                 this.scoreManager.handleWordEscaped();
 
@@ -131,6 +144,7 @@ export class Game {
                 return;
             }
 
+            this.audioManager.resume();
             this.wordManager.handleTypedLetter(letter);
         });
 
