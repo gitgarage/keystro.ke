@@ -17,11 +17,20 @@ import { Game } from "./game/Game.js";
  *
  * Responsibility
  * --------------
- * Finds the application shell, creates the top-level Game, and starts it.
+ * Finds the application shell, resolves application-level launch options,
+ * creates the top-level Game, and starts it.
  *
  * Gameplay rules belong to dedicated systems rather than this entry point.
  * ============================================================================
  */
+
+function getRequestedStageId() {
+    const searchParameters = new URLSearchParams(
+        window.location.search
+    );
+
+    return searchParameters.get("stage") ?? "amoeba";
+}
 
 function startApplication() {
     const elements = {
@@ -54,11 +63,18 @@ function startApplication() {
         }
     }
 
-    const game = new Game(elements);
+    const requestedStageId = getRequestedStageId();
+
+    const game = new Game({
+        ...elements,
+        requestedStageId
+    });
 
     game.start();
 
-    console.info("keystro.ke amoeba stage foundation loaded.");
+    console.info(
+        `keystro.ke ${game.getCurrentStage().name} stage loaded.`
+    );
 }
 
 window.addEventListener("DOMContentLoaded", startApplication);

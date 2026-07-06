@@ -23,6 +23,7 @@ import { neuralStage } from "./stages/neuralStage.js";
  * Responsibilities include:
  *
  * - storing available stage definitions
+ * - resolving requested stage identity
  * - exposing stage identity
  * - exposing stage word pools
  * - exposing stage tuning values
@@ -41,23 +42,36 @@ import { neuralStage } from "./stages/neuralStage.js";
  */
 
 export class StageManager {
-    constructor() {
+    constructor(requestedStageId = "amoeba") {
+        this.defaultStageId = "amoeba";
+
         this.stages = new Map([
             [amoebaStage.id, amoebaStage],
             [neuralStage.id, neuralStage]
         ]);
 
-        this.currentStage = this.getStageById("amoeba");
+        this.currentStage = this.resolveStage(
+            requestedStageId
+        );
+    }
+
+    resolveStage(stageId) {
+        const stage = this.stages.get(stageId);
+
+        if (stage) {
+            return stage;
+        }
+
+        console.warn(
+            `Unknown stage id "${stageId}". ` +
+            `Falling back to "${this.defaultStageId}".`
+        );
+
+        return this.stages.get(this.defaultStageId);
     }
 
     getStageById(stageId) {
-        const stage = this.stages.get(stageId);
-
-        if (!stage) {
-            throw new Error(`Unknown stage id: ${stageId}`);
-        }
-
-        return stage;
+        return this.stages.get(stageId) ?? null;
     }
 
     /**

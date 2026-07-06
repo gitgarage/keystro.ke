@@ -48,9 +48,10 @@ export class Game {
         resultHighestCombo,
         resultCompletedWords,
         resultPerfectWords,
-        resultMistakes
+        resultMistakes,
+        requestedStageId
     }) {
-        this.stageManager = new StageManager();
+        this.stageManager = new StageManager(requestedStageId);
         this.currentStage = this.stageManager.getCurrentStage();
 
         this.audioManager = new AudioManager();
@@ -155,6 +156,10 @@ export class Game {
         this.runFrame = this.runFrame.bind(this);
     }
 
+    getCurrentStage() {
+        return this.currentStage;
+    }
+
     getCurrentProgressionPhase() {
         const progression = this.currentStage.progression;
 
@@ -244,7 +249,9 @@ export class Game {
     }
 
     logSessionTelemetry(telemetrySummary) {
-        console.group("Stage One Session Telemetry");
+        console.group(
+            `${this.currentStage.name} Session Telemetry`
+        );
 
         for (const phaseTelemetry of telemetrySummary) {
             console.group(
