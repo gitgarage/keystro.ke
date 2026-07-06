@@ -145,7 +145,7 @@ export class Game {
                 return;
             }
 
-            this.audioManager.resume();
+            this.audioManager.unlock();
             this.wordManager.handleTypedLetter(letter);
         });
 

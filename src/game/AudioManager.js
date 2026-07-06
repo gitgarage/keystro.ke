@@ -36,7 +36,7 @@ export class AudioManager {
         this.masterGain.connect(this.audioContext.destination);
     }
 
-    resume() {
+    unlock() {
         this.ensureAudioContext();
 
         if (!this.audioContext) {
@@ -59,8 +59,6 @@ export class AudioManager {
         if (!this.isEnabled) {
             return;
         }
-
-        this.resume();
 
         if (!this.audioContext || !this.masterGain) {
             return;
