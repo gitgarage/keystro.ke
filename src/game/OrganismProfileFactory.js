@@ -26,6 +26,10 @@
  * ============================================================================
  */
 
+function randomRadius() {
+    return 42 + Math.random() * 16;
+}
+
 export class OrganismProfileFactory {
     createPresentationProfile() {
         const membraneDurationSeconds = 7 + Math.random() * 7;
@@ -34,10 +38,10 @@ export class OrganismProfileFactory {
             scaleX: 0.9 + Math.random() * 0.24,
             scaleY: 0.88 + Math.random() * 0.26,
             rotationDegrees: -4 + Math.random() * 8,
-            radiusOne: 42 + Math.random() * 16,
-            radiusTwo: 42 + Math.random() * 16,
-            radiusThree: 42 + Math.random() * 16,
-            radiusFour: 42 + Math.random() * 16,
+            radiusOne: randomRadius(),
+            radiusTwo: randomRadius(),
+            radiusThree: randomRadius(),
+            radiusFour: randomRadius(),
             membraneOpacity: 0.38 + Math.random() * 0.24,
             membraneDurationSeconds,
             membraneDelaySeconds:
