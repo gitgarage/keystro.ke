@@ -42,11 +42,10 @@ import {
  * - move word targets
  * - own session timing
  *
- * Gameplay systems report meaningful events to ScoreManager. ScoreManager
- * decides what those events mean numerically.
+ * Gameplay systems report meaningful events to ScoreManager.
+ * ScoreManager decides what those events mean numerically.
  * ============================================================================
  */
-
 export class ScoreManager {
     constructor({ comboValue, scoreValue }) {
         this.comboValue = comboValue;
@@ -81,6 +80,10 @@ export class ScoreManager {
         this.render();
     }
 
+    computeBaseScore(word) {
+        return word.text.length * BASE_SCORE_PER_LETTER;
+    }
+
     /**
      * Rewards a perfect word and advances the current combo.
      */
@@ -92,13 +95,14 @@ export class ScoreManager {
         }
 
         const targetMultiplier =
-            word.type === "power-up" ? POWER_UP_SCORE_MULTIPLIER : 1;
+            word.type === "power-up"
+                ? POWER_UP_SCORE_MULTIPLIER
+                : 1;
 
         const wordScore =
-            word.text.length *
-            BASE_SCORE_PER_LETTER *
-            this.combo *
-            targetMultiplier;
+            this.computeBaseScore(word)
+            * this.combo
+            * targetMultiplier;
 
         this.score += wordScore;
     }
@@ -107,10 +111,7 @@ export class ScoreManager {
      * Rewards an imperfect word with base score only.
      */
     rewardImperfectWord(word) {
-        const wordScore =
-            word.text.length *
-            BASE_SCORE_PER_LETTER;
-
+        const wordScore = this.computeBaseScore(word);
         this.score += wordScore;
     }
 
@@ -137,7 +138,6 @@ export class ScoreManager {
         }
 
         this.combo = 0;
-
         this.render();
     }
 
