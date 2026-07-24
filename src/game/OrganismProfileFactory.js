@@ -27,7 +27,11 @@
  */
 
 function randomRadius() {
-    return 42 + Math.random() * 16;
+    return 20 + Math.random() * 60;
+}
+
+function randomVerticalRadius() {
+    return 20 + Math.random() * 60;
 }
 
 export class OrganismProfileFactory {
@@ -42,6 +46,10 @@ export class OrganismProfileFactory {
             radiusTwo: randomRadius(),
             radiusThree: randomRadius(),
             radiusFour: randomRadius(),
+            radiusOneVertical: randomVerticalRadius(),
+            radiusTwoVertical: randomVerticalRadius(),
+            radiusThreeVertical: randomVerticalRadius(),
+            radiusFourVertical: randomVerticalRadius(),
             membraneOpacity: 0.38 + Math.random() * 0.24,
             membraneDurationSeconds,
             membraneDelaySeconds:

@@ -70,6 +70,26 @@ export class OrganismRenderer {
         );
 
         element.style.setProperty(
+            "--organism-radius-one-vertical",
+            `${profile.radiusOneVertical.toFixed(2)}%`
+        );
+
+        element.style.setProperty(
+            "--organism-radius-two-vertical",
+            `${profile.radiusTwoVertical.toFixed(2)}%`
+        );
+
+        element.style.setProperty(
+            "--organism-radius-three-vertical",
+            `${profile.radiusThreeVertical.toFixed(2)}%`
+        );
+
+        element.style.setProperty(
+            "--organism-radius-four-vertical",
+            `${profile.radiusFourVertical.toFixed(2)}%`
+        );
+
+        element.style.setProperty(
             "--organism-membrane-opacity",
             profile.membraneOpacity.toFixed(3)
         );

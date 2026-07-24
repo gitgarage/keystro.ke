@@ -24,6 +24,10 @@
     --organism-radius-two: 50%;
     --organism-radius-three: 50%;
     --organism-radius-four: 50%;
+    --organism-radius-one-vertical: 50%;
+    --organism-radius-two-vertical: 50%;
+    --organism-radius-three-vertical: 50%;
+    --organism-radius-four-vertical: 50%;
     --organism-membrane-opacity: 0.48;
     --organism-membrane-duration: 10s;
     --organism-membrane-delay: 0s;
@@ -42,7 +46,12 @@
         var(--organism-radius-one)
         var(--organism-radius-two)
         var(--organism-radius-three)
-        var(--organism-radius-four);
+        var(--organism-radius-four)
+        /
+        var(--organism-radius-one-vertical)
+        var(--organism-radius-two-vertical)
+        var(--organism-radius-three-vertical)
+        var(--organism-radius-four-vertical);
     color: #ffffff;
     background:
         radial-gradient(
@@ -137,7 +146,12 @@
             var(--organism-radius-one)
             var(--organism-radius-two)
             var(--organism-radius-three)
-            var(--organism-radius-four);
+            var(--organism-radius-four)
+            /
+            var(--organism-radius-one-vertical)
+            var(--organism-radius-two-vertical)
+            var(--organism-radius-three-vertical)
+            var(--organism-radius-four-vertical);
     }
 
     28% {
@@ -145,7 +159,12 @@
             calc(var(--organism-radius-one) + 6%)
             calc(var(--organism-radius-two) - 5%)
             calc(var(--organism-radius-three) + 3%)
-            calc(var(--organism-radius-four) - 4%);
+            calc(var(--organism-radius-four) - 4%)
+            /
+            calc(var(--organism-radius-one-vertical) - 9%)
+            calc(var(--organism-radius-two-vertical) + 8%)
+            calc(var(--organism-radius-three-vertical) - 6%)
+            calc(var(--organism-radius-four-vertical) + 7%);
     }
 
     57% {
@@ -153,7 +172,12 @@
             calc(var(--organism-radius-one) - 4%)
             calc(var(--organism-radius-two) + 6%)
             calc(var(--organism-radius-three) - 5%)
-            calc(var(--organism-radius-four) + 5%);
+            calc(var(--organism-radius-four) + 5%)
+            /
+            calc(var(--organism-radius-one-vertical) + 10%)
+            calc(var(--organism-radius-two-vertical) - 8%)
+            calc(var(--organism-radius-three-vertical) + 7%)
+            calc(var(--organism-radius-four-vertical) - 9%);
     }
 
     79% {
@@ -161,7 +185,12 @@
             calc(var(--organism-radius-one) + 3%)
             calc(var(--organism-radius-two) + 2%)
             calc(var(--organism-radius-three) + 6%)
-            calc(var(--organism-radius-four) - 6%);
+            calc(var(--organism-radius-four) - 6%)
+            /
+            calc(var(--organism-radius-one-vertical) - 6%)
+            calc(var(--organism-radius-two-vertical) - 4%)
+            calc(var(--organism-radius-three-vertical) + 9%)
+            calc(var(--organism-radius-four-vertical) + 5%);
     }
 
     100% {
@@ -169,7 +198,12 @@
             calc(var(--organism-radius-one) - 5%)
             calc(var(--organism-radius-two) + 4%)
             calc(var(--organism-radius-three) + 2%)
-            calc(var(--organism-radius-four) + 6%);
+            calc(var(--organism-radius-four) + 6%)
+            /
+            calc(var(--organism-radius-one-vertical) + 8%)
+            calc(var(--organism-radius-two-vertical) + 6%)
+            calc(var(--organism-radius-three-vertical) - 8%)
+            calc(var(--organism-radius-four-vertical) - 5%);
     }
 }
 
