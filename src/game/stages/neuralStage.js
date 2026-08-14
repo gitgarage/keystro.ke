@@ -28,6 +28,12 @@ export const neuralStage = {
     name: "Neural Current",
     className: "stage-neural",
 
+    intro: {
+        kicker: "Stage Two",
+        title: "Neural Current",
+        copy: "Lock onto each signal before the current destabilizes."
+    },
+
     wordPool: [
         "arc",
         "volt",

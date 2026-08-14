@@ -9,6 +9,7 @@
  */
 
 import { AudioManager } from "./AudioManager.js";
+import { LEVEL_ONE_CLEAR_WORD_COUNT } from "./constants.js";
 import { InputManager } from "./InputManager.js";
 import { MicroscopicEnvironment } from "./MicroscopicEnvironment.js";
 import { ScoreManager } from "./ScoreManager.js";
@@ -205,6 +206,7 @@ export class Game {
             this.getCurrentProgressionPhase();
 
         this.stagePresentationManager.start(
+            this.currentStage,
             this.stageManager.getStageClassName(),
             progressionPhase.phaseIndex
         );
@@ -237,6 +239,10 @@ export class Game {
         const scoreSummary = this.scoreManager.getSummary();
         const sessionSummary = this.sessionManager.getSummary();
 
+        const isLevelCleared =
+            sessionSummary.completedWords >=
+            LEVEL_ONE_CLEAR_WORD_COUNT;
+
         const telemetrySummary =
             this.sessionManager.getTelemetrySummary();
 
@@ -244,7 +250,8 @@ export class Game {
 
         this.stagePresentationManager.complete({
             scoreSummary,
-            sessionSummary
+            sessionSummary,
+            isLevelCleared
         });
     }
 

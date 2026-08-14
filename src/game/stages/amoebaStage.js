@@ -28,6 +28,12 @@ export const amoebaStage = {
     name: "Microscopic Drift",
     className: "stage-amoeba",
 
+    intro: {
+        kicker: "Stage One",
+        title: "Microscopic Drift",
+        copy: "Type organisms before the sample grows unstable."
+    },
+
     wordPool: [
         "cell",
         "flow",

@@ -98,10 +98,29 @@
 }
 
 .results-title {
-    margin: 0 0 1.8rem;
+    margin: 0 0 0.6rem;
 
     font-size: clamp(2.4rem, 7vw, 5rem);
     line-height: 0.95;
+}
+
+.results-title.is-cleared {
+    color: rgba(148, 255, 214, 0.96);
+    text-shadow: 0 0 1.4rem rgba(87, 255, 190, 0.32);
+}
+
+.results-title.is-failed {
+    color: rgba(255, 158, 158, 0.96);
+    text-shadow: 0 0 1.4rem rgba(255, 108, 108, 0.24);
+}
+
+.results-status {
+    margin: 0 0 1.8rem;
+
+    color: rgba(243, 247, 255, 0.62);
+
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
 }
 
 .results-grid {

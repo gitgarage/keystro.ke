@@ -174,9 +174,11 @@ export class OrganismRenderer {
     createElement({
         wordTarget,
         speed,
-        presentationProfile,
-        organelleProfiles
+        organismProfile
     }) {
+        const presentationProfile = organismProfile.presentation;
+        const organelleProfiles = organismProfile.organelles;
+
         const element = document.createElement("span");
 
         element.className = "word-target";
@@ -224,7 +226,7 @@ export class OrganismRenderer {
 
         this.appendOrganelles(
             word.element,
-            word.organelleProfiles
+            word.organismProfile.organelles
         );
     }
 

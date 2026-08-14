@@ -8,6 +8,8 @@
  * License, or (at your option) any later version.
  */
 
+import { LEVEL_ONE_CLEAR_WORD_COUNT } from "./constants.js";
+
 /**
  * ============================================================================
  * Stage Presentation Manager
@@ -53,11 +55,30 @@ export class StagePresentationManager {
         this.stageIntro =
             this.gameViewport.querySelector("[data-stage-intro]");
 
+        this.stageIntroKicker = this.stageIntro?.querySelector(
+            ".stage-intro-kicker"
+        ) ?? null;
+
+        this.stageIntroTitle = this.stageIntro?.querySelector(
+            ".stage-intro-title"
+        ) ?? null;
+
+        this.stageIntroCopy = this.stageIntro?.querySelector(
+            ".stage-intro-copy"
+        ) ?? null;
+
+        this.resultsTitle =
+            this.resultsScreen.querySelector(".results-title");
+
+        this.resultsStatus = this.resultsScreen.querySelector(
+            "[data-result-status]"
+        );
+
         this.completionTransitionDurationMs = 1100;
         this.isCompleting = false;
     }
 
-    start(stageClassName, initialPhaseIndex) {
+    start(stage, stageClassName, initialPhaseIndex) {
         this.isCompleting = false;
 
         this.resultsScreen.hidden = true;
@@ -65,16 +86,32 @@ export class StagePresentationManager {
 
         this.gameViewport.classList.add(stageClassName);
 
-        this.showStageIntro();
+        this.showStageIntro(stage.intro);
 
-        this.microscopicEnvironment.start();
+        if (stage.id === "amoeba") {
+            this.microscopicEnvironment.start();
+        }
 
         this.applyProgressionPhase(initialPhaseIndex);
     }
 
-    showStageIntro() {
+    showStageIntro(intro) {
         if (!this.stageIntro) {
             return;
+        }
+
+        if (intro) {
+            if (this.stageIntroKicker) {
+                this.stageIntroKicker.textContent = intro.kicker;
+            }
+
+            if (this.stageIntroTitle) {
+                this.stageIntroTitle.textContent = intro.title;
+            }
+
+            if (this.stageIntroCopy) {
+                this.stageIntroCopy.textContent = intro.copy;
+            }
         }
 
         this.stageIntro.classList.remove("is-visible");
@@ -93,6 +130,7 @@ export class StagePresentationManager {
     complete({
         scoreSummary,
         sessionSummary,
+        isLevelCleared,
         onTransitionComplete
     }) {
         if (this.isCompleting) {
@@ -103,7 +141,8 @@ export class StagePresentationManager {
 
         this.populateResults({
             scoreSummary,
-            sessionSummary
+            sessionSummary,
+            isLevelCleared
         });
 
         this.wordManager.settleWords();
@@ -120,7 +159,8 @@ export class StagePresentationManager {
 
     populateResults({
         scoreSummary,
-        sessionSummary
+        sessionSummary,
+        isLevelCleared
     }) {
         this.resultScore.textContent =
             String(scoreSummary.score);
@@ -136,6 +176,28 @@ export class StagePresentationManager {
 
         this.resultMistakes.textContent =
             String(sessionSummary.mistakes);
+
+        if (this.resultsTitle) {
+            this.resultsTitle.textContent = isLevelCleared
+                ? "Level Cleared"
+                : "Not Cleared";
+
+            this.resultsTitle.classList.toggle(
+                "is-cleared",
+                isLevelCleared
+            );
+
+            this.resultsTitle.classList.toggle(
+                "is-failed",
+                !isLevelCleared
+            );
+        }
+
+        if (this.resultsStatus) {
+            this.resultsStatus.textContent =
+                `${sessionSummary.completedWords} words completed — ` +
+                `${LEVEL_ONE_CLEAR_WORD_COUNT}+ needed to clear.`;
+        }
     }
 
     showResults() {

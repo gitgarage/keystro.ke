@@ -9,8 +9,7 @@
  */
 
 import { ERROR_FLASH_DURATION_MS } from "./constants.js";
-import { OrganismProfileFactory } from "./OrganismProfileFactory.js";
-import { OrganismRenderer } from "./OrganismRenderer.js";
+import { createOrganismSystem } from "./organismSystems.js";
 
 /**
  * ============================================================================
@@ -58,11 +57,13 @@ export class WordManager {
         this.onIncorrectLetter = onIncorrectLetter;
         this.onWordEscaped = onWordEscaped;
 
-        this.organismProfileFactory = new OrganismProfileFactory();
+        const organismSystem = createOrganismSystem(
+            stage.id,
+            stage.tuning
+        );
 
-        this.organismRenderer = new OrganismRenderer({
-            tuning: this.tuning
-        });
+        this.organismProfileFactory = organismSystem.profileFactory;
+        this.organismRenderer = organismSystem.renderer;
 
         this.activeWords = [];
         this.activeTarget = null;
@@ -178,7 +179,6 @@ export class WordManager {
 
         const presentationProfile = organismProfile.presentation;
         const movementProfile = organismProfile.movement;
-        const organelleProfiles = organismProfile.organelles;
 
         const y =
             viewportHeight *
@@ -201,8 +201,7 @@ export class WordManager {
         const element = this.organismRenderer.createElement({
             wordTarget,
             speed: baseSpeed,
-            presentationProfile,
-            organelleProfiles
+            organismProfile
         });
 
         this.wordLayer.appendChild(element);
@@ -217,7 +216,7 @@ export class WordManager {
             baseSpeed,
             presentationProfile,
             movementProfile,
-            organelleProfiles,
+            organismProfile,
             element
         };
 

@@ -29,3 +29,5 @@ export const BASE_SCORE_PER_LETTER = 100;
 export const POWER_UP_SCORE_MULTIPLIER = 4;
 
 export const SESSION_DURATION_SECONDS = 60;
+
+export const LEVEL_ONE_CLEAR_WORD_COUNT = 40;
