@@ -74,8 +74,20 @@ export class StagePresentationManager {
             "[data-result-status]"
         );
 
+        this.resultsControls = this.resultsScreen.querySelector(
+            "[data-result-controls]"
+        );
+
         this.completionTransitionDurationMs = 1100;
         this.isCompleting = false;
+
+        this.isLevelCleared = false;
+        this.nextStageId = null;
+
+        this.handleResultsKeyDown =
+            this.handleResultsKeyDown.bind(this);
+
+        window.addEventListener("keydown", this.handleResultsKeyDown);
     }
 
     start(stage, stageClassName, initialPhaseIndex) {
@@ -131,6 +143,7 @@ export class StagePresentationManager {
         scoreSummary,
         sessionSummary,
         isLevelCleared,
+        nextStageId,
         onTransitionComplete
     }) {
         if (this.isCompleting) {
@@ -142,7 +155,8 @@ export class StagePresentationManager {
         this.populateResults({
             scoreSummary,
             sessionSummary,
-            isLevelCleared
+            isLevelCleared,
+            nextStageId
         });
 
         this.wordManager.settleWords();
@@ -160,8 +174,12 @@ export class StagePresentationManager {
     populateResults({
         scoreSummary,
         sessionSummary,
-        isLevelCleared
+        isLevelCleared,
+        nextStageId
     }) {
+        this.isLevelCleared = isLevelCleared;
+        this.nextStageId = nextStageId ?? null;
+
         this.resultScore.textContent =
             String(scoreSummary.score);
 
@@ -198,6 +216,26 @@ export class StagePresentationManager {
                 `${sessionSummary.completedWords} words completed — ` +
                 `${LEVEL_ONE_CLEAR_WORD_COUNT}+ needed to clear.`;
         }
+
+        if (this.resultsControls) {
+            this.resultsControls.textContent = this.buildControlsText();
+        }
+    }
+
+    /**
+     * "Next stage" is only ever offered when the level was actually cleared
+     * and a stage exists to advance to - otherwise Enter has nothing
+     * meaningful to do, so it's left out of the hint entirely rather than
+     * shown as a dead option.
+     */
+    buildControlsText() {
+        const controls = ["Esc — menu", "R — replay"];
+
+        if (this.isLevelCleared && this.nextStageId) {
+            controls.unshift("Enter — next stage");
+        }
+
+        return controls.join("   ·   ");
     }
 
     showResults() {
@@ -206,5 +244,42 @@ export class StagePresentationManager {
         window.requestAnimationFrame(() => {
             this.resultsScreen.classList.add("is-visible");
         });
+    }
+
+    /**
+     * Only acts once the results screen is actually showing - gameplay's
+     * own InputManager already stops listening before results appear, so
+     * there's no risk of "r" being swallowed as a replay while a word
+     * target starting with "r" is still on screen.
+     */
+    handleResultsKeyDown(event) {
+        if (this.resultsScreen.hidden) {
+            return;
+        }
+
+        if (event.ctrlKey || event.altKey || event.metaKey) {
+            return;
+        }
+
+        if (event.key === "Escape") {
+            event.preventDefault();
+            window.location.href = "index.html";
+            return;
+        }
+
+        if (event.key === "Enter") {
+            if (!this.isLevelCleared || !this.nextStageId) {
+                return;
+            }
+
+            event.preventDefault();
+            window.location.href = `arcade.html?stage=${this.nextStageId}`;
+            return;
+        }
+
+        if (event.key.toLowerCase() === "r") {
+            event.preventDefault();
+            window.location.reload();
+        }
     }
 }

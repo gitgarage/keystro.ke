@@ -243,6 +243,10 @@ export class Game {
             sessionSummary.completedWords >=
             LEVEL_ONE_CLEAR_WORD_COUNT;
 
+        const nextStageId = this.stageManager.getNextStageId(
+            this.currentStage.id
+        );
+
         const telemetrySummary =
             this.sessionManager.getTelemetrySummary();
 
@@ -251,7 +255,8 @@ export class Game {
         this.stagePresentationManager.complete({
             scoreSummary,
             sessionSummary,
-            isLevelCleared
+            isLevelCleared,
+            nextStageId
         });
     }
 

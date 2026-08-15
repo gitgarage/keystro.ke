@@ -27,6 +27,7 @@ import { neuralStage } from "./stages/neuralStage.js";
  * - exposing stage identity
  * - exposing stage word pools
  * - exposing stage tuning values
+ * - exposing stage order, for results-screen "next stage" progression
  * - providing one stable place for future stage switching
  *
  * This class intentionally does NOT:
@@ -50,6 +51,11 @@ export class StageManager {
             [neuralStage.id, neuralStage]
         ]);
 
+        // Fixed progression order, kept separate from the Map above (whose
+        // key order is an implementation detail) since this order is a
+        // gameplay decision the results screen depends on.
+        this.stageOrder = [amoebaStage.id, neuralStage.id];
+
         this.currentStage = this.resolveStage(
             requestedStageId
         );
@@ -72,6 +78,20 @@ export class StageManager {
 
     getStageById(stageId) {
         return this.stages.get(stageId) ?? null;
+    }
+
+    /**
+     * Returns the id of the stage that follows the given stage in the fixed
+     * progression order, or null if it is the last stage (or unrecognized).
+     */
+    getNextStageId(stageId) {
+        const currentIndex = this.stageOrder.indexOf(stageId);
+
+        if (currentIndex === -1 || currentIndex + 1 >= this.stageOrder.length) {
+            return null;
+        }
+
+        return this.stageOrder[currentIndex + 1];
     }
 
     /**
