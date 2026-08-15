@@ -23,6 +23,15 @@
  * than the sans-serif in-game HUD. It intentionally does not share
  * main.css - the menu has no word targets, no environment, no session
  * state, and pulling in that stylesheet would just be dead weight here.
+ *
+ * No-scroll design: the monitor fills whatever viewport it's given rather
+ * than holding a fixed aspect ratio, so it reads as "this device's own
+ * screen" - wide on a laptop, tall on a phone - instead of a fixed TV-shaped
+ * box floating in whatever space is left. Every internal dimension scales
+ * off vmin (the smaller of viewport width/height) rather than vw alone, so
+ * a short-but-wide window (landscape phone, a shallow laptop browser) and
+ * a narrow-but-tall one (portrait phone) both shrink correctly - vw alone
+ * only reacts to width and will overflow vertically on the former.
  * ============================================================================
  */
 
@@ -56,30 +65,35 @@
 
 html,
 body {
-    min-height: 100%;
+    height: 100%;
     margin: 0;
 }
 
 body {
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
     background: radial-gradient(circle at 50% 20%, #14131c, var(--ground-deep) 70%);
     color: var(--ink);
     font-family: var(--mono);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(14px, 3vw, 40px);
+    padding: clamp(6px, 2vmin, 24px);
 }
 
 /* ================= CRT MONITOR BEZEL ================= */
 
 .monitor {
     position: relative;
-    width: min(1180px, 100%);
-    aspect-ratio: 4 / 3;
+    width: 100%;
+    height: 100%;
+    max-width: 1500px;
+    max-height: 960px;
     background: linear-gradient(155deg, var(--bezel-hi), var(--bezel) 40%, #0c0b12);
-    border-radius: 28px;
-    padding: clamp(16px, 2.6vw, 34px);
+    border-radius: clamp(10px, 2.4vmin, 28px);
+    padding: clamp(8px, 2vmin, 28px);
     box-shadow:
         0 30px 70px rgba(0, 0, 0, 0.6),
         inset 0 2px 0 rgba(255, 255, 255, 0.05),
@@ -90,9 +104,9 @@ body {
     content: "keystro.ke 9000";
     position: absolute;
     left: 50%;
-    bottom: 8px;
+    bottom: clamp(2px, 0.8vmin, 8px);
     transform: translateX(-50%);
-    font-size: 0.6rem;
+    font-size: clamp(0.45rem, 1.1vmin, 0.6rem);
     letter-spacing: 0.3em;
     color: rgba(243, 247, 255, 0.18);
 }
@@ -102,7 +116,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: clamp(6px, 1.4vmin, 10px);
     background: var(--ground);
     box-shadow:
         inset 0 0 0 2px rgba(0, 0, 0, 0.6),
@@ -138,9 +152,10 @@ body {
     z-index: 5;
     width: 100%;
     height: 100%;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    padding: clamp(10px, 1.6vw, 22px) clamp(14px, 2.2vw, 30px);
+    padding: clamp(8px, 1.6vmin, 20px) clamp(10px, 2vmin, 26px);
 }
 
 /* ================= BOOT SEQUENCE ================= */
@@ -151,9 +166,9 @@ body {
     z-index: 80;
     background: var(--ground);
     color: var(--cyan);
-    font-size: clamp(11px, 1.35vw, 15px);
+    font-size: clamp(9px, 1.6vmin, 15px);
     line-height: 1.55;
-    padding: clamp(18px, 3vw, 32px);
+    padding: clamp(12px, 3vmin, 32px);
     white-space: pre-wrap;
     text-shadow: 0 0 6px rgba(var(--cyan-rgb), 0.55);
     animation: boot-hide 0.4s ease forwards;
@@ -184,11 +199,11 @@ body {
 .hud {
     display: flex;
     align-items: center;
-    gap: clamp(10px, 2vw, 22px);
+    gap: clamp(6px, 2vmin, 22px);
     flex-wrap: wrap;
-    padding-bottom: clamp(8px, 1.4vw, 14px);
+    padding-bottom: clamp(6px, 1.4vmin, 14px);
     border-bottom: 1px solid rgba(var(--cyan-rgb), 0.22);
-    font-size: clamp(0.62rem, 1.1vw, 0.78rem);
+    font-size: clamp(0.56rem, 1.6vmin, 0.78rem);
 }
 
 .hud-item {
@@ -205,7 +220,7 @@ body {
 }
 
 .xp-track {
-    width: clamp(70px, 9vw, 120px);
+    width: clamp(50px, 9vmin, 120px);
     height: 8px;
     border: 1px solid rgba(var(--gold-rgb), 0.5);
     background: rgba(var(--gold-rgb), 0.08);
@@ -272,12 +287,12 @@ body {
 
 .wordmark-block {
     text-align: center;
-    padding: clamp(10px, 2.2vw, 20px) 0 clamp(6px, 1.6vw, 14px);
+    padding: clamp(4px, 2vmin, 20px) 0 clamp(3px, 1.6vmin, 14px);
 }
 
 .wordmark {
     margin: 0;
-    font-size: clamp(1.7rem, 5vw, 3.1rem);
+    font-size: clamp(1.3rem, 6vmin, 3.1rem);
     font-weight: 800;
     letter-spacing: 0.02em;
     text-transform: uppercase;
@@ -295,7 +310,7 @@ body {
 
 .tagline {
     margin: 0.35em 0 0;
-    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    font-size: clamp(0.5rem, 1.6vmin, 0.8rem);
     letter-spacing: 0.34em;
     text-transform: uppercase;
     color: var(--ink-dim);
@@ -324,11 +339,12 @@ body {
 
 .rooms {
     flex: 1;
+    min-height: 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: clamp(8px, 1.6vw, 16px);
+    gap: clamp(6px, 1.8vmin, 16px);
     align-content: center;
-    padding: clamp(4px, 1vw, 10px) 0;
+    padding: clamp(4px, 1vmin, 10px) 0;
 }
 
 .room {
@@ -336,8 +352,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: clamp(10px, 1.6vw, 18px) clamp(6px, 1vw, 10px) clamp(12px, 1.6vw, 16px);
+    gap: clamp(4px, 1vmin, 8px);
+    padding: clamp(6px, 1.8vmin, 18px) clamp(4px, 1vmin, 10px) clamp(8px, 1.8vmin, 16px);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
     border: 1px solid rgba(243, 247, 255, 0.14);
     border-top: 3px solid var(--tile-accent, var(--cyan));
@@ -370,8 +386,8 @@ body {
 
 .room-icon {
     position: relative;
-    width: clamp(36px, 5vw, 52px);
-    height: clamp(36px, 5vw, 52px);
+    width: clamp(26px, 6vmin, 52px);
+    height: clamp(26px, 6vmin, 52px);
     border-radius: 8px;
     background: var(--tile-accent, var(--cyan));
     display: grid;
@@ -403,14 +419,14 @@ body {
 }
 
 .room-name {
-    font-size: clamp(0.62rem, 1.05vw, 0.82rem);
+    font-size: clamp(0.54rem, 1.4vmin, 0.82rem);
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
 .room-blurb {
-    font-size: clamp(0.52rem, 0.85vw, 0.64rem);
+    font-size: clamp(0.46rem, 1vmin, 0.64rem);
     color: var(--ink-dim);
     line-height: 1.4;
 }
@@ -431,8 +447,8 @@ body {
 /* ================= DAILY PROMPT ================= */
 
 .daily {
-    margin-top: clamp(6px, 1.4vw, 12px);
-    font-size: clamp(0.58rem, 1vw, 0.72rem);
+    margin-top: clamp(4px, 1.4vmin, 12px);
+    font-size: clamp(0.48rem, 1.2vmin, 0.72rem);
     color: var(--cyan);
     letter-spacing: 0.03em;
     text-shadow: 0 0 8px rgba(var(--cyan-rgb), 0.4);
@@ -441,19 +457,19 @@ body {
 /* ================= TICKER ================= */
 
 .ticker-bar {
-    margin-top: clamp(8px, 1.6vw, 14px);
+    margin-top: clamp(4px, 1.6vmin, 14px);
     overflow: hidden;
     background: linear-gradient(90deg, rgba(var(--violet-rgb), 0.22), rgba(var(--magenta-rgb), 0.18));
     border-top: 1px solid rgba(var(--magenta-rgb), 0.4);
     border-bottom: 1px solid rgba(var(--magenta-rgb), 0.4);
-    padding: 5px 0;
+    padding: clamp(3px, 0.8vmin, 5px) 0;
 }
 
 .ticker-track {
     display: inline-flex;
     white-space: nowrap;
     animation: ticker-scroll 26s linear infinite;
-    font-size: clamp(0.56rem, 0.95vw, 0.68rem);
+    font-size: clamp(0.48rem, 1.1vmin, 0.68rem);
     letter-spacing: 0.03em;
     color: var(--ink);
 }
@@ -485,9 +501,9 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: clamp(6px, 1.2vw, 10px);
-    padding-top: clamp(5px, 1vw, 8px);
-    font-size: clamp(0.52rem, 0.85vw, 0.64rem);
+    margin-top: clamp(4px, 1.2vmin, 10px);
+    padding-top: clamp(3px, 1vmin, 8px);
+    font-size: clamp(0.46rem, 1vmin, 0.64rem);
     color: var(--ink-faint);
 }
 
@@ -501,8 +517,24 @@ body {
     color: var(--cyan);
 }
 
+/* ================= RESPONSIVE FALLBACKS ================= */
+/* vmin sizing above handles most shapes gracefully; these two rules cover
+   the extremes where there just isn't room for everything at once. */
+
 @media (max-width: 620px) {
     .rooms {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-height: 480px) {
+    .tagline,
+    .ticker-bar,
+    .room-blurb {
+        display: none;
+    }
+
+    .wordmark-block {
+        padding: 2px 0;
     }
 }
