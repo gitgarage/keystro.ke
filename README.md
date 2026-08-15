@@ -73,28 +73,6 @@ See `ARCHITECTURE.md` for the current application structure.
 
 ---
 
-## Development Workflow
-
-Feature work is developed on dedicated Git branches.
-
-The current workflow is:
-
-```text
-feature branch
-      |
-      v
-     dev
-      |
-      v
-Cloudflare Pages
-```
-
-The `dev` branch is automatically deployed to the public development demo.
-
-The `main` branch is reserved for intentional stable release checkpoints.
-
----
-
 ## Open Source
 
 keystro.ke is an open-source project.
