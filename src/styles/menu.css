@@ -331,7 +331,13 @@ body {
         4px 4px 0 rgba(var(--violet-rgb), 0.5);
 }
 
+/* The period glyph carries a lot of built-in side bearing, which read as
+   a much wider gap around it than around any other letter pair - pulled
+   in with a negative margin rather than removed outright, so there's
+   still a deliberate small gap, just not the font's default one. */
 .wordmark .dot {
+    display: inline-block;
+    margin: 0 -0.14em;
     color: var(--magenta);
     text-shadow: 0 0 14px rgba(var(--magenta-rgb), 0.7);
 }
@@ -405,10 +411,16 @@ body {
     transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
 }
 
+/* border-color used to hardcode cyan here regardless of which room's
+   own theme was being hovered, so every tile but Lesson Hall changed to
+   a color that didn't match its own accent - muted further by the low
+   opacity, which read as a flat gray instead of a color at all. Now
+   pulled from the same --tile-glow each tile already uses for its glow
+   shadow, so the border brightens into the room's own hue. */
 .room:hover,
 .room:focus-visible {
     transform: translateY(-3px);
-    border-color: rgba(var(--cyan-rgb), 0.6);
+    border-color: rgba(var(--tile-glow, var(--cyan-rgb)), 0.85);
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 0 22px rgba(var(--tile-glow, var(--cyan-rgb)), 0.28);
 }
 
@@ -433,10 +445,13 @@ body {
     cursor: default;
 }
 
+/* No lift or glow-shadow, so a disabled tile still doesn't feel
+   interactive - but the border still brightens into the room's own
+   hue rather than resetting to flat gray, matching every other tile. */
 .room:disabled:hover {
     transform: none;
     box-shadow: none;
-    border-color: rgba(243, 247, 255, 0.14);
+    border-color: rgba(var(--tile-glow, var(--cyan-rgb)), 0.85);
 }
 
 .room-icon {
