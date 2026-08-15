@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>keystro.ke — Lesson Hall</title>
+
+    <meta
+        name="description"
+        content="Pick a lesson from the Lesson Hall typing curriculum."
+    >
+
+    <link rel="canonical" href="https://keystro.ke/lesson-hall.html">
+    <link rel="stylesheet" href="src/styles/lesson-hall.css">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to lesson path</a>
+
+    <div class="monitor">
+        <div class="screen">
+            <div class="crt-overlay"></div>
+
+            <div class="screen-content">
+
+                <header class="hud">
+                    <a class="brand-mark" href="index.html">keystro.ke</a>
+                    <span class="lesson-label">LESSON HALL</span>
+                    <button class="sound-toggle" id="soundToggle" type="button">SOUND: ON</button>
+                </header>
+
+                <div class="hall-banner">
+                    <p class="hall-kicker">CURRICULUM</p>
+                    <h1 class="hall-title">Select a Lesson</h1>
+                </div>
+
+                <div class="trace-viewport" id="main-content" tabindex="-1">
+                    <nav class="trace-lane" id="traceLane" aria-label="Lesson curriculum path"></nav>
+                </div>
+
+                <footer class="screen-footer">
+                    <span>keystro.ke &middot; open source &middot; AGPL-3.0-or-later</span>
+                    <a href="https://github.com/gitgarage/keystro.ke" target="_blank" rel="noopener noreferrer">View source &#8599;</a>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="src/lesson-hall.js" type="module"></script>
+</body>
+</html>

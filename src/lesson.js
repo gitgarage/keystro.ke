@@ -481,7 +481,7 @@ function wireLesson() {
             event.preventDefault();
 
             if (isComplete) {
-                window.location.href = "index.html";
+                window.location.href = "lesson-hall.html";
             } else {
                 loadStep(stepIndex);
             }

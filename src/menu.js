@@ -279,7 +279,7 @@ const TYPING_LOCK_MS = 3000;
 // Rooms that are real destinations, keyed by the command that opens them.
 const ROOM_DESTINATIONS = {
     "ARCADE WING": "arcade.html",
-    "LESSON HALL": "lesson.html"
+    "LESSON HALL": "lesson-hall.html"
 };
 
 // Rooms that exist in the nav but aren't real destinations yet - kept
