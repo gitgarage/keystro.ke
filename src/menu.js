@@ -257,9 +257,100 @@ function wireRoomSounds(sound) {
     });
 }
 
+/* ---- live terminal prompt ----
+   The "> " prompt itself is a separate element from the editable text,
+   so the cursor index below is naturally bounded to [0, text.length] -
+   it can never reach into the prompt, which is what makes the prompt
+   effectively undeletable and unpassable, the same as a real shell. */
+
+const DAILY_MAX_LENGTH = 140;
+const INTERACTIVE_FOCUS_TAGS = new Set(["BUTTON", "A", "INPUT", "TEXTAREA"]);
+
+function isInteractiveElementFocused() {
+    const active = document.activeElement;
+
+    return (
+        INTERACTIVE_FOCUS_TAGS.has(active.tagName) ||
+        active.isContentEditable
+    );
+}
+
+function wireDailyPrompt() {
+    const beforeEl = document.getElementById("dailyBefore");
+    const afterEl = document.getElementById("dailyAfter");
+
+    if (!beforeEl || !afterEl) {
+        return;
+    }
+
+    let text = beforeEl.textContent;
+    let cursorIndex = text.length;
+
+    function render() {
+        beforeEl.textContent = text.slice(0, cursorIndex);
+        afterEl.textContent = text.slice(cursorIndex);
+    }
+
+    window.addEventListener("keydown", (event) => {
+        if (event.ctrlKey || event.altKey || event.metaKey) {
+            return;
+        }
+
+        if (isInteractiveElementFocused()) {
+            return;
+        }
+
+        if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            cursorIndex = Math.max(0, cursorIndex - 1);
+            render();
+            return;
+        }
+
+        if (event.key === "ArrowRight") {
+            event.preventDefault();
+            cursorIndex = Math.min(text.length, cursorIndex + 1);
+            render();
+            return;
+        }
+
+        if (event.key === "Backspace") {
+            event.preventDefault();
+
+            if (cursorIndex > 0) {
+                text = text.slice(0, cursorIndex - 1) + text.slice(cursorIndex);
+                cursorIndex -= 1;
+                render();
+            }
+
+            return;
+        }
+
+        if (event.key === "Delete") {
+            event.preventDefault();
+
+            if (cursorIndex < text.length) {
+                text = text.slice(0, cursorIndex) + text.slice(cursorIndex + 1);
+                render();
+            }
+
+            return;
+        }
+
+        if (event.key.length === 1 && text.length < DAILY_MAX_LENGTH) {
+            const upper = event.key.toUpperCase();
+
+            text = text.slice(0, cursorIndex) + upper + text.slice(cursorIndex);
+            cursorIndex += 1;
+            render();
+        }
+    });
+}
+
 function startMenu() {
     renderTicker();
     renderPixelIcons();
+    wireDailyPrompt();
 
     const toggleButton = document.getElementById("soundToggle");
 

@@ -344,7 +344,6 @@ body {
     color: var(--ink-dim);
 }
 
-.tagline .cursor,
 .daily .cursor {
     display: inline-block;
     width: 0.6em;
@@ -357,7 +356,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .tagline .cursor,
     .daily .cursor {
         animation: none;
     }
