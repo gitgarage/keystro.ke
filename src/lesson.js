@@ -12,14 +12,17 @@ import { AudioManager } from "./game/AudioManager.js";
 
 /**
  * ============================================================================
- * Lesson Hall - Home Row
+ * Lesson Hall
  * ============================================================================
  *
- * The first real lesson: a small, plain-data drill sequence rather than a
- * generalized curriculum format - one lesson does not justify that
- * abstraction yet (see PHILOSOPHY.md and ROADMAP.md's Stage System note,
- * which makes the same call about not overbuilding before multiple
- * examples exist).
+ * Small, plain-data drill sequences rather than a generalized curriculum
+ * format - two lessons still doesn't justify that abstraction (see
+ * PHILOSOPHY.md and ROADMAP.md's Stage System note, which makes the same
+ * call about not overbuilding before multiple examples exist). What *is*
+ * justified now that there's a second lesson: a lesson id resolved from
+ * the URL (mirroring arcade.html's ?stage= pattern) and a fixed
+ * progression order, so the results screen can offer a real "next lesson"
+ * the same way the arcade's results screen offers a next stage.
  *
  * Error handling follows the "permissive-but-counted" school the research
  * found to be the more humane default across classic typing tutors: a
@@ -29,22 +32,87 @@ import { AudioManager } from "./game/AudioManager.js";
  * ============================================================================
  */
 
-const HOME_ROW_LESSON = {
-    steps: [
-        {
-            title: "Index Fingers: F and J",
-            text: "fj fj jf jf fjf jfj ff jj fj jf"
-        },
-        {
-            title: "The Full Row",
-            text: "asdf jkl; jkl; asdf fdsa ;lkj asdf jkl;"
-        },
-        {
-            title: "Real Words",
-            text: "ask lad sad fall flask salad dads"
-        }
-    ]
-};
+const LESSONS = [
+    {
+        id: "home-row",
+        kicker: "HOME ROW",
+        resultsTitle: "Home Row",
+        activeKeys: new Set(["a", "s", "d", "f", "j", "k", "l", ";", " "]),
+        steps: [
+            {
+                title: "Index Fingers: F and J",
+                text: "fj fj jf jf fjf jfj ff jj fj jf"
+            },
+            {
+                title: "The Full Row",
+                text: "asdf jkl; jkl; asdf fdsa ;lkj asdf jkl;"
+            },
+            {
+                title: "Real Words",
+                text: "ask lad sad fall flask salad dads"
+            }
+        ]
+    },
+    {
+        id: "home-row-2",
+        kicker: "HOME ROW · PART 2",
+        resultsTitle: "Home Row: Part 2",
+        // f/j through l/; were the no-stretch home position taught in
+        // lesson one; g and h are technically the same row but need a
+        // slight inward reach, which is why classic tutors teach them as
+        // their own follow-up rather than bundling all ten home keys at
+        // once.
+        activeKeys: new Set(["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", " "]),
+        steps: [
+            {
+                title: "Reach In: G and H",
+                text: "gh gh hg hg ghg hgh gg hh gh hg"
+            },
+            {
+                title: "The Full Row",
+                text: "asdfgh jkl; jkl; hgfdsa asdfgh jkl;"
+            },
+            {
+                title: "Real Words",
+                text: "half hall dash flash glass shall flags gash"
+            }
+        ]
+    }
+];
+
+const LESSON_ORDER = LESSONS.map((lesson) => lesson.id);
+const DEFAULT_LESSON_ID = LESSONS[0].id;
+
+function getRequestedLessonId() {
+    const searchParameters = new URLSearchParams(window.location.search);
+
+    return searchParameters.get("lesson") ?? DEFAULT_LESSON_ID;
+}
+
+function resolveLesson(lessonId) {
+    const lesson = LESSONS.find((candidate) => candidate.id === lessonId);
+
+    if (lesson) {
+        return lesson;
+    }
+
+    console.warn(
+        `Unknown lesson id "${lessonId}". ` +
+        `Falling back to "${DEFAULT_LESSON_ID}".`
+    );
+
+    return LESSONS.find((candidate) => candidate.id === DEFAULT_LESSON_ID);
+}
+
+function getNextLessonId(lessonId) {
+    const currentIndex = LESSON_ORDER.indexOf(lessonId);
+
+    if (currentIndex === -1 || currentIndex + 1 >= LESSON_ORDER.length) {
+        return null;
+    }
+
+    return LESSON_ORDER[currentIndex + 1];
+}
 
 const STATS_RENDER_INTERVAL_MS = 250;
 
@@ -76,13 +144,12 @@ const FINGER_COLOR_VAR = {
     thumb: "--gold"
 };
 
-// Only these keys are drilled in this lesson - the rest of the keyboard
-// renders dim for context, ready for future lessons to light up.
-const HOME_ROW_ACTIVE_KEYS = new Set(["a", "s", "d", "f", "j", "k", "l", ";", " "]);
-
 const TYPABLE_CHARACTER_PATTERN = /^[a-z ;]$/;
 
-function buildKeyboard(container) {
+// activeKeys is per-lesson (lesson one drills a-s-d-f-j-k-l-; only, lesson
+// two adds g/h) - the rest of the keyboard renders dim for context, ready
+// for whichever future lesson lights each of them up.
+function buildKeyboard(container, activeKeys) {
     const keyElements = new Map();
 
     function createKey(key) {
@@ -94,7 +161,7 @@ function buildKeyboard(container) {
         const finger = KEY_FINGER[key];
         keyEl.style.setProperty("--finger-color", `var(${FINGER_COLOR_VAR[finger]})`);
 
-        if (HOME_ROW_ACTIVE_KEYS.has(key)) {
+        if (activeKeys.has(key)) {
             keyEl.classList.add("is-active");
         }
 
@@ -138,6 +205,8 @@ function wireLesson() {
     const statAccuracyEl = document.getElementById("statAccuracy");
     const statProgressEl = document.getElementById("statProgress");
     const resultsScreenEl = document.getElementById("resultsScreen");
+    const resultsTitleEl = document.getElementById("resultsTitle");
+    const resultsStatusEl = document.getElementById("resultsStatus");
     const resultWpmEl = document.getElementById("resultWpm");
     const resultAccuracyEl = document.getElementById("resultAccuracy");
     const resultMistakesEl = document.getElementById("resultMistakes");
@@ -146,16 +215,22 @@ function wireLesson() {
     if (
         !kickerEl || !titleEl || !drillEl || !targetEl || !typedEl ||
         !statusEl || !keyboardEl || !statWpmEl || !statAccuracyEl ||
-        !statProgressEl || !resultsScreenEl || !resultWpmEl ||
-        !resultAccuracyEl || !resultMistakesEl
+        !statProgressEl || !resultsScreenEl || !resultsTitleEl ||
+        !resultsStatusEl || !resultWpmEl || !resultAccuracyEl ||
+        !resultMistakesEl
     ) {
         return;
     }
 
+    const currentLesson = resolveLesson(getRequestedLessonId());
+    const nextLessonId = getNextLessonId(currentLesson.id);
+
+    resultsTitleEl.textContent = currentLesson.resultsTitle;
+
     const audio = new AudioManager();
     let soundOn = true;
 
-    const keyElements = buildKeyboard(keyboardEl);
+    const keyElements = buildKeyboard(keyboardEl, currentLesson.activeKeys);
 
     let stepIndex = 0;
     let text = "";
@@ -217,13 +292,13 @@ function wireLesson() {
     function loadStep(index) {
         stepIndex = index;
 
-        const step = HOME_ROW_LESSON.steps[stepIndex];
+        const step = currentLesson.steps[stepIndex];
 
         text = step.text;
         cursorIndex = 0;
         mistakePositions = new Set();
 
-        kickerEl.textContent = `HOME ROW · DRILL ${stepIndex + 1} OF ${HOME_ROW_LESSON.steps.length}`;
+        kickerEl.textContent = `${currentLesson.kicker} · DRILL ${stepIndex + 1} OF ${currentLesson.steps.length}`;
         titleEl.textContent = step.title;
 
         drillEl.setAttribute("aria-label", `Type: ${text}`);
@@ -246,12 +321,12 @@ function wireLesson() {
             ? Math.round((totalCorrect / totalAttempts) * 100)
             : 100;
 
-        const totalLength = HOME_ROW_LESSON.steps.reduce(
+        const totalLength = currentLesson.steps.reduce(
             (sum, step) => sum + step.text.length,
             0
         );
 
-        const completedLength = HOME_ROW_LESSON.steps
+        const completedLength = currentLesson.steps
             .slice(0, stepIndex)
             .reduce((sum, step) => sum + step.text.length, 0) + cursorIndex;
 
@@ -312,6 +387,22 @@ function wireLesson() {
         renderStats();
     }
 
+    /**
+     * "Next lesson" is only offered when one actually exists - mirrors the
+     * arcade results screen's "next stage" hint, which is left out
+     * entirely rather than shown as a dead option when there's nothing to
+     * advance to.
+     */
+    function buildResultsControlsText() {
+        const controls = ["Esc — menu", "R — replay"];
+
+        if (nextLessonId) {
+            controls.unshift("Enter — next lesson");
+        }
+
+        return controls.join("   ·   ");
+    }
+
     function finishLesson() {
         isComplete = true;
         stopStatsTimer();
@@ -321,6 +412,7 @@ function wireLesson() {
         resultWpmEl.textContent = String(wpm);
         resultAccuracyEl.textContent = `${accuracy}%`;
         resultMistakesEl.textContent = String(totalMistakes);
+        resultsStatusEl.textContent = buildResultsControlsText();
 
         resultsScreenEl.hidden = false;
 
@@ -330,7 +422,7 @@ function wireLesson() {
     }
 
     function advanceStep() {
-        if (stepIndex + 1 < HOME_ROW_LESSON.steps.length) {
+        if (stepIndex + 1 < currentLesson.steps.length) {
             loadStep(stepIndex + 1);
             showStepCompleteStatus();
         } else {
@@ -389,7 +481,7 @@ function wireLesson() {
             event.preventDefault();
 
             if (isComplete) {
-                restartLesson();
+                window.location.href = "index.html";
             } else {
                 loadStep(stepIndex);
             }
@@ -398,9 +490,15 @@ function wireLesson() {
         }
 
         if (isComplete) {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" && nextLessonId) {
                 event.preventDefault();
-                window.location.href = "index.html";
+                window.location.href = `lesson.html?lesson=${nextLessonId}`;
+                return;
+            }
+
+            if (event.key.toLowerCase() === "r") {
+                event.preventDefault();
+                restartLesson();
             }
 
             return;
