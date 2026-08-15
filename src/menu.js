@@ -274,6 +274,7 @@ function wireRoomSounds(sound) {
 const DAILY_MAX_LENGTH = 140;
 const INTERACTIVE_FOCUS_TAGS = new Set(["BUTTON", "A", "INPUT", "TEXTAREA"]);
 const ARCADE_LOAD_DELAY_MS = 700;
+const TYPING_LOCK_MS = 3000;
 
 // Rooms that exist in the nav but aren't real destinations yet - kept
 // as a literal list here rather than read from the DOM, since the
@@ -306,7 +307,7 @@ function wireDailyPrompt() {
 
     let text = beforeEl.textContent + cursorEl.textContent + afterEl.textContent;
     let cursorIndex = text.length;
-    let inputDisabled = false;
+    let typingLocked = false;
 
     function render() {
         beforeEl.textContent = text.slice(0, cursorIndex);
@@ -348,7 +349,11 @@ function wireDailyPrompt() {
         if (command === "ARCADE WING") {
             setStatus("LOADING ARCADE WING...", false);
             clearLine();
-            inputDisabled = true;
+            typingLocked = true;
+
+            window.setTimeout(() => {
+                typingLocked = false;
+            }, TYPING_LOCK_MS);
 
             window.setTimeout(() => {
                 window.location.href = "arcade.html";
@@ -367,10 +372,6 @@ function wireDailyPrompt() {
     }
 
     window.addEventListener("keydown", (event) => {
-        if (inputDisabled) {
-            return;
-        }
-
         if (event.ctrlKey || event.altKey || event.metaKey) {
             return;
         }
@@ -419,6 +420,10 @@ function wireDailyPrompt() {
                 render();
             }
 
+            return;
+        }
+
+        if (typingLocked) {
             return;
         }
 
