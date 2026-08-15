@@ -35,12 +35,19 @@
         width: 280px;
         flex: 0 0 auto;
         background: var(--panel);
-        border-right: 1px solid var(--border);
-        padding: 16px;
-        overflow-y: auto;
+        padding: 12px;
+        overflow-y: hidden;
         display: flex;
         flex-direction: column;
-        gap: 18px;
+        gap: 10px;
+    }
+
+    .controls-left {
+        border-right: 1px solid var(--border);
+    }
+
+    .controls-right {
+        border-left: 1px solid var(--border);
     }
 
     .controls h1 {
@@ -64,13 +71,38 @@
         color: var(--ink-dim);
     }
 
-    .field-row {
+    .stepper {
         display: flex;
-        gap: 8px;
+        align-items: stretch;
+        gap: 6px;
     }
 
-    .field-row .field {
+    .stepper button {
+        flex: 0 0 auto;
+        width: 34px;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .stepper input[type="number"] {
         flex: 1;
+        text-align: center;
+    }
+
+    .dpad {
+        display: grid;
+        grid-template-columns: repeat(3, 30px);
+        grid-template-rows: repeat(3, 30px);
+        gap: 4px;
+        justify-content: center;
+        margin: 2px 0;
+    }
+
+    .dpad button {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        font-size: 0.85rem;
     }
 
     input[type="number"],
@@ -109,6 +141,16 @@
         color: var(--accent);
     }
 
+    button:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    button:disabled:hover {
+        border-color: var(--border);
+        color: var(--ink);
+    }
+
     button.active {
         background: var(--accent);
         color: #06131a;
@@ -117,11 +159,30 @@
 
     .tool-row {
         display: flex;
+        flex-wrap: wrap;
         gap: 6px;
     }
 
     .tool-row button {
-        flex: 1;
+        flex: 1 1 45%;
+    }
+
+    .transform-pad {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        margin: 4px 0;
+    }
+
+    .transform-pad button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+    }
+
+    .transform-pad svg {
+        display: block;
     }
 
     .opacity-value,
@@ -201,6 +262,7 @@
     .canvas-wrap {
         position: relative;
         box-shadow: 0 0 0 1px var(--border), 0 20px 60px rgba(0,0,0,0.6);
+        transform-origin: center center;
     }
 
     .canvas-wrap canvas {
@@ -216,6 +278,10 @@
 
     #gridCanvas {
         cursor: crosshair;
+    }
+
+    #selectionCanvas {
+        pointer-events: none;
     }
 
     .hint {
@@ -246,7 +312,7 @@
 </head>
 <body>
 <div class="app">
-    <aside class="controls">
+    <aside class="controls controls-left">
         <h1>Pixel Tracer</h1>
 
         <div class="field">
@@ -256,18 +322,31 @@
 
         <div class="divider"></div>
 
-        <div class="field-row">
-            <div class="field">
-                <label>Grid columns</label>
-                <input type="number" id="gridCols" value="32" min="1" max="256">
-            </div>
-            <div class="field">
-                <label>Grid rows</label>
-                <input type="number" id="gridRows" value="32" min="1" max="256">
+        <div class="field">
+            <label>Grid rows/columns</label>
+            <div class="stepper">
+                <button id="gridSizeMinus" type="button">-</button>
+                <input type="number" id="gridSize" value="32" min="1" max="256">
+                <button id="gridSizePlus" type="button">+</button>
             </div>
         </div>
-        <button id="applyGridBtn">Apply grid size</button>
         <p class="cell-size-value" id="cellSizeLabel"></p>
+
+        <div class="field">
+            <label>Nudge reference image (1 native px)</label>
+            <div class="dpad">
+                <span></span>
+                <button id="refNudgeUp" type="button" title="Move reference up">&#9650;</button>
+                <span></span>
+                <button id="refNudgeLeft" type="button" title="Move reference left">&#9664;</button>
+                <button id="refNudgeReset" type="button" title="Reset reference to original position">&#8226;</button>
+                <button id="refNudgeRight" type="button" title="Move reference right">&#9654;</button>
+                <span></span>
+                <button id="refNudgeDown" type="button" title="Move reference down">&#9660;</button>
+                <span></span>
+            </div>
+            <p class="cell-size-value" id="refOffsetLabel">Reference offset: 0, 0 native px</p>
+        </div>
 
         <div class="divider"></div>
 
@@ -283,13 +362,70 @@
         <div class="divider"></div>
 
         <div class="field">
+            <label>Transform reference (drag within selection)</label>
+            <div class="transform-pad">
+                <button id="shiftRowDownBtn" type="button" title="Push rows down / stretch from top">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <line x1="2" y1="9" x2="22" y2="9" stroke="currentColor" stroke-width="2"/>
+                        <polygon points="12,19 7,12 17,12" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button id="shiftRowUpBtn" type="button" title="Push rows up / stretch from bottom">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <line x1="2" y1="15" x2="22" y2="15" stroke="currentColor" stroke-width="2"/>
+                        <polygon points="12,5 7,12 17,12" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button id="shiftColLeftBtn" type="button" title="Push columns left / stretch from right">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <line x1="15" y1="2" x2="15" y2="22" stroke="currentColor" stroke-width="2"/>
+                        <polygon points="5,12 12,7 12,17" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button id="shiftColRightBtn" type="button" title="Push columns right / stretch from left">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <line x1="9" y1="2" x2="9" y2="22" stroke="currentColor" stroke-width="2"/>
+                        <polygon points="19,12 12,7 12,17" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+            <label><input type="checkbox" id="transformInsertToggle" checked> Insert (keep far side fixed)</label>
+            <p class="hint">Click + drag on the reference. Far side covers; near side stretches to fill.</p>
+        </div>
+    </aside>
+
+    <main class="stage">
+        <div class="canvas-wrap" id="canvasWrap">
+            <canvas id="referenceCanvas"></canvas>
+            <canvas id="gridCanvas"></canvas>
+            <canvas id="selectionCanvas"></canvas>
+        </div>
+        <div class="status-bar" id="statusBar">Load a reference image to begin.</div>
+    </main>
+
+    <aside class="controls controls-right">
+        <h1>Tools</h1>
+
+        <div class="field">
+            <label>History</label>
+            <div class="tool-row">
+                <button id="undoBtn" type="button" disabled>Undo</button>
+                <button id="redoBtn" type="button" disabled>Redo</button>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
             <label>Tool</label>
             <div class="tool-row">
                 <button id="toolPaint" class="active">Paint</button>
                 <button id="toolErase">Erase</button>
                 <button id="toolEyedrop">Eyedrop</button>
+                <button id="toolSelect">Select</button>
             </div>
-            <p class="hint">Right-click a cell to eyedrop the reference at any time. Drag to paint/erase multiple cells.</p>
+            <p class="hint">Right-click to eyedrop. Drag to paint/erase/select.</p>
+            <button id="clearSelectionBtn" type="button" disabled>Clear selection</button>
         </div>
 
         <div class="divider"></div>
@@ -315,14 +451,6 @@
 
         <p class="hint">Export writes the grid at its true native resolution (one image pixel per cell) - no upscaling, no antialiasing, transparent where nothing's painted.</p>
     </aside>
-
-    <main class="stage">
-        <div class="canvas-wrap" id="canvasWrap">
-            <canvas id="referenceCanvas"></canvas>
-            <canvas id="gridCanvas"></canvas>
-        </div>
-        <div class="status-bar" id="statusBar">Load a reference image to begin.</div>
-    </main>
 </div>
 
 <script>
@@ -334,14 +462,22 @@
     const fileInput = document.getElementById("fileInput");
     const referenceCanvas = document.getElementById("referenceCanvas");
     const gridCanvas = document.getElementById("gridCanvas");
+    const selectionCanvas = document.getElementById("selectionCanvas");
     const canvasWrap = document.getElementById("canvasWrap");
     const refCtx = referenceCanvas.getContext("2d");
     const gridCtx = gridCanvas.getContext("2d");
+    const selectionCtx = selectionCanvas.getContext("2d");
 
-    const gridColsInput = document.getElementById("gridCols");
-    const gridRowsInput = document.getElementById("gridRows");
-    const applyGridBtn = document.getElementById("applyGridBtn");
+    const gridSizeInput = document.getElementById("gridSize");
+    const gridSizeMinusBtn = document.getElementById("gridSizeMinus");
+    const gridSizePlusBtn = document.getElementById("gridSizePlus");
     const cellSizeLabel = document.getElementById("cellSizeLabel");
+    const refNudgeUpBtn = document.getElementById("refNudgeUp");
+    const refNudgeDownBtn = document.getElementById("refNudgeDown");
+    const refNudgeLeftBtn = document.getElementById("refNudgeLeft");
+    const refNudgeRightBtn = document.getElementById("refNudgeRight");
+    const refNudgeResetBtn = document.getElementById("refNudgeReset");
+    const refOffsetLabel = document.getElementById("refOffsetLabel");
 
     const opacitySlider = document.getElementById("opacitySlider");
     const opacityValue = document.getElementById("opacityValue");
@@ -350,6 +486,13 @@
     const toolPaintBtn = document.getElementById("toolPaint");
     const toolEraseBtn = document.getElementById("toolErase");
     const toolEyedropBtn = document.getElementById("toolEyedrop");
+    const toolSelectBtn = document.getElementById("toolSelect");
+    const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+    const shiftRowDownBtn = document.getElementById("shiftRowDownBtn");
+    const shiftRowUpBtn = document.getElementById("shiftRowUpBtn");
+    const shiftColLeftBtn = document.getElementById("shiftColLeftBtn");
+    const shiftColRightBtn = document.getElementById("shiftColRightBtn");
+    const transformInsertToggle = document.getElementById("transformInsertToggle");
 
     const colorPicker = document.getElementById("colorPicker");
     const currentColorSwatch = document.getElementById("currentColorSwatch");
@@ -359,21 +502,86 @@
     const clearBtn = document.getElementById("clearBtn");
     const exportBtn = document.getElementById("exportBtn");
     const statusBar = document.getElementById("statusBar");
+    const undoBtn = document.getElementById("undoBtn");
+    const redoBtn = document.getElementById("redoBtn");
 
     let refImage = null;
     let displayW = 0;
     let displayH = 0;
+    let refScale = 1; // native image px -> display px, set when the image loads
+    let refOffsetX = 0; // reference image draw offset, in display px
+    let refOffsetY = 0;
+
+    // The reference layer's actual pixel store. Drawn once from the
+    // loaded file when it's first opened, then persistent and directly
+    // editable from then on (by the transform tools below) - refCtx
+    // (the visible canvas) is just refBuffer composited at the current
+    // offset, redrawn by drawReference() any time either one changes.
+    // Nudging moves refBuffer's *view* (the offset), it never touches
+    // refBuffer's own content, so edits and nudging can't clobber each
+    // other.
+    let refBuffer = null;
+    let refBufferCtx = null;
     let gridCols = 32;
     let gridRows = 32;
     let cellW = 0;
     let cellH = 0;
-    let gridData = []; // gridData[row][col] = "#rrggbb" | null
+    let gridData = makeGrid(gridCols, gridRows); // gridData[row][col] = "#rrggbb" | null
     let opacity = 0.6;
     let showGridLines = true;
     let tool = "paint"; // "paint" | "erase" | "eyedrop"
     let currentColor = "#7febff";
     let palette = ["#7febff", "#ff5ce0", "#ffe778", "#8274ff", "#ffcb57", "#f3f7ff"];
     let isPointerDown = false;
+
+    // Undo/redo history. Each entry is a full snapshot of everything that
+    // counts as "pixel data" - the grid's dimensions plus its cell colors -
+    // taken immediately before a change that would otherwise lose it. A
+    // paint/erase drag is batched into a single entry (see beginStroke/
+    // endStroke) rather than one entry per cell.
+    let undoStack = [];
+    let redoStack = [];
+    let strokeSnapshot = null;
+    let strokeDirty = false;
+    const MAX_HISTORY = 200;
+
+    // Selection: which drawing-layer cells tools are allowed to touch.
+    // null means "no selection" - per spec, that's equivalent to the whole
+    // grid being selected, so every selection-aware check goes through
+    // isCellSelected()/selectionBounds() rather than testing the mask
+    // directly. A real selection is additive: each dragged rectangle is
+    // OR'd into the existing mask, never replaces it.
+    let selectionMask = null; // null | boolean[row][col]
+    let selectionDragStart = null; // { row, col } while actively dragging a new rect
+    let selectionDragCurrent = null;
+
+    // Transform tools (push/stretch): these edit the REFERENCE layer's
+    // actual pixels (refBuffer, see below) within the area under the
+    // selection - never gridData. Live preview is recomputed from a
+    // snapshot taken at mousedown so the result only ever depends on
+    // total drag distance, not the sequence of mousemoves - dragging back
+    // and forth settles on the right answer.
+    let shiftDragAxis = null; // "row" | "col"
+    let shiftDragSnapshot = null; // ImageData of the selection's bounding box, pre-drag
+    let shiftDragSplit = null; // clicked row/col, 0-based within the bounding box
+    let shiftDragBounds = null; // { top, bottom, left, right } in refBuffer px
+    let shiftDragBeforeState = null; // full undo snapshot, taken once at drag start
+    const SHIFT_TOOLS = new Set(["shiftRowDown", "shiftRowUp", "shiftColLeft", "shiftColRight"]);
+    let transformInsertMode = true; // true = insert (pin far side, grow at split); false = translate the whole near side as a rigid block
+
+    // View-only transform (zoom/pan) applied to canvasWrap, which holds
+    // both canvases together - the underlay and the drawing layer always
+    // move and scale as one unit. This never touches image data, grid
+    // data, or the exported PNG; it's purely how the two layers are
+    // being looked at.
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
+    const ZOOM_MIN = 0.125;
+    const ZOOM_MAX = 64;
+    const PAN_HOLD_DELAY_MS = 1000;
+    const PAN_REPEAT_MS = 150;
+    const panKeyState = {}; // key -> { timeoutId, intervalId }
 
     function setStatus(text) {
         statusBar.textContent = text;
@@ -389,6 +597,105 @@
             grid[r] = new Array(cols).fill(null);
         }
         return grid;
+    }
+
+    // includeRef=true also snapshots the full reference buffer + its
+    // offset, for the (rarer) actions that actually touch the reference
+    // layer - kept optional so the common case (paint/erase strokes,
+    // grid resize, clear) stays a cheap gridData-only snapshot instead of
+    // copying a potentially large image on every stroke.
+    function cloneGridState(includeRef) {
+        const state = {
+            cols: gridCols,
+            rows: gridRows,
+            data: gridData.map((row) => row.slice()),
+        };
+        if (includeRef && refBuffer) {
+            state.refImageData = refBufferCtx.getImageData(0, 0, displayW, displayH);
+            state.refOffsetX = refOffsetX;
+            state.refOffsetY = refOffsetY;
+        }
+        return state;
+    }
+
+    function restoreGridState(state) {
+        gridCols = state.cols;
+        gridRows = state.rows;
+        gridData = state.data.map((row) => row.slice());
+        gridSizeInput.value = gridCols;
+        recomputeCellSize();
+
+        if (state.refImageData && refBuffer) {
+            refBufferCtx.putImageData(state.refImageData, 0, 0);
+            refOffsetX = state.refOffsetX;
+            refOffsetY = state.refOffsetY;
+            updateRefOffsetLabel();
+            drawReference();
+        }
+
+        renderGrid();
+    }
+
+    function updateUndoRedoButtons() {
+        undoBtn.disabled = undoStack.length === 0;
+        redoBtn.disabled = redoStack.length === 0;
+    }
+
+    // Records a state as the "before" side of a completed change. Any new
+    // change invalidates whatever was available to redo, same as every
+    // other undo/redo implementation.
+    function commitHistory(beforeState) {
+        undoStack.push(beforeState);
+        if (undoStack.length > MAX_HISTORY) {
+            undoStack.shift();
+        }
+        redoStack.length = 0;
+        updateUndoRedoButtons();
+    }
+
+    function pushHistoryBefore() {
+        commitHistory(cloneGridState(false));
+    }
+
+    // A paint/erase drag is one undo step, not one per cell: snapshot the
+    // state once at pointer-down, and only actually commit it once the
+    // drag ends and only if it actually changed anything (a click-and-
+    // release with no effect shouldn't leave a no-op undo entry).
+    function beginStroke() {
+        strokeSnapshot = cloneGridState(false);
+        strokeDirty = false;
+    }
+
+    function endStroke() {
+        if (strokeSnapshot && strokeDirty) {
+            commitHistory(strokeSnapshot);
+        }
+        strokeSnapshot = null;
+        strokeDirty = false;
+    }
+
+    function undo() {
+        if (undoStack.length === 0) {
+            return;
+        }
+        const prev = undoStack.pop();
+        const current = cloneGridState(Boolean(prev.refImageData));
+        redoStack.push(current);
+        restoreGridState(prev);
+        updateUndoRedoButtons();
+        setStatus("Undo.");
+    }
+
+    function redo() {
+        if (redoStack.length === 0) {
+            return;
+        }
+        const next = redoStack.pop();
+        const current = cloneGridState(Boolean(next.refImageData));
+        undoStack.push(current);
+        restoreGridState(next);
+        updateUndoRedoButtons();
+        setStatus("Redo.");
     }
 
     function renderPalette() {
@@ -423,12 +730,50 @@
         currentColorSwatch.style.background = currentColor;
     }
 
+    // Small inline SVG cursors so each transform tool visibly shows its
+    // axis and direction, per spec ("your cursor should then become a
+    // horizontal line with a down arrow").
+    function svgCursor(inner) {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">${inner}</svg>`;
+        return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 12 12, crosshair`;
+    }
+
+    const CURSOR_BY_TOOL = {
+        eyedrop: "copy",
+        select: "crosshair",
+        shiftRowDown: svgCursor(
+            '<line x1="2" y1="9" x2="22" y2="9" stroke="black" stroke-width="3"/>' +
+            '<line x1="2" y1="9" x2="22" y2="9" stroke="white" stroke-width="1.5"/>' +
+            '<polygon points="12,19 7,12 17,12" fill="white" stroke="black" stroke-width="1.5"/>'
+        ),
+        shiftRowUp: svgCursor(
+            '<line x1="2" y1="15" x2="22" y2="15" stroke="black" stroke-width="3"/>' +
+            '<line x1="2" y1="15" x2="22" y2="15" stroke="white" stroke-width="1.5"/>' +
+            '<polygon points="12,5 7,12 17,12" fill="white" stroke="black" stroke-width="1.5"/>'
+        ),
+        shiftColLeft: svgCursor(
+            '<line x1="15" y1="2" x2="15" y2="22" stroke="black" stroke-width="3"/>' +
+            '<line x1="15" y1="2" x2="15" y2="22" stroke="white" stroke-width="1.5"/>' +
+            '<polygon points="5,12 12,7 12,17" fill="white" stroke="black" stroke-width="1.5"/>'
+        ),
+        shiftColRight: svgCursor(
+            '<line x1="9" y1="2" x2="9" y2="22" stroke="black" stroke-width="3"/>' +
+            '<line x1="9" y1="2" x2="9" y2="22" stroke="white" stroke-width="1.5"/>' +
+            '<polygon points="19,12 12,7 12,17" fill="white" stroke="black" stroke-width="1.5"/>'
+        ),
+    };
+
     function setTool(next) {
         tool = next;
         toolPaintBtn.classList.toggle("active", tool === "paint");
         toolEraseBtn.classList.toggle("active", tool === "erase");
         toolEyedropBtn.classList.toggle("active", tool === "eyedrop");
-        gridCanvas.style.cursor = tool === "eyedrop" ? "copy" : "crosshair";
+        toolSelectBtn.classList.toggle("active", tool === "select");
+        shiftRowDownBtn.classList.toggle("active", tool === "shiftRowDown");
+        shiftRowUpBtn.classList.toggle("active", tool === "shiftRowUp");
+        shiftColLeftBtn.classList.toggle("active", tool === "shiftColLeft");
+        shiftColRightBtn.classList.toggle("active", tool === "shiftColRight");
+        gridCanvas.style.cursor = CURSOR_BY_TOOL[tool] || "crosshair";
     }
 
     function sizeCanvases() {
@@ -436,10 +781,14 @@
         referenceCanvas.height = displayH;
         gridCanvas.width = displayW;
         gridCanvas.height = displayH;
+        selectionCanvas.width = displayW;
+        selectionCanvas.height = displayH;
         referenceCanvas.style.width = displayW + "px";
         referenceCanvas.style.height = displayH + "px";
         gridCanvas.style.width = displayW + "px";
         gridCanvas.style.height = displayH + "px";
+        selectionCanvas.style.width = displayW + "px";
+        selectionCanvas.style.height = displayH + "px";
         canvasWrap.style.width = displayW + "px";
         canvasWrap.style.height = displayH + "px";
     }
@@ -452,12 +801,44 @@
             : "";
     }
 
+    // Composites the live refBuffer onto the visible canvas at the
+    // current offset. refBuffer itself is never touched by this - it's
+    // the one place both nudging and the transform tools read/write, so
+    // neither one can silently discard what the other did.
     function drawReference() {
-        if (!refImage) {
+        if (!refImage || !refBuffer) {
             return;
         }
         refCtx.clearRect(0, 0, displayW, displayH);
-        refCtx.drawImage(refImage, 0, 0, displayW, displayH);
+        refCtx.drawImage(refBuffer, refOffsetX, refOffsetY);
+    }
+
+    // Nudges only the reference layer, not the grid/drawing layer sitting
+    // on top of it - for correcting a reference that's a pixel or two off
+    // from where you want it to sit under an already-placed grid. dx/dy
+    // are in the reference image's own native pixels; refScale converts
+    // that to the display px this canvas is actually drawn at.
+    function nudgeReference(dx, dy) {
+        if (!refImage) {
+            return;
+        }
+        refOffsetX += dx * refScale;
+        refOffsetY += dy * refScale;
+        drawReference();
+        updateRefOffsetLabel();
+    }
+
+    function resetReferencePosition() {
+        refOffsetX = 0;
+        refOffsetY = 0;
+        drawReference();
+        updateRefOffsetLabel();
+    }
+
+    function updateRefOffsetLabel() {
+        const nativeX = refScale ? Math.round(refOffsetX / refScale) : 0;
+        const nativeY = refScale ? Math.round(refOffsetY / refScale) : 0;
+        refOffsetLabel.textContent = `Reference offset: ${nativeX}, ${nativeY} native px`;
     }
 
     function renderGrid() {
@@ -487,7 +868,33 @@
         gridCanvas.style.opacity = opacity;
 
         if (showGridLines && cellW >= 4) {
-            gridCtx.strokeStyle = "rgba(255,255,255,0.15)";
+            drawAdaptiveGridLines();
+        }
+
+        drawSelectionOverlay();
+    }
+
+    const GRID_LINE_BRIGHTNESS_THRESHOLD = 127.5; // 50% of 255
+
+    function referenceBrightnessAt(refData, x, y) {
+        const px = Math.min(displayW - 1, Math.max(0, Math.round(x)));
+        const py = Math.min(displayH - 1, Math.max(0, Math.round(y)));
+        const idx = (py * displayW + px) * 4;
+        // ITU-R BT.601 luma - a standard, cheap "how bright does this look"
+        // estimate, not a strict accessibility contrast calculation.
+        return 0.299 * refData[idx] + 0.587 * refData[idx + 1] + 0.114 * refData[idx + 2];
+    }
+
+    // Plain white at low opacity disappears over anything but a dark
+    // background - each grid line segment is colored per-segment against
+    // the reference art underneath it (white over dark, black over
+    // bright), rather than one fixed color for the whole grid. Segments
+    // are batched into two Path2D objects (one per color) so this stays
+    // one stroke() call per color regardless of grid size, not one call
+    // per segment.
+    function drawAdaptiveGridLines() {
+        if (!refImage) {
+            gridCtx.strokeStyle = "rgba(255,255,255,0.4)";
             gridCtx.lineWidth = 1;
             gridCtx.beginPath();
             for (let c = 0; c <= gridCols; c++) {
@@ -501,7 +908,453 @@
                 gridCtx.lineTo(displayW, y);
             }
             gridCtx.stroke();
+            return;
         }
+
+        const refData = refCtx.getImageData(0, 0, displayW, displayH).data;
+        const whitePath = new Path2D();
+        const blackPath = new Path2D();
+
+        for (let c = 0; c <= gridCols; c++) {
+            const x = Math.round(c * cellW) + 0.5;
+            for (let r = 0; r < gridRows; r++) {
+                const y0 = Math.round(r * cellH);
+                const y1 = Math.round((r + 1) * cellH);
+                const brightness = referenceBrightnessAt(refData, x, (y0 + y1) / 2);
+                const path = brightness >= GRID_LINE_BRIGHTNESS_THRESHOLD ? blackPath : whitePath;
+                path.moveTo(x, y0);
+                path.lineTo(x, y1);
+            }
+        }
+
+        for (let r = 0; r <= gridRows; r++) {
+            const y = Math.round(r * cellH) + 0.5;
+            for (let c = 0; c < gridCols; c++) {
+                const x0 = Math.round(c * cellW);
+                const x1 = Math.round((c + 1) * cellW);
+                const brightness = referenceBrightnessAt(refData, (x0 + x1) / 2, y);
+                const path = brightness >= GRID_LINE_BRIGHTNESS_THRESHOLD ? blackPath : whitePath;
+                path.moveTo(x0, y);
+                path.lineTo(x1, y);
+            }
+        }
+
+        gridCtx.lineWidth = 1;
+        gridCtx.strokeStyle = "rgba(255,255,255,0.4)";
+        gridCtx.stroke(whitePath);
+        gridCtx.strokeStyle = "rgba(0,0,0,0.4)";
+        gridCtx.stroke(blackPath);
+    }
+
+    // ---- selection ----
+
+    function isCellSelected(row, col) {
+        if (!selectionMask) {
+            return true; // no selection -> the whole grid counts as selected
+        }
+        return !!(selectionMask[row] && selectionMask[row][col]);
+    }
+
+    function makeSelectionMask() {
+        const mask = new Array(gridRows);
+        for (let r = 0; r < gridRows; r++) {
+            mask[r] = new Array(gridCols).fill(false);
+        }
+        return mask;
+    }
+
+    function selectionBounds() {
+        if (!selectionMask) {
+            return { top: 0, bottom: gridRows - 1, left: 0, right: gridCols - 1 };
+        }
+
+        let top = Infinity, bottom = -Infinity, left = Infinity, right = -Infinity;
+        for (let r = 0; r < gridRows; r++) {
+            for (let c = 0; c < gridCols; c++) {
+                if (selectionMask[r][c]) {
+                    if (r < top) top = r;
+                    if (r > bottom) bottom = r;
+                    if (c < left) left = c;
+                    if (c > right) right = c;
+                }
+            }
+        }
+
+        if (top === Infinity) {
+            return { top: 0, bottom: gridRows - 1, left: 0, right: gridCols - 1 };
+        }
+
+        return { top, bottom, left, right };
+    }
+
+    function updateClearSelectionButton() {
+        clearSelectionBtn.disabled = !selectionMask;
+    }
+
+    function clearSelection() {
+        selectionMask = null;
+        updateClearSelectionButton();
+        drawSelectionOverlay();
+        setStatus("Selection cleared - the whole grid is editable.");
+    }
+
+    function commitSelectionDrag() {
+        if (!selectionDragStart || !selectionDragCurrent) {
+            selectionDragStart = null;
+            selectionDragCurrent = null;
+            return;
+        }
+
+        const top = Math.min(selectionDragStart.row, selectionDragCurrent.row);
+        const bottom = Math.max(selectionDragStart.row, selectionDragCurrent.row);
+        const left = Math.min(selectionDragStart.col, selectionDragCurrent.col);
+        const right = Math.max(selectionDragStart.col, selectionDragCurrent.col);
+
+        if (!selectionMask) {
+            selectionMask = makeSelectionMask();
+        }
+
+        for (let r = top; r <= bottom; r++) {
+            for (let c = left; c <= right; c++) {
+                selectionMask[r][c] = true;
+            }
+        }
+
+        selectionDragStart = null;
+        selectionDragCurrent = null;
+        updateClearSelectionButton();
+        drawSelectionOverlay();
+        setStatus(`Selection: added ${bottom - top + 1}x${right - left + 1} region.`);
+    }
+
+    // Drawn on its own always-full-opacity canvas, stacked above the
+    // drawing layer, so the selection stays clearly visible regardless of
+    // the overlay opacity slider (which only affects gridCanvas).
+    function drawSelectionOverlay() {
+        selectionCtx.clearRect(0, 0, displayW, displayH);
+
+        if (tool === "select" && selectionDragStart && selectionDragCurrent) {
+            const top = Math.min(selectionDragStart.row, selectionDragCurrent.row);
+            const bottom = Math.max(selectionDragStart.row, selectionDragCurrent.row);
+            const left = Math.min(selectionDragStart.col, selectionDragCurrent.col);
+            const right = Math.max(selectionDragStart.col, selectionDragCurrent.col);
+
+            selectionCtx.save();
+            selectionCtx.setLineDash([4, 3]);
+            selectionCtx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+            selectionCtx.lineWidth = 2;
+            selectionCtx.strokeRect(
+                Math.round(left * cellW) + 1,
+                Math.round(top * cellH) + 1,
+                Math.round((right - left + 1) * cellW) - 2,
+                Math.round((bottom - top + 1) * cellH) - 2
+            );
+            selectionCtx.restore();
+        }
+
+        if (!selectionMask) {
+            return;
+        }
+
+        selectionCtx.save();
+        selectionCtx.fillStyle = "rgba(127, 235, 255, 0.16)";
+        for (let r = 0; r < gridRows; r++) {
+            for (let c = 0; c < gridCols; c++) {
+                if (selectionMask[r][c]) {
+                    selectionCtx.fillRect(
+                        Math.round(c * cellW),
+                        Math.round(r * cellH),
+                        Math.ceil(cellW) + 1,
+                        Math.ceil(cellH) + 1
+                    );
+                }
+            }
+        }
+
+        // Boundary stroke wherever a selected cell borders an unselected
+        // one (or the grid edge), batched into one Path2D so this stays
+        // one stroke() call regardless of grid size or selection shape.
+        const boundaryPath = new Path2D();
+        for (let r = 0; r < gridRows; r++) {
+            for (let c = 0; c < gridCols; c++) {
+                if (!selectionMask[r][c]) {
+                    continue;
+                }
+                const x0 = Math.round(c * cellW);
+                const y0 = Math.round(r * cellH);
+                const x1 = Math.round((c + 1) * cellW);
+                const y1 = Math.round((r + 1) * cellH);
+
+                if (r === 0 || !selectionMask[r - 1][c]) {
+                    boundaryPath.moveTo(x0, y0);
+                    boundaryPath.lineTo(x1, y0);
+                }
+                if (r === gridRows - 1 || !selectionMask[r + 1][c]) {
+                    boundaryPath.moveTo(x0, y1);
+                    boundaryPath.lineTo(x1, y1);
+                }
+                if (c === 0 || !selectionMask[r][c - 1]) {
+                    boundaryPath.moveTo(x0, y0);
+                    boundaryPath.lineTo(x0, y1);
+                }
+                if (c === gridCols - 1 || !selectionMask[r][c + 1]) {
+                    boundaryPath.moveTo(x1, y0);
+                    boundaryPath.lineTo(x1, y1);
+                }
+            }
+        }
+        selectionCtx.strokeStyle = "rgba(127, 235, 255, 0.95)";
+        selectionCtx.lineWidth = 2;
+        selectionCtx.stroke(boundaryPath);
+        selectionCtx.restore();
+    }
+
+    // ---- transform tools: push/stretch the REFERENCE image within the
+    // selection's footprint. These edit refBuffer's actual pixels; they
+    // never touch gridData. The selection (grid cells) only decides which
+    // reference pixels are fair game - the manipulation itself works at
+    // full reference-pixel resolution, not grid-cell resolution. ----
+
+    function shiftAxisFor(toolName) {
+        return toolName === "shiftRowDown" || toolName === "shiftRowUp" ? "row" : "col";
+    }
+
+    // The selection's grid-cell bounding box, converted to refBuffer
+    // pixel coordinates (cellW/cellH map cells to buffer px directly -
+    // the buffer is at display resolution, same space the grid is drawn
+    // in, so no refScale/refOffset math is needed here at all).
+    function bufferBoundsFromSelection() {
+        const b = selectionBounds();
+        return {
+            top: Math.max(0, Math.round(b.top * cellH)),
+            bottom: Math.min(displayH - 1, Math.round((b.bottom + 1) * cellH) - 1),
+            left: Math.max(0, Math.round(b.left * cellW)),
+            right: Math.min(displayW - 1, Math.round((b.right + 1) * cellW) - 1),
+        };
+    }
+
+    // Click position in refBuffer pixel space (not grid cells) - "the
+    // exact pixel of the background image you clicked on."
+    function bufferPixelFromEvent(e) {
+        if (!refImage || !refBuffer) {
+            return null;
+        }
+        const rect = gridCanvas.getBoundingClientRect();
+        const dx = (e.clientX - rect.left) / zoom;
+        const dy = (e.clientY - rect.top) / zoom;
+        const bx = Math.floor(dx - refOffsetX);
+        const by = Math.floor(dy - refOffsetY);
+        if (bx < 0 || by < 0 || bx >= displayW || by >= displayH) {
+            return null;
+        }
+        return { x: bx, y: by };
+    }
+
+    // ---- Insert mode: pins one whole side exactly in place; the other
+    // side gets overwritten by repeatedly duplicating the split index
+    // outward ("insert" more copies of that edge). ----
+
+    // Pins zone [0, split] exactly in place - it never moves or changes.
+    // Zone (split, length-1] gets overwritten by repeatedly duplicating
+    // index `split` outward for `d` steps ("add more of the edge that's
+    // selected"), covering whatever was there; content further out than
+    // the duplicated run just slides down to make room.
+    function pinLowGrowHigh(length, split, d) {
+        const clampedD = Math.max(0, Math.min(d, length - 1 - split));
+        const mapping = new Array(length);
+        for (let i = 0; i < length; i++) {
+            mapping[i] = i <= split ? i : Math.max(split, i - clampedD);
+        }
+        return mapping;
+    }
+
+    // Mirror of pinLowGrowHigh - pins [split, length-1] in place, grows
+    // [0, split) by duplicating index `split` outward.
+    function pinHighGrowLow(length, split, d) {
+        const mirroredSplit = length - 1 - split;
+        const mirrored = pinLowGrowHigh(length, mirroredSplit, d);
+        const mapping = new Array(length);
+        for (let i = 0; i < length; i++) {
+            mapping[i] = length - 1 - mirrored[length - 1 - i];
+        }
+        return mapping;
+    }
+
+    // shiftRowDown / shiftColRight: dragging toward the increasing-index
+    // direction (its own arrow) pins the low side and grows the high side
+    // from the split point. Dragging the opposite way pins the high side
+    // instead and grows the low side from split+1. Reused for both axes.
+    function shiftDownMappingInsert(length, split, delta) {
+        return delta >= 0
+            ? pinLowGrowHigh(length, split, delta)
+            : pinHighGrowLow(length, Math.min(length - 1, split + 1), -delta);
+    }
+
+    // Mirror of shiftDownMappingInsert - reused for row-up and col-left.
+    function shiftUpMappingInsert(length, split, delta) {
+        return delta <= 0
+            ? pinHighGrowLow(length, split, -delta)
+            : pinLowGrowHigh(length, Math.max(0, split - 1), delta);
+    }
+
+    // ---- Translate mode (the earlier behavior): the whole [0, split]
+    // zone slides as a rigid block toward increasing indices, covering
+    // over the other zone as it advances, and backfilling its own
+    // vacated low edge with a duplicate of index 0 - so both edges of the
+    // moving zone shift, not just the one at the split point. ----
+
+    function shiftDownMappingTranslate(length, split, delta) {
+        const mapping = new Array(length);
+        const last = length - 1;
+        if (delta >= 0) {
+            const s = Math.max(0, Math.min(delta, last - split));
+            for (let i = 0; i < length; i++) {
+                if (i < s) {
+                    mapping[i] = 0;
+                } else if (i <= split + s) {
+                    mapping[i] = i - s;
+                } else {
+                    mapping[i] = i;
+                }
+            }
+        } else {
+            const s = Math.max(0, Math.min(-delta, split + 1));
+            for (let i = 0; i < length; i++) {
+                if (i < split + 1 - s) {
+                    mapping[i] = i;
+                } else if (i <= last - s) {
+                    mapping[i] = i + s;
+                } else {
+                    mapping[i] = last;
+                }
+            }
+        }
+        return mapping;
+    }
+
+    // Mirror of shiftDownMappingTranslate - reused for row-up and col-left.
+    function shiftUpMappingTranslate(length, split, delta) {
+        const mirroredSplit = length - 1 - split;
+        const mirrored = shiftDownMappingTranslate(length, mirroredSplit, -delta);
+        const mapping = new Array(length);
+        for (let i = 0; i < length; i++) {
+            mapping[i] = length - 1 - mirrored[length - 1 - i];
+        }
+        return mapping;
+    }
+
+    const SHIFT_MAPPERS_INSERT = {
+        shiftRowDown: shiftDownMappingInsert,
+        shiftColRight: shiftDownMappingInsert,
+        shiftRowUp: shiftUpMappingInsert,
+        shiftColLeft: shiftUpMappingInsert,
+    };
+
+    const SHIFT_MAPPERS_TRANSLATE = {
+        shiftRowDown: shiftDownMappingTranslate,
+        shiftColRight: shiftDownMappingTranslate,
+        shiftRowUp: shiftUpMappingTranslate,
+        shiftColLeft: shiftUpMappingTranslate,
+    };
+
+    function beginShiftDrag(e) {
+        const hit = bufferPixelFromEvent(e);
+        if (!hit) {
+            return;
+        }
+        shiftDragAxis = shiftAxisFor(tool);
+        shiftDragBounds = bufferBoundsFromSelection();
+        shiftDragSplit = shiftDragAxis === "row"
+            ? hit.y - shiftDragBounds.top
+            : hit.x - shiftDragBounds.left;
+
+        const { top, left, bottom, right } = shiftDragBounds;
+        shiftDragSnapshot = refBufferCtx.getImageData(left, top, right - left + 1, bottom - top + 1);
+        shiftDragBeforeState = cloneGridState(true);
+        strokeDirty = false;
+    }
+
+    function applyShift(delta) {
+        const { top, left, bottom, right } = shiftDragBounds;
+        const w = right - left + 1;
+        const h = bottom - top + 1;
+        const mapper = (transformInsertMode ? SHIFT_MAPPERS_INSERT : SHIFT_MAPPERS_TRANSLATE)[tool];
+
+        const out = refBufferCtx.createImageData(w, h);
+        const src = shiftDragSnapshot.data;
+        const dst = out.data;
+
+        if (shiftDragAxis === "row") {
+            const mapping = mapper(h, shiftDragSplit, delta);
+            for (let row = 0; row < h; row++) {
+                const srcOffset = mapping[row] * w * 4;
+                const dstOffset = row * w * 4;
+                dst.set(src.subarray(srcOffset, srcOffset + w * 4), dstOffset);
+            }
+        } else {
+            const mapping = mapper(w, shiftDragSplit, delta);
+            for (let row = 0; row < h; row++) {
+                const rowBase = row * w * 4;
+                for (let col = 0; col < w; col++) {
+                    const srcIdx = rowBase + mapping[col] * 4;
+                    const dstIdx = rowBase + col * 4;
+                    dst[dstIdx] = src[srcIdx];
+                    dst[dstIdx + 1] = src[srcIdx + 1];
+                    dst[dstIdx + 2] = src[srcIdx + 2];
+                    dst[dstIdx + 3] = src[srcIdx + 3];
+                }
+            }
+        }
+
+        // Any output pixel outside the actual selection (even within the
+        // selection's own bounding box, for an irregular multi-rect
+        // selection) keeps its original pre-drag value untouched.
+        for (let row = 0; row < h; row++) {
+            const gridRow = Math.floor((top + row) / cellH);
+            for (let col = 0; col < w; col++) {
+                if (isCellSelected(gridRow, Math.floor((left + col) / cellW))) {
+                    continue;
+                }
+                const idx = (row * w + col) * 4;
+                dst[idx] = src[idx];
+                dst[idx + 1] = src[idx + 1];
+                dst[idx + 2] = src[idx + 2];
+                dst[idx + 3] = src[idx + 3];
+            }
+        }
+
+        refBufferCtx.putImageData(out, left, top);
+        if (delta !== 0) {
+            strokeDirty = true;
+        }
+        drawReference();
+        renderGrid();
+    }
+
+    function updateShiftDrag(e) {
+        if (!shiftDragSnapshot) {
+            return;
+        }
+        const hit = bufferPixelFromEvent(e);
+        if (!hit) {
+            return;
+        }
+        const current = shiftDragAxis === "row"
+            ? hit.y - shiftDragBounds.top
+            : hit.x - shiftDragBounds.left;
+        applyShift(current - shiftDragSplit);
+    }
+
+    function endShiftDrag() {
+        if (shiftDragBeforeState && strokeDirty) {
+            commitHistory(shiftDragBeforeState);
+        }
+        shiftDragAxis = null;
+        shiftDragSnapshot = null;
+        shiftDragSplit = null;
+        shiftDragBounds = null;
+        shiftDragBeforeState = null;
+        strokeDirty = false;
     }
 
     function loadImageFile(file) {
@@ -513,13 +1366,31 @@
             const scale = Math.min(1, MAX_DISPLAY / img.width, MAX_DISPLAY / img.height);
             displayW = Math.round(img.width * scale);
             displayH = Math.round(img.height * scale);
+            refScale = scale;
+            refOffsetX = 0;
+            refOffsetY = 0;
+            updateRefOffsetLabel();
 
             sizeCanvases();
+
+            refBuffer = document.createElement("canvas");
+            refBuffer.width = displayW;
+            refBuffer.height = displayH;
+            refBufferCtx = refBuffer.getContext("2d");
+            refBufferCtx.drawImage(img, 0, 0, displayW, displayH);
             drawReference();
 
+            pushHistoryBefore();
             gridData = makeGrid(gridCols, gridRows);
+            selectionMask = null;
+            updateClearSelectionButton();
             recomputeCellSize();
             renderGrid();
+
+            zoom = 1;
+            panX = 0;
+            panY = 0;
+            applyViewTransform();
 
             setStatus(`Loaded ${img.width}x${img.height} reference, displayed at ${displayW}x${displayH}.`);
             URL.revokeObjectURL(url);
@@ -527,21 +1398,47 @@
         img.src = url;
     }
 
-    function applyGridSize() {
-        const cols = Math.max(1, Math.min(256, parseInt(gridColsInput.value, 10) || 1));
-        const rows = Math.max(1, Math.min(256, parseInt(gridRowsInput.value, 10) || 1));
-        gridCols = cols;
-        gridRows = rows;
+    // Rows and columns are always equal (square cells) - kept as two
+    // variables through the rest of the file since most of the drawing/
+    // export code already indexes by both, but every write to grid size
+    // goes through here so they can never drift apart.
+    function applyGridSize(size) {
+        const clamped = Math.max(1, Math.min(256, size || 1));
+        gridSizeInput.value = clamped;
+        pushHistoryBefore();
+        gridCols = clamped;
+        gridRows = clamped;
         gridData = makeGrid(gridCols, gridRows);
+        selectionMask = null;
+        updateClearSelectionButton();
         recomputeCellSize();
         renderGrid();
         setStatus(`Grid set to ${gridCols}x${gridRows}.`);
     }
 
+    function applyViewTransform() {
+        canvasWrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    }
+
+    function setZoom(nextZoom) {
+        zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, nextZoom));
+        applyViewTransform();
+        setStatus(`Zoom ${zoom < 1 ? zoom.toFixed(3) : zoom}x`);
+    }
+
+    function panBy(dx, dy) {
+        panX += dx;
+        panY += dy;
+        applyViewTransform();
+    }
+
     function cellFromEvent(e) {
+        // getBoundingClientRect() reflects the current CSS transform (zoom
+        // included), so its size is already scaled - divide back out to
+        // land on the same canvas-internal cell regardless of zoom level.
         const rect = gridCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const x = (e.clientX - rect.left) / zoom;
+        const y = (e.clientY - rect.top) / zoom;
         const col = Math.floor(x / cellW);
         const row = Math.floor(y / cellH);
         if (col < 0 || col >= gridCols || row < 0 || row >= gridRows) {
@@ -574,10 +1471,15 @@
             return;
         }
 
-        if (activeTool === "erase") {
-            gridData[hit.row][hit.col] = null;
-        } else {
-            gridData[hit.row][hit.col] = currentColor;
+        if (!isCellSelected(hit.row, hit.col)) {
+            return; // outside the active selection - ignored
+        }
+
+        const newValue = activeTool === "erase" ? null : currentColor;
+
+        if (gridData[hit.row][hit.col] !== newValue) {
+            gridData[hit.row][hit.col] = newValue;
+            strokeDirty = true;
         }
 
         renderGrid();
@@ -620,7 +1522,23 @@
         }
     });
 
-    applyGridBtn.addEventListener("click", applyGridSize);
+    gridSizeMinusBtn.addEventListener("click", () => {
+        applyGridSize(gridCols - 1);
+    });
+
+    gridSizePlusBtn.addEventListener("click", () => {
+        applyGridSize(gridCols + 1);
+    });
+
+    gridSizeInput.addEventListener("change", () => {
+        applyGridSize(parseInt(gridSizeInput.value, 10));
+    });
+
+    refNudgeUpBtn.addEventListener("click", () => nudgeReference(0, -1));
+    refNudgeDownBtn.addEventListener("click", () => nudgeReference(0, 1));
+    refNudgeLeftBtn.addEventListener("click", () => nudgeReference(-1, 0));
+    refNudgeRightBtn.addEventListener("click", () => nudgeReference(1, 0));
+    refNudgeResetBtn.addEventListener("click", resetReferencePosition);
 
     opacitySlider.addEventListener("input", () => {
         opacity = parseInt(opacitySlider.value, 10) / 100;
@@ -633,9 +1551,19 @@
         renderGrid();
     });
 
+    transformInsertToggle.addEventListener("change", () => {
+        transformInsertMode = transformInsertToggle.checked;
+    });
+
     toolPaintBtn.addEventListener("click", () => setTool("paint"));
     toolEraseBtn.addEventListener("click", () => setTool("erase"));
     toolEyedropBtn.addEventListener("click", () => setTool("eyedrop"));
+    toolSelectBtn.addEventListener("click", () => setTool("select"));
+    shiftRowDownBtn.addEventListener("click", () => setTool("shiftRowDown"));
+    shiftRowUpBtn.addEventListener("click", () => setTool("shiftRowUp"));
+    shiftColLeftBtn.addEventListener("click", () => setTool("shiftColLeft"));
+    shiftColRightBtn.addEventListener("click", () => setTool("shiftColRight"));
+    clearSelectionBtn.addEventListener("click", clearSelection);
 
     colorPicker.addEventListener("input", () => {
         currentColor = colorPicker.value;
@@ -651,28 +1579,86 @@
     });
 
     clearBtn.addEventListener("click", () => {
-        gridData = makeGrid(gridCols, gridRows);
+        pushHistoryBefore();
+        for (let r = 0; r < gridRows; r++) {
+            for (let c = 0; c < gridCols; c++) {
+                if (isCellSelected(r, c)) {
+                    gridData[r][c] = null;
+                }
+            }
+        }
         renderGrid();
     });
 
     exportBtn.addEventListener("click", exportPNG);
+
+    undoBtn.addEventListener("click", undo);
+    redoBtn.addEventListener("click", redo);
 
     gridCanvas.addEventListener("mousedown", (e) => {
         if (e.button === 2) {
             return; // handled by contextmenu
         }
         isPointerDown = true;
+
+        if (tool === "select") {
+            const hit = cellFromEvent(e);
+            if (hit) {
+                selectionDragStart = { row: hit.row, col: hit.col };
+                selectionDragCurrent = selectionDragStart;
+                drawSelectionOverlay();
+            }
+            return;
+        }
+
+        if (SHIFT_TOOLS.has(tool)) {
+            beginShiftDrag(e);
+            return;
+        }
+
+        if (tool !== "eyedrop") {
+            beginStroke();
+        }
         paintAt(e, false);
     });
 
     window.addEventListener("mouseup", () => {
+        const wasDown = isPointerDown;
         isPointerDown = false;
+
+        if (!wasDown) {
+            return;
+        }
+
+        if (tool === "select") {
+            commitSelectionDrag();
+        } else if (SHIFT_TOOLS.has(tool)) {
+            endShiftDrag();
+        } else {
+            endStroke();
+        }
     });
 
     gridCanvas.addEventListener("mousemove", (e) => {
-        if (isPointerDown) {
-            paintAt(e, false);
+        if (!isPointerDown) {
+            return;
         }
+
+        if (tool === "select") {
+            const hit = cellFromEvent(e);
+            if (hit) {
+                selectionDragCurrent = { row: hit.row, col: hit.col };
+                drawSelectionOverlay();
+            }
+            return;
+        }
+
+        if (SHIFT_TOOLS.has(tool)) {
+            updateShiftDrag(e);
+            return;
+        }
+
+        paintAt(e, false);
     });
 
     gridCanvas.addEventListener("contextmenu", (e) => {
@@ -680,11 +1666,119 @@
         paintAt(e, true);
     });
 
+    // ---- view controls: zoom (+/-) and pan (arrow keys) ----
+
+    const INTERACTIVE_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
+
+    function isInteractiveElementFocused() {
+        const active = document.activeElement;
+        return active && INTERACTIVE_TAGS.has(active.tagName);
+    }
+
+    // Arrow keys move the picture opposite the arrow pressed (pressing
+    // Right scrolls the view rightward, so the content shifts left) - one
+    // step immediately, then a pause, then a slow steady walk for as long
+    // as the key stays held. Keyed by e.key so holding two arrows at once
+    // (e.g. a diagonal nudge) runs both independently.
+    const PAN_DIRECTIONS = {
+        ArrowUp: [0, 1],
+        ArrowDown: [0, -1],
+        ArrowLeft: [1, 0],
+        ArrowRight: [-1, 0],
+    };
+
+    // "One pixel" here means one big pixel of the drawing layer - a full
+    // grid cell at its current on-screen size - not one physical screen
+    // pixel. Computed fresh on every step (not just once per key-hold) so
+    // it stays correct if the zoom level changes mid-hold.
+    function currentCellStepPx() {
+        return { stepX: cellW * zoom, stepY: cellH * zoom };
+    }
+
+    function panStepFor(key) {
+        const [signX, signY] = PAN_DIRECTIONS[key];
+        const { stepX, stepY } = currentCellStepPx();
+        return [signX * stepX, signY * stepY];
+    }
+
+    function startPanning(key) {
+        panBy(...panStepFor(key));
+
+        const timeoutId = window.setTimeout(() => {
+            const intervalId = window.setInterval(() => {
+                panBy(...panStepFor(key));
+            }, PAN_REPEAT_MS);
+
+            panKeyState[key].intervalId = intervalId;
+        }, PAN_HOLD_DELAY_MS);
+
+        panKeyState[key] = { timeoutId, intervalId: null };
+    }
+
+    function stopPanning(key) {
+        const state = panKeyState[key];
+        if (!state) {
+            return;
+        }
+        window.clearTimeout(state.timeoutId);
+        if (state.intervalId !== null) {
+            window.clearInterval(state.intervalId);
+        }
+        delete panKeyState[key];
+    }
+
+    window.addEventListener("keydown", (e) => {
+        if (isInteractiveElementFocused()) {
+            return;
+        }
+
+        if (e.key === "+" || e.key === "=") {
+            e.preventDefault();
+            setZoom(zoom * 2);
+            return;
+        }
+
+        if (e.key === "-" || e.key === "_") {
+            e.preventDefault();
+            setZoom(zoom * 0.5);
+            return;
+        }
+
+        if (PAN_DIRECTIONS[e.key]) {
+            e.preventDefault();
+
+            // Ignore the OS's own key-repeat keydown events - panKeyState
+            // already owns a real timeout/interval sequence for this key
+            // from the first physical press.
+            if (e.repeat || panKeyState[e.key]) {
+                return;
+            }
+
+            startPanning(e.key);
+        }
+    });
+
+    window.addEventListener("keyup", (e) => {
+        if (PAN_DIRECTIONS[e.key]) {
+            stopPanning(e.key);
+        }
+    });
+
+    // If the window loses focus mid-hold (alt-tab, etc.) there's no keyup
+    // to catch, so the picture would otherwise keep drifting forever.
+    window.addEventListener("blur", () => {
+        for (const key of Object.keys(panKeyState)) {
+            stopPanning(key);
+        }
+    });
+
     // ---- init ----
 
     updateCurrentColorSwatch();
     renderPalette();
     setTool("paint");
+    updateUndoRedoButtons();
+    updateClearSelectionButton();
 })();
 </script>
 </body>
