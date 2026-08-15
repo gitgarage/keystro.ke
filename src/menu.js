@@ -15,9 +15,10 @@
  *
  * Responsibility
  * --------------
- * Behavior for the landing/main-menu screen (index.html): procedural
- * pixel-art room icons, the scrolling ticker, and PC-speaker-style sound
- * feedback on the room tiles.
+ * Behavior for the landing/main-menu screen (index.html): the scrolling
+ * ticker and PC-speaker-style sound feedback on the room tiles. Room
+ * artwork itself is static image assets (assets/icons/room-*.webp), not
+ * rendered here.
  *
  * This intentionally does not touch anything under src/game/ - the menu
  * has no gameplay state. It links to the arcade (arcade.html) rather than
@@ -46,153 +47,6 @@ function renderTicker() {
         .join("");
 
     track.innerHTML = items;
-}
-
-/* ---- procedural pixel-art icons, 16x16, rendered to canvas ----
-   0 = transparent, 1 = dark silhouette ink, 3 = white highlight fleck */
-const GRID = 16;
-
-function makeGrid() {
-    return Array.from({ length: GRID }, () => new Array(GRID).fill(0));
-}
-
-function setPixel(grid, x, y, value) {
-    if (x >= 0 && x < GRID && y >= 0 && y < GRID) {
-        grid[y][x] = value;
-    }
-}
-
-function fillRect(grid, x0, y0, x1, y1, value) {
-    for (let y = y0; y <= y1; y += 1) {
-        for (let x = x0; x <= x1; x += 1) {
-            setPixel(grid, x, y, value);
-        }
-    }
-}
-
-function drawCap() {
-    const grid = makeGrid();
-    const cx = 7;
-    const cy = 5;
-    const halfW = 6;
-    const halfH = 4;
-
-    for (let r = -halfH; r <= halfH; r += 1) {
-        const w = Math.round(halfW * (1 - Math.abs(r) / halfH));
-        fillRect(grid, cx - w, cy + r, cx + w, cy + r, 1);
-    }
-
-    fillRect(grid, cx - 2, cy + halfH, cx + 2, cy + halfH + 2, 1);
-
-    setPixel(grid, cx + 5, cy - 1, 1);
-    setPixel(grid, cx + 6, cy, 1);
-    setPixel(grid, cx + 6, cy + 1, 1);
-    setPixel(grid, cx + 7, cy + 2, 1);
-    fillRect(grid, cx + 6, cy + 3, cx + 7, cy + 4, 3);
-
-    setPixel(grid, cx - 3, cy - 1, 3);
-
-    return grid;
-}
-
-function drawStick() {
-    const grid = makeGrid();
-
-    fillRect(grid, 2, 10, 13, 12, 1);
-    fillRect(grid, 7, 4, 8, 10, 1);
-
-    const bx = 7.5;
-    const by = 3;
-    const radius = 3;
-
-    for (let y = 0; y < GRID; y += 1) {
-        for (let x = 0; x < GRID; x += 1) {
-            if (Math.hypot(x - bx, y - by) <= radius) {
-                setPixel(grid, x, y, 1);
-            }
-        }
-    }
-
-    setPixel(grid, 5, 1, 3);
-    setPixel(grid, 6, 1, 3);
-    setPixel(grid, 4, 11, 3);
-
-    return grid;
-}
-
-function drawStar() {
-    const grid = makeGrid();
-
-    fillRect(grid, 7, 2, 8, 13, 1);
-    fillRect(grid, 2, 7, 13, 8, 1);
-    fillRect(grid, 4, 4, 5, 5, 1);
-    fillRect(grid, 10, 4, 11, 5, 1);
-    fillRect(grid, 4, 10, 5, 11, 1);
-    fillRect(grid, 10, 10, 11, 11, 1);
-    fillRect(grid, 7, 7, 8, 8, 3);
-
-    return grid;
-}
-
-function drawGear() {
-    const grid = makeGrid();
-    const cx = 7.5;
-    const cy = 7.5;
-
-    for (let y = 0; y < GRID; y += 1) {
-        for (let x = 0; x < GRID; x += 1) {
-            const distance = Math.hypot(x - cx, y - cy);
-
-            if (distance <= 1.4) {
-                setPixel(grid, x, y, 1);
-            } else if (distance >= 3.6 && distance <= 6.2) {
-                setPixel(grid, x, y, 1);
-            }
-        }
-    }
-
-    setPixel(grid, 5, 4, 3);
-    setPixel(grid, 6, 4, 3);
-
-    return grid;
-}
-
-const ICON_DRAWERS = {
-    cap: drawCap,
-    stick: drawStick,
-    star: drawStar,
-    gear: drawGear
-};
-
-const INK_COLORS = {
-    1: "#0c0b12",
-    3: "#ffffff"
-};
-
-function renderPixelIcons() {
-    document.querySelectorAll(".pixel-icon").forEach((canvas) => {
-        const drawer = ICON_DRAWERS[canvas.dataset.icon];
-
-        if (!drawer) {
-            return;
-        }
-
-        const grid = drawer();
-        const context = canvas.getContext("2d");
-
-        context.clearRect(0, 0, GRID, GRID);
-
-        for (let y = 0; y < GRID; y += 1) {
-            for (let x = 0; x < GRID; x += 1) {
-                const value = grid[y][x];
-
-                if (value && INK_COLORS[value]) {
-                    context.fillStyle = INK_COLORS[value];
-                    context.fillRect(x, y, 1, 1);
-                }
-            }
-        }
-    });
 }
 
 /* ---- PC-speaker-style sound feedback ---- */
@@ -449,7 +303,6 @@ function wireDailyPrompt() {
 
 function startMenu() {
     renderTicker();
-    renderPixelIcons();
     wireDailyPrompt();
 
     const toggleButton = document.getElementById("soundToggle");

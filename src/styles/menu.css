@@ -420,19 +420,17 @@ body {
     outline-offset: 3px;
 }
 
-/* Disabled tiles dim only decorative chrome (the icon plate), never
-   text - opacity on the whole tile was crushing room-blurb and the
-   SOON flag well under WCAG contrast minimums (as low as 2.2:1).
-   Disabled-control text is technically exempt from that requirement,
-   but exempt isn't the bar here: the SOON label is the one thing a
-   player most needs to actually read. */
+/* Disabled tiles used to dim the icon plate via filter, back when the
+   plate was a flat color square drawn by this stylesheet and the room
+   name was separate text alongside it. Now that the room's name is
+   baked directly into the artwork itself, a filter on the image would
+   dim that text along with the graphic - the same contrast mistake
+   already found and fixed once for room-blurb/the SOON flag (opacity
+   crushed them under WCAG minimums). The SOON flag and suppressed
+   hover/focus glow below already carry the "not available yet" signal
+   without needing to touch the image itself. */
 .room:disabled {
     cursor: default;
-}
-
-.room:disabled .room-icon {
-    filter: grayscale(0.5) brightness(0.75);
-    box-shadow: none;
 }
 
 .room:disabled:hover {
@@ -442,44 +440,19 @@ body {
 }
 
 .room-icon {
-    position: relative;
-    width: clamp(44px, 11vmin, 108px);
-    height: clamp(44px, 11vmin, 108px);
-    border-radius: clamp(8px, 1.6vmin, 14px);
-    background: var(--tile-accent, var(--cyan));
     display: grid;
     place-items: center;
-    overflow: hidden;
-    box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.25), 0 0 16px rgba(var(--tile-glow, var(--cyan-rgb)), 0.4);
+    width: clamp(76px, 15vmin, 160px);
+    height: clamp(76px, 15vmin, 160px);
 }
 
-.room-icon::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0) 0px,
-        rgba(0, 0, 0, 0.22) 1px,
-        rgba(0, 0, 0, 0) 3px
-    );
-    mix-blend-mode: multiply;
-}
-
-.pixel-icon {
-    width: 70%;
-    height: 70%;
+.room-icon img {
+    width: 100%;
+    height: 100%;
+    border-radius: clamp(8px, 1.6vmin, 14px);
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.3)) contrast(1.15) saturate(1.1);
-}
-
-.room-name {
-    font-size: clamp(0.85rem, 2.2vmin, 1.4rem);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    box-shadow: 0 0 16px rgba(var(--tile-glow, var(--cyan-rgb)), 0.35);
 }
 
 .room-blurb {
