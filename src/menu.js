@@ -273,15 +273,20 @@ function wireRoomSounds(sound) {
 
 const DAILY_MAX_LENGTH = 140;
 const INTERACTIVE_FOCUS_TAGS = new Set(["BUTTON", "A", "INPUT", "TEXTAREA"]);
-const ARCADE_LOAD_DELAY_MS = 700;
+const ROOM_LOAD_DELAY_MS = 700;
 const TYPING_LOCK_MS = 3000;
+
+// Rooms that are real destinations, keyed by the command that opens them.
+const ROOM_DESTINATIONS = {
+    "ARCADE WING": "arcade.html",
+    "LESSON HALL": "lesson.html"
+};
 
 // Rooms that exist in the nav but aren't real destinations yet - kept
 // as a literal list here rather than read from the DOM, since the
 // command interpreter's vocabulary is a design decision independent
 // of whatever happens to be marked disabled in the markup right now.
 const UNAVAILABLE_ROOM_COMMANDS = new Set([
-    "LESSON HALL",
     "RECORDS ROOM",
     "OPTIONS TERMINAL"
 ]);
@@ -339,6 +344,20 @@ function wireDailyPrompt() {
         render();
     }
 
+    function loadRoom(command, href) {
+        setStatus(`LOADING ${command}...`, false);
+        clearLine();
+        typingLocked = true;
+
+        window.setTimeout(() => {
+            typingLocked = false;
+        }, TYPING_LOCK_MS);
+
+        window.setTimeout(() => {
+            window.location.href = href;
+        }, ROOM_LOAD_DELAY_MS);
+    }
+
     function submitCommand() {
         const command = text.trim();
 
@@ -346,19 +365,10 @@ function wireDailyPrompt() {
             return;
         }
 
-        if (command === "ARCADE WING") {
-            setStatus("LOADING ARCADE WING...", false);
-            clearLine();
-            typingLocked = true;
+        const destination = ROOM_DESTINATIONS[command];
 
-            window.setTimeout(() => {
-                typingLocked = false;
-            }, TYPING_LOCK_MS);
-
-            window.setTimeout(() => {
-                window.location.href = "arcade.html";
-            }, ARCADE_LOAD_DELAY_MS);
-
+        if (destination) {
+            loadRoom(command, destination);
             return;
         }
 

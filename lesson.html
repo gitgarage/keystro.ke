@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>keystro.ke — Lesson Hall</title>
+
+    <meta
+        name="description"
+        content="Home row touch-typing drills from an open-source typing academy."
+    >
+
+    <link rel="canonical" href="https://keystro.ke/lesson.html">
+    <link rel="stylesheet" href="src/styles/lesson.css">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to drill</a>
+
+    <div class="monitor">
+        <div class="screen">
+            <div class="crt-overlay"></div>
+
+            <div class="screen-content">
+
+                <header class="hud">
+                    <a class="brand-mark" href="index.html">keystro.ke</a>
+                    <span class="lesson-label">LESSON HALL</span>
+                    <button class="sound-toggle" id="soundToggle" type="button">SOUND: ON</button>
+                </header>
+
+                <div class="lesson-banner">
+                    <p class="lesson-kicker" id="lessonKicker">HOME ROW</p>
+                    <h1 class="lesson-title" id="lessonTitle">Loading drill&hellip;</h1>
+                </div>
+
+                <div class="drill" id="main-content" tabindex="-1">
+                    <p class="drill-target" id="drillTarget" aria-hidden="true"></p>
+                    <p class="drill-typed" id="drillTyped" aria-hidden="true"></p>
+                </div>
+
+                <p class="drill-status" id="drillStatus" aria-live="polite"></p>
+
+                <div class="keyboard" id="keyboard" aria-hidden="true"></div>
+
+                <div class="stats-strip" role="status" aria-live="polite">
+                    <div class="stat">
+                        <span class="stat-label">WPM</span>
+                        <span class="stat-value" id="statWpm">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Accuracy</span>
+                        <span class="stat-value" id="statAccuracy">100%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Progress</span>
+                        <span class="stat-value" id="statProgress">0%</span>
+                    </div>
+                </div>
+
+                <footer class="screen-footer">
+                    <span>keystro.ke &middot; open source &middot; AGPL-3.0-or-later</span>
+                    <a href="https://github.com/gitgarage/keystro.ke" target="_blank" rel="noopener noreferrer">View source &#8599;</a>
+                </footer>
+
+                <section class="results-screen" id="resultsScreen" hidden>
+                    <div class="results-card">
+                        <p class="results-kicker">Drill complete</p>
+                        <h2 class="results-title" id="resultsTitle">Home Row</h2>
+                        <p class="results-status" id="resultsStatus">Press Enter to return to the menu. Press Escape to run it again.</p>
+
+                        <dl class="results-grid">
+                            <div class="result-item">
+                                <dt>Words per minute</dt>
+                                <dd id="resultWpm">0</dd>
+                            </div>
+
+                            <div class="result-item">
+                                <dt>Accuracy</dt>
+                                <dd id="resultAccuracy">100%</dd>
+                            </div>
+
+                            <div class="result-item">
+                                <dt>Mistakes</dt>
+                                <dd id="resultMistakes">0</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="src/lesson.js" type="module"></script>
+</body>
+</html>

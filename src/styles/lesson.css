@@ -1,0 +1,464 @@
+/*
+ * keystro.ke
+ * Copyright (C) 2026 Mike O'Riley
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ */
+
+/**
+ * ============================================================================
+ * Lesson Hall
+ * ============================================================================
+ *
+ * Presentation for lesson.html - the instructional/drill counterpart to the
+ * arcade stages. Deliberately keeps the same CRT-monitor bezel as the main
+ * menu (menu.css), unlike arcade.html which breaks out of the frame into a
+ * full-bleed game viewport: a lesson is "sitting at a terminal doing an
+ * exercise," where the arcade is "inside the game." The bezel/no-scroll/
+ * scanline rules below are intentionally duplicated from menu.css rather
+ * than shared, matching how every page here already owns its own body/reset
+ * instead of pulling in a stylesheet with unrelated concerns. The boot
+ * sequence is not replayed here - that is a first-thing-you-see landing
+ * beat that belongs to the menu.
+ * ============================================================================
+ */
+
+@import "./results.css";
+
+:root {
+    --ground: #070914;
+    --ground-deep: #04050c;
+    --bezel: #14131c;
+    --bezel-hi: #24222e;
+
+    --ink: #f3f7ff;
+    --ink-dim: #8b93c2;
+
+    --cyan: #7febff;
+    --cyan-rgb: 127, 235, 255;
+    --violet: #8274ff;
+    --violet-rgb: 130, 116, 255;
+    --magenta: #ff5ce0;
+    --magenta-rgb: 255, 92, 224;
+    --amber: #ffcb57;
+    --amber-rgb: 255, 203, 87;
+    --gold: #ffe778;
+    --gold-rgb: 255, 231, 120;
+
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: radial-gradient(circle at 50% 20%, #14131c, var(--ground-deep) 70%);
+    color: var(--ink);
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(6px, 2vmin, 24px);
+}
+
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    background: var(--ground);
+    color: var(--ink);
+    border: 2px solid var(--cyan);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-weight: 700;
+    text-decoration: none;
+    transition: top 150ms ease;
+}
+
+.skip-link:focus {
+    top: 1rem;
+}
+
+/* ================= CRT MONITOR BEZEL ================= */
+
+.monitor {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 2400px;
+    max-height: 1400px;
+    background: linear-gradient(155deg, var(--bezel-hi), var(--bezel) 40%, #0c0b12);
+    border-radius: clamp(10px, 2.4vmin, 28px);
+    padding: clamp(8px, 1.6vmin, 22px);
+    box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.6),
+        inset 0 2px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -6px 14px rgba(0, 0, 0, 0.5);
+}
+
+.monitor::after {
+    content: "keystro.ke 9000";
+    position: absolute;
+    left: 50%;
+    bottom: clamp(2px, 0.8vmin, 8px);
+    transform: translateX(-50%);
+    font-size: clamp(0.45rem, 1.1vmin, 0.6rem);
+    letter-spacing: 0.3em;
+    color: rgba(243, 247, 255, 0.18);
+}
+
+.screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: clamp(6px, 1.4vmin, 10px);
+    background: var(--ground);
+    box-shadow:
+        inset 0 0 0 2px rgba(0, 0, 0, 0.6),
+        inset 0 0 60px rgba(0, 0, 0, 0.7),
+        inset 0 0 120px rgba(var(--cyan-rgb), 0.06);
+}
+
+.crt-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0) 0px,
+            rgba(0, 0, 0, 0.16) 1px,
+            rgba(0, 0, 0, 0) 2px
+        ),
+        radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+    mix-blend-mode: multiply;
+    animation: crt-flicker 6.5s steps(60, end) infinite;
+}
+
+@keyframes crt-flicker {
+    0%, 96%, 100% { opacity: 0.92; }
+    97% { opacity: 0.98; }
+    98% { opacity: 0.86; }
+}
+
+.screen-content {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(8px, 1.6vmin, 20px) clamp(10px, 2vmin, 26px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crt-overlay { animation: none; }
+}
+
+/* ================= HUD STRIP ================= */
+
+.hud {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 2.4vmin, 30px);
+    flex-wrap: wrap;
+    padding-bottom: clamp(8px, 1.8vmin, 18px);
+    border-bottom: 2px solid rgba(var(--cyan-rgb), 0.22);
+    font-size: clamp(0.7rem, 2vmin, 1.05rem);
+}
+
+.brand-mark {
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+}
+
+.brand-mark:hover,
+.brand-mark:focus-visible {
+    color: var(--cyan);
+    text-decoration: underline;
+}
+
+.lesson-label {
+    color: var(--ink-dim);
+    letter-spacing: 0.12em;
+}
+
+.sound-toggle {
+    appearance: none;
+    /* WCAG 2.5.8 24px minimum target size, held even at the smallest
+       end of the vmin-based padding clamp below. */
+    min-height: 28px;
+    margin-left: auto;
+    background: rgba(var(--cyan-rgb), 0.08);
+    border: 1px solid rgba(var(--cyan-rgb), 0.4);
+    color: var(--cyan);
+    font-family: var(--mono);
+    font-size: clamp(0.62rem, 1.4vmin, 0.9rem);
+    letter-spacing: 0.05em;
+    padding: clamp(4px, 0.9vmin, 8px) clamp(8px, 1.4vmin, 14px);
+    cursor: pointer;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+    background: rgba(var(--cyan-rgb), 0.18);
+}
+
+/* ================= LESSON BANNER ================= */
+
+.lesson-banner {
+    text-align: center;
+    padding: clamp(10px, 3vmin, 28px) 0 clamp(6px, 1.6vmin, 14px);
+}
+
+.lesson-kicker {
+    margin: 0 0 0.4em;
+    font-size: clamp(0.62rem, 1.5vmin, 0.85rem);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+}
+
+.lesson-title {
+    margin: 0;
+    font-size: clamp(1.3rem, 4.4vmin, 2.6rem);
+    font-weight: 800;
+    color: var(--ink);
+    text-shadow: 0 0 18px rgba(var(--cyan-rgb), 0.35);
+}
+
+/* ================= DRILL TEXT ================= */
+
+.drill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(4px, 1.2vmin, 10px);
+    padding: clamp(6px, 1.6vmin, 14px) 0;
+}
+
+.drill-target,
+.drill-typed {
+    margin: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    text-align: center;
+    font-size: clamp(1rem, 3.6vmin, 2.1rem);
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+}
+
+.drill-target {
+    color: var(--ink-dim);
+}
+
+.drill-typed .char {
+    display: inline-block;
+}
+
+.drill-typed .char.is-pending {
+    color: rgba(139, 147, 194, 0.35);
+}
+
+.drill-typed .char.is-correct {
+    color: var(--cyan);
+    text-shadow: 0 0 8px rgba(var(--cyan-rgb), 0.4);
+}
+
+.drill-typed .char.is-incorrect {
+    color: var(--magenta);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    text-shadow: 0 0 8px rgba(var(--magenta-rgb), 0.4);
+}
+
+/* Same reverse-video block idiom as the main menu's daily-prompt
+   cursor - the character stays in place and only its coloring
+   inverts, rather than a bar displacing it. */
+.drill-typed .char.is-cursor {
+    background: var(--cyan);
+    color: var(--ground);
+    animation: cursor-blink 1s steps(1, end) infinite;
+}
+
+@keyframes cursor-blink {
+    0%, 50% {
+        background: var(--cyan);
+        color: var(--ground);
+    }
+
+    50.01%, 100% {
+        background: transparent;
+        color: inherit;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .drill-typed .char.is-cursor {
+        animation: none;
+    }
+}
+
+.drill-status {
+    margin: 0;
+    min-height: 1.4em;
+    text-align: center;
+    font-size: clamp(0.7rem, 1.8vmin, 1rem);
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    text-shadow: 0 0 8px rgba(var(--gold-rgb), 0.4);
+}
+
+/* ================= ON-SCREEN KEYBOARD ================= */
+
+.keyboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(4px, 1vmin, 8px);
+    padding: clamp(6px, 1.6vmin, 16px) 0;
+}
+
+.keyboard-row {
+    display: flex;
+    gap: clamp(3px, 0.8vmin, 7px);
+}
+
+.keyboard-row.offset-1 { margin-left: clamp(8px, 2vmin, 20px); }
+.keyboard-row.offset-2 { margin-left: clamp(16px, 4vmin, 40px); }
+
+.key {
+    position: relative;
+    width: clamp(20px, 4.6vmin, 46px);
+    height: clamp(20px, 4.6vmin, 46px);
+    display: grid;
+    place-items: center;
+    border-radius: clamp(3px, 0.8vmin, 6px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(243, 247, 255, 0.14);
+    color: var(--ink-dim);
+    font-size: clamp(0.6rem, 1.6vmin, 0.95rem);
+    text-transform: uppercase;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.key.is-active {
+    color: var(--ground);
+    background: var(--finger-color, var(--cyan));
+    border-color: var(--finger-color, var(--cyan));
+}
+
+/* The next key gets a shape/glyph change in addition to color, so the
+   cue does not rely on color perception alone. */
+.key.is-next {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}
+
+.key.is-next::after {
+    content: "\25B4";
+    position: absolute;
+    top: -1.1em;
+    font-size: 0.7em;
+    color: var(--ink);
+}
+
+.key.is-space {
+    width: clamp(140px, 30vmin, 320px);
+}
+
+/* ================= STATS STRIP ================= */
+
+.stats-strip {
+    display: flex;
+    justify-content: center;
+    gap: clamp(16px, 4vmin, 48px);
+    margin-top: auto;
+    padding-top: clamp(6px, 1.6vmin, 14px);
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2em;
+}
+
+.stat-label {
+    font-size: clamp(0.56rem, 1.2vmin, 0.75rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+}
+
+.stat-value {
+    font-size: clamp(0.95rem, 2.6vmin, 1.5rem);
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+
+/* results.css's title size was tuned for arcade.html's sans-serif,
+   full-bleed viewport - at that size in this page's monospace font the
+   fixed character cells read as unusually gappy, so it's scoped down
+   here to match the rest of this page's type scale. */
+.results-title {
+    font-size: clamp(1.5rem, 5vmin, 3rem);
+}
+
+/* ================= FOOTER ================= */
+
+.screen-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: clamp(6px, 1.6vmin, 14px);
+    padding-top: clamp(4px, 1.2vmin, 10px);
+    font-size: clamp(0.6rem, 1.3vmin, 0.85rem);
+    color: var(--ink-dim);
+}
+
+.screen-footer a {
+    color: var(--ink-dim);
+    text-decoration: none;
+}
+
+.screen-footer a:hover,
+.screen-footer a:focus-visible {
+    color: var(--cyan);
+}
+
+/* ================= RESPONSIVE FALLBACKS ================= */
+
+@media (max-height: 480px) {
+    .keyboard-row:nth-child(3),
+    .lesson-kicker {
+        display: none;
+    }
+}
