@@ -273,6 +273,17 @@ function wireRoomSounds(sound) {
 
 const DAILY_MAX_LENGTH = 140;
 const INTERACTIVE_FOCUS_TAGS = new Set(["BUTTON", "A", "INPUT", "TEXTAREA"]);
+const ARCADE_LOAD_DELAY_MS = 700;
+
+// Rooms that exist in the nav but aren't real destinations yet - kept
+// as a literal list here rather than read from the DOM, since the
+// command interpreter's vocabulary is a design decision independent
+// of whatever happens to be marked disabled in the markup right now.
+const UNAVAILABLE_ROOM_COMMANDS = new Set([
+    "LESSON HALL",
+    "RECORDS ROOM",
+    "OPTIONS TERMINAL"
+]);
 
 function isInteractiveElementFocused() {
     const active = document.activeElement;
@@ -287,13 +298,15 @@ function wireDailyPrompt() {
     const beforeEl = document.getElementById("dailyBefore");
     const cursorEl = document.getElementById("dailyCursor");
     const afterEl = document.getElementById("dailyAfter");
+    const statusEl = document.getElementById("dailyStatus");
 
-    if (!beforeEl || !cursorEl || !afterEl) {
+    if (!beforeEl || !cursorEl || !afterEl || !statusEl) {
         return;
     }
 
     let text = beforeEl.textContent + cursorEl.textContent + afterEl.textContent;
     let cursorIndex = text.length;
+    let inputDisabled = false;
 
     function render() {
         beforeEl.textContent = text.slice(0, cursorIndex);
@@ -314,12 +327,61 @@ function wireDailyPrompt() {
 
     render();
 
+    function setStatus(message, isDenied) {
+        statusEl.textContent = message;
+        statusEl.classList.toggle("is-denied", Boolean(isDenied));
+    }
+
+    function clearLine() {
+        text = "";
+        cursorIndex = 0;
+        render();
+    }
+
+    function submitCommand() {
+        const command = text.trim();
+
+        if (command === "") {
+            return;
+        }
+
+        if (command === "ARCADE WING") {
+            setStatus("LOADING ARCADE WING...", false);
+            clearLine();
+            inputDisabled = true;
+
+            window.setTimeout(() => {
+                window.location.href = "arcade.html";
+            }, ARCADE_LOAD_DELAY_MS);
+
+            return;
+        }
+
+        if (UNAVAILABLE_ROOM_COMMANDS.has(command)) {
+            setStatus("ACCESS DENIED", true);
+        } else {
+            setStatus(`UNKNOWN COMMAND: ${command}`, true);
+        }
+
+        clearLine();
+    }
+
     window.addEventListener("keydown", (event) => {
+        if (inputDisabled) {
+            return;
+        }
+
         if (event.ctrlKey || event.altKey || event.metaKey) {
             return;
         }
 
         if (isInteractiveElementFocused()) {
+            return;
+        }
+
+        if (event.key === "Enter") {
+            event.preventDefault();
+            submitCommand();
             return;
         }
 
