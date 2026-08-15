@@ -5,115 +5,104 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>keystro.ke</title>
+    <title>keystro.ke — Typing Academy</title>
 
     <meta
         name="description"
-        content="An open-source typing game focused on attention, rhythm, accuracy, and long-term typing skill."
+        content="An open-source typing academy. Pick a room: arcade stages that turn typing practice into a game, with a lesson mode on the way."
     >
 
     <link rel="canonical" href="https://keystro.ke/">
-    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/menu.css">
     <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-    <main id="app" class="app-shell">
-        <section class="game-viewport" aria-label="Keystro.ke typing game demo">
-            <header class="hud">
-                <div class="brand">
-                    <span class="brand-mark">keystro.ke</span>
-                    <span class="build-label">v0.1 development</span>
+    <div class="monitor">
+        <div class="screen">
+            <div class="boot" aria-hidden="true">
+<span style="animation-delay:0.02s">KEYSTRO.KE TYPING ACADEMY v0.2</span>
+<span style="animation-delay:0.16s">(C) MIKE O'RILEY -- AGPL-3.0-OR-LATER</span>
+<span style="animation-delay:0.30s"></span>
+<span style="animation-delay:0.44s">INITIALIZING PHOSPHOR ARRAY....... OK</span>
+<span style="animation-delay:0.62s">MOUNTING ARCADE MODULES........... OK</span>
+<span style="animation-delay:0.80s">CALIBRATING KEYBOARD INTERFACE.... OK</span>
+<span style="animation-delay:0.98s">MEMORY TEST: 640K..................OK</span>
+<span style="animation-delay:1.16s"></span>
+<span style="animation-delay:1.34s">LOADING KEYSTRO.KE OS_</span>
+            </div>
+
+            <div class="crt-overlay"></div>
+
+            <div class="screen-content">
+
+                <header class="hud">
+                    <div class="hud-item">OPERATOR: <strong>GUEST</strong></div>
+                    <div class="hud-item">LEVEL <strong id="menuLevel">1</strong></div>
+                    <div class="hud-item">
+                        XP
+                        <span class="xp-track"><span class="xp-fill" id="menuXpFill"></span></span>
+                        <strong id="menuXpLabel">0/100</strong>
+                    </div>
+                    <div class="hud-item">STREAK <strong id="menuStreak">0</strong> DAYS</div>
+                    <div class="badges" aria-label="Achievements — none unlocked yet">
+                        <span class="badge locked" title="Locked">??</span>
+                        <span class="badge locked" title="Locked">??</span>
+                        <span class="badge locked" title="Locked">??</span>
+                        <span class="badge locked" title="Locked">??</span>
+                        <span class="badge locked" title="Locked">??</span>
+                    </div>
+                    <button class="sound-toggle" id="soundToggle" type="button">SOUND: ON</button>
+                </header>
+
+                <div class="wordmark-block">
+                    <h1 class="wordmark">KEYSTRO<span class="dot">.</span>KE</h1>
+                    <p class="tagline">TRAIN YOUR FINGERS. LEVEL UP YOUR TYPING.<span class="cursor">&nbsp;</span></p>
                 </div>
 
-                <div class="score-panel" aria-live="polite">
-                    <span class="score-label">Score</span>
-                    <span id="score-value" class="score-value">0</span>
+                <nav class="rooms" aria-label="Main menu">
+                    <button class="room" type="button" disabled style="--tile-accent: var(--cyan); --tile-glow: var(--cyan-rgb);">
+                        <span class="room-flag" style="color: var(--cyan);">SOON</span>
+                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="cap"></canvas></span>
+                        <span class="room-name">Lesson Hall</span>
+                        <span class="room-blurb">Home row to full speed, one drill at a time.</span>
+                    </button>
+
+                    <a class="room" href="arcade.html" style="--tile-accent: var(--magenta); --tile-glow: var(--magenta-rgb);">
+                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="stick"></canvas></span>
+                        <span class="room-name">Arcade Wing</span>
+                        <span class="room-blurb">Microscopic Drift &middot; Neural Current</span>
+                    </a>
+
+                    <button class="room" type="button" disabled style="--tile-accent: var(--gold); --tile-glow: var(--gold-rgb);">
+                        <span class="room-flag" style="color: var(--gold);">SOON</span>
+                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="star"></canvas></span>
+                        <span class="room-name">Records Room</span>
+                        <span class="room-blurb">Stats, streaks, and every badge you've earned.</span>
+                    </button>
+
+                    <button class="room" type="button" disabled style="--tile-accent: var(--violet); --tile-glow: var(--violet-rgb);">
+                        <span class="room-flag" style="color: var(--violet);">SOON</span>
+                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="gear"></canvas></span>
+                        <span class="room-name">Options Terminal</span>
+                        <span class="room-blurb">Sound, motion, and accessibility settings.</span>
+                    </button>
+                </nav>
+
+                <p class="daily">&gt; READY WHEN YOU ARE -- PICK A ROOM TO BEGIN<span class="cursor">&nbsp;</span></p>
+
+                <div class="ticker-bar" aria-hidden="true">
+                    <div class="ticker-track" id="tickerTrack"></div>
                 </div>
 
-                <div class="timer-panel" aria-live="polite">
-                    <span class="timer-label">Time</span>
-                    <span id="timer-value" class="timer-value">60</span>
-                </div>
+                <footer class="screen-footer">
+                    <span>keystro.ke &middot; open source &middot; AGPL-3.0-or-later</span>
+                    <a href="https://github.com/gitgarage/keystro.ke" target="_blank" rel="noopener noreferrer">View source &#8599;</a>
+                </footer>
 
-                <div class="combo-panel" aria-live="polite">
-                    <span class="combo-label">Combo</span>
-                    <span id="combo-value" class="combo-value">0</span>
-                </div>
-            </header>
+            </div>
+        </div>
+    </div>
 
-            <div id="word-layer" class="word-layer" aria-hidden="true"></div>
-
-            <section
-                class="stage-intro"
-                data-stage-intro
-                aria-label="Stage introduction"
-            >
-                <div class="stage-intro-content">
-                    <p class="stage-intro-kicker">Stage One</p>
-
-                    <h1 class="stage-intro-title">
-                        Microscopic Drift
-                    </h1>
-
-                    <p class="stage-intro-copy">
-                        Type organisms before the sample grows unstable.
-                    </p>
-                </div>
-            </section>
-
-            <section id="results-screen" class="results-screen" hidden>
-                <div class="results-card">
-                    <p class="results-kicker">Session complete</p>
-                    <h2 class="results-title">Results</h2>
-                    <p class="results-status" data-result-status></p>
-
-                    <dl class="results-grid">
-                        <div class="result-item">
-                            <dt>Score</dt>
-                            <dd id="result-score">0</dd>
-                        </div>
-
-                        <div class="result-item">
-                            <dt>Highest combo</dt>
-                            <dd id="result-highest-combo">0</dd>
-                        </div>
-
-                        <div class="result-item">
-                            <dt>Completed words</dt>
-                            <dd id="result-completed-words">0</dd>
-                        </div>
-
-                        <div class="result-item">
-                            <dt>Perfect words</dt>
-                            <dd id="result-perfect-words">0</dd>
-                        </div>
-
-                        <div class="result-item">
-                            <dt>Mistakes</dt>
-                            <dd id="result-mistakes">0</dd>
-                        </div>
-                    </dl>
-
-                    <p class="results-note">
-                        Refresh the page to play again.
-                    </p>
-                </div>
-            </section>
-
-            <footer class="source-footer" aria-label="Open source project information">
-                <span>keystro.ke · open source</span>
-                <a
-                    href="https://github.com/gitgarage/keystro.ke"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    View source ↗
-                </a>
-                <span>AGPL-3.0-or-later</span>
-            </footer>
-        </section>
-    </main>
-
-    <script src="src/main.js" type="module"></script>
+    <script src="src/menu.js" type="module"></script>
 </body>
 </html>

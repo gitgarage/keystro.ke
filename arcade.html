@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>keystro.ke — Arcade Wing</title>
+
+    <meta
+        name="description"
+        content="An open-source typing game focused on attention, rhythm, accuracy, and long-term typing skill."
+    >
+
+    <link rel="canonical" href="https://keystro.ke/arcade.html">
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <main id="app" class="app-shell">
+        <section class="game-viewport" aria-label="Keystro.ke typing game demo">
+            <header class="hud">
+                <div class="brand">
+                    <a class="brand-mark" href="index.html">keystro.ke</a>
+                    <span class="build-label">v0.1 development</span>
+                </div>
+
+                <div class="score-panel" aria-live="polite">
+                    <span class="score-label">Score</span>
+                    <span id="score-value" class="score-value">0</span>
+                </div>
+
+                <div class="timer-panel" aria-live="polite">
+                    <span class="timer-label">Time</span>
+                    <span id="timer-value" class="timer-value">60</span>
+                </div>
+
+                <div class="combo-panel" aria-live="polite">
+                    <span class="combo-label">Combo</span>
+                    <span id="combo-value" class="combo-value">0</span>
+                </div>
+            </header>
+
+            <div id="word-layer" class="word-layer" aria-hidden="true"></div>
+
+            <section
+                class="stage-intro"
+                data-stage-intro
+                aria-label="Stage introduction"
+            >
+                <div class="stage-intro-content">
+                    <p class="stage-intro-kicker">Stage One</p>
+
+                    <h1 class="stage-intro-title">
+                        Microscopic Drift
+                    </h1>
+
+                    <p class="stage-intro-copy">
+                        Type organisms before the sample grows unstable.
+                    </p>
+                </div>
+            </section>
+
+            <section id="results-screen" class="results-screen" hidden>
+                <div class="results-card">
+                    <p class="results-kicker">Session complete</p>
+                    <h2 class="results-title">Results</h2>
+                    <p class="results-status" data-result-status></p>
+
+                    <dl class="results-grid">
+                        <div class="result-item">
+                            <dt>Score</dt>
+                            <dd id="result-score">0</dd>
+                        </div>
+
+                        <div class="result-item">
+                            <dt>Highest combo</dt>
+                            <dd id="result-highest-combo">0</dd>
+                        </div>
+
+                        <div class="result-item">
+                            <dt>Completed words</dt>
+                            <dd id="result-completed-words">0</dd>
+                        </div>
+
+                        <div class="result-item">
+                            <dt>Perfect words</dt>
+                            <dd id="result-perfect-words">0</dd>
+                        </div>
+
+                        <div class="result-item">
+                            <dt>Mistakes</dt>
+                            <dd id="result-mistakes">0</dd>
+                        </div>
+                    </dl>
+
+                    <p class="results-note">
+                        Refresh the page to play again.
+                    </p>
+                </div>
+            </section>
+
+            <footer class="source-footer" aria-label="Open source project information">
+                <span>keystro.ke · open source</span>
+                <a
+                    href="https://github.com/gitgarage/keystro.ke"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    View source ↗
+                </a>
+                <span>AGPL-3.0-or-later</span>
+            </footer>
+        </section>
+    </main>
+
+    <script src="src/main.js" type="module"></script>
+</body>
+</html>

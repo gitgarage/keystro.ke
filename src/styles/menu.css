@@ -1,0 +1,508 @@
+/*
+ * keystro.ke
+ * Copyright (C) 2026 Mike O'Riley
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ */
+
+/**
+ * ============================================================================
+ * Main Menu
+ * ============================================================================
+ *
+ * Responsibility
+ * --------------
+ * Presentation for the landing/main-menu screen (index.html).
+ *
+ * This is a deliberately separate visual world from the arcade stages: a
+ * CRT-monitor bezel framing a boot sequence and a room-tile navigation
+ * screen, styled entirely in monospace to read as an old terminal rather
+ * than the sans-serif in-game HUD. It intentionally does not share
+ * main.css - the menu has no word targets, no environment, no session
+ * state, and pulling in that stylesheet would just be dead weight here.
+ * ============================================================================
+ */
+
+:root {
+    --ground: #070914;
+    --ground-deep: #04050c;
+    --bezel: #14131c;
+    --bezel-hi: #24222e;
+
+    --ink: #f3f7ff;
+    --ink-dim: #8b93c2;
+    --ink-faint: #545a7c;
+
+    --cyan: #7febff;
+    --cyan-rgb: 127, 235, 255;
+    --violet: #8274ff;
+    --violet-rgb: 130, 116, 255;
+    --magenta: #ff5ce0;
+    --magenta-rgb: 255, 92, 224;
+    --amber: #ffcb57;
+    --amber-rgb: 255, 203, 87;
+    --gold: #ffe778;
+    --gold-rgb: 255, 231, 120;
+
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 50% 20%, #14131c, var(--ground-deep) 70%);
+    color: var(--ink);
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(14px, 3vw, 40px);
+}
+
+/* ================= CRT MONITOR BEZEL ================= */
+
+.monitor {
+    position: relative;
+    width: min(1180px, 100%);
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(155deg, var(--bezel-hi), var(--bezel) 40%, #0c0b12);
+    border-radius: 28px;
+    padding: clamp(16px, 2.6vw, 34px);
+    box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.6),
+        inset 0 2px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -6px 14px rgba(0, 0, 0, 0.5);
+}
+
+.monitor::after {
+    content: "keystro.ke 9000";
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: rgba(243, 247, 255, 0.18);
+}
+
+.screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--ground);
+    box-shadow:
+        inset 0 0 0 2px rgba(0, 0, 0, 0.6),
+        inset 0 0 60px rgba(0, 0, 0, 0.7),
+        inset 0 0 120px rgba(var(--cyan-rgb), 0.06);
+}
+
+.crt-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0) 0px,
+            rgba(0, 0, 0, 0.16) 1px,
+            rgba(0, 0, 0, 0) 2px
+        ),
+        radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+    mix-blend-mode: multiply;
+    animation: crt-flicker 6.5s steps(60, end) infinite;
+}
+
+@keyframes crt-flicker {
+    0%, 96%, 100% { opacity: 0.92; }
+    97% { opacity: 0.98; }
+    98% { opacity: 0.86; }
+}
+
+.screen-content {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(10px, 1.6vw, 22px) clamp(14px, 2.2vw, 30px);
+}
+
+/* ================= BOOT SEQUENCE ================= */
+
+.boot {
+    position: absolute;
+    inset: 0;
+    z-index: 80;
+    background: var(--ground);
+    color: var(--cyan);
+    font-size: clamp(11px, 1.35vw, 15px);
+    line-height: 1.55;
+    padding: clamp(18px, 3vw, 32px);
+    white-space: pre-wrap;
+    text-shadow: 0 0 6px rgba(var(--cyan-rgb), 0.55);
+    animation: boot-hide 0.4s ease forwards;
+    animation-delay: 2.4s;
+}
+
+.boot span {
+    opacity: 0;
+    animation: boot-line 0.18s steps(1, end) forwards;
+}
+
+@keyframes boot-line {
+    to { opacity: 1; }
+}
+
+@keyframes boot-hide {
+    to { opacity: 0; visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .boot { animation: boot-hide 0.01s linear forwards; animation-delay: 0s; }
+    .boot span { animation: none; opacity: 1; }
+    .crt-overlay { animation: none; }
+}
+
+/* ================= HUD STRIP ================= */
+
+.hud {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 2vw, 22px);
+    flex-wrap: wrap;
+    padding-bottom: clamp(8px, 1.4vw, 14px);
+    border-bottom: 1px solid rgba(var(--cyan-rgb), 0.22);
+    font-size: clamp(0.62rem, 1.1vw, 0.78rem);
+}
+
+.hud-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    color: var(--ink-dim);
+    letter-spacing: 0.04em;
+}
+
+.hud-item strong {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.xp-track {
+    width: clamp(70px, 9vw, 120px);
+    height: 8px;
+    border: 1px solid rgba(var(--gold-rgb), 0.5);
+    background: rgba(var(--gold-rgb), 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.xp-fill {
+    position: absolute;
+    inset: 1px;
+    width: 0%;
+    background: linear-gradient(90deg, rgba(var(--gold-rgb), 0.5), rgba(var(--gold-rgb), 0.95));
+    box-shadow: 0 0 8px rgba(var(--gold-rgb), 0.6);
+    transition: width 400ms ease;
+}
+
+.badges {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    display: grid;
+    place-items: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+}
+
+.badge.won {
+    background: rgba(var(--amber-rgb), 0.18);
+    border: 1px solid rgba(var(--amber-rgb), 0.7);
+    color: var(--amber);
+    box-shadow: 0 0 8px rgba(var(--amber-rgb), 0.35);
+}
+
+.badge.locked {
+    background: rgba(243, 247, 255, 0.04);
+    border: 1px dashed rgba(243, 247, 255, 0.18);
+    color: var(--ink-faint);
+}
+
+.sound-toggle {
+    appearance: none;
+    background: rgba(var(--cyan-rgb), 0.08);
+    border: 1px solid rgba(var(--cyan-rgb), 0.4);
+    color: var(--cyan);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+    background: rgba(var(--cyan-rgb), 0.18);
+}
+
+/* ================= WORDMARK ================= */
+
+.wordmark-block {
+    text-align: center;
+    padding: clamp(10px, 2.2vw, 20px) 0 clamp(6px, 1.6vw, 14px);
+}
+
+.wordmark {
+    margin: 0;
+    font-size: clamp(1.7rem, 5vw, 3.1rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-shadow:
+        0 0 2px rgba(var(--cyan-rgb), 0.9),
+        0 0 22px rgba(var(--cyan-rgb), 0.45),
+        3px 3px 0 rgba(var(--violet-rgb), 0.5);
+}
+
+.wordmark .dot {
+    color: var(--magenta);
+    text-shadow: 0 0 14px rgba(var(--magenta-rgb), 0.7);
+}
+
+.tagline {
+    margin: 0.35em 0 0;
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+}
+
+.tagline .cursor,
+.daily .cursor {
+    display: inline-block;
+    width: 0.6em;
+    background: var(--cyan);
+    animation: blink 1s steps(1, end) infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tagline .cursor,
+    .daily .cursor {
+        animation: none;
+    }
+}
+
+/* ================= ROOM GRID ================= */
+
+.rooms {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(8px, 1.6vw, 16px);
+    align-content: center;
+    padding: clamp(4px, 1vw, 10px) 0;
+}
+
+.room {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: clamp(10px, 1.6vw, 18px) clamp(6px, 1vw, 10px) clamp(12px, 1.6vw, 16px);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+    border: 1px solid rgba(243, 247, 255, 0.14);
+    border-top: 3px solid var(--tile-accent, var(--cyan));
+    cursor: pointer;
+    font-family: var(--mono);
+    color: var(--ink);
+    text-align: center;
+    text-decoration: none;
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.room:hover,
+.room:focus-visible {
+    transform: translateY(-3px);
+    border-color: rgba(var(--cyan-rgb), 0.6);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 0 22px rgba(var(--tile-glow, var(--cyan-rgb)), 0.28);
+    outline: none;
+}
+
+.room:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.room:disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: rgba(243, 247, 255, 0.14);
+}
+
+.room-icon {
+    position: relative;
+    width: clamp(36px, 5vw, 52px);
+    height: clamp(36px, 5vw, 52px);
+    border-radius: 8px;
+    background: var(--tile-accent, var(--cyan));
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.25), 0 0 16px rgba(var(--tile-glow, var(--cyan-rgb)), 0.4);
+}
+
+.room-icon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0px,
+        rgba(0, 0, 0, 0.22) 1px,
+        rgba(0, 0, 0, 0) 3px
+    );
+    mix-blend-mode: multiply;
+}
+
+.pixel-icon {
+    width: 62%;
+    height: 62%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.3)) contrast(1.15) saturate(1.1);
+}
+
+.room-name {
+    font-size: clamp(0.62rem, 1.05vw, 0.82rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.room-blurb {
+    font-size: clamp(0.52rem, 0.85vw, 0.64rem);
+    color: var(--ink-dim);
+    line-height: 1.4;
+}
+
+.room-flag {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 5px;
+    background: var(--ground);
+    border: 1px solid currentColor;
+    text-transform: uppercase;
+}
+
+/* ================= DAILY PROMPT ================= */
+
+.daily {
+    margin-top: clamp(6px, 1.4vw, 12px);
+    font-size: clamp(0.58rem, 1vw, 0.72rem);
+    color: var(--cyan);
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 8px rgba(var(--cyan-rgb), 0.4);
+}
+
+/* ================= TICKER ================= */
+
+.ticker-bar {
+    margin-top: clamp(8px, 1.6vw, 14px);
+    overflow: hidden;
+    background: linear-gradient(90deg, rgba(var(--violet-rgb), 0.22), rgba(var(--magenta-rgb), 0.18));
+    border-top: 1px solid rgba(var(--magenta-rgb), 0.4);
+    border-bottom: 1px solid rgba(var(--magenta-rgb), 0.4);
+    padding: 5px 0;
+}
+
+.ticker-track {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: ticker-scroll 26s linear infinite;
+    font-size: clamp(0.56rem, 0.95vw, 0.68rem);
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+.ticker-track span {
+    padding: 0 2em;
+}
+
+.ticker-track strong {
+    color: var(--gold);
+}
+
+@keyframes ticker-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+        animation: none;
+    }
+}
+
+/* ================= FOOTER ================= */
+
+.screen-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: clamp(6px, 1.2vw, 10px);
+    padding-top: clamp(5px, 1vw, 8px);
+    font-size: clamp(0.52rem, 0.85vw, 0.64rem);
+    color: var(--ink-faint);
+}
+
+.screen-footer a {
+    color: var(--ink-dim);
+    text-decoration: none;
+}
+
+.screen-footer a:hover,
+.screen-footer a:focus-visible {
+    color: var(--cyan);
+}
+
+@media (max-width: 620px) {
+    .rooms {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
