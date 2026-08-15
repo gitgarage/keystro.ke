@@ -297,7 +297,18 @@ function wireDailyPrompt() {
 
     function render() {
         beforeEl.textContent = text.slice(0, cursorIndex);
-        cursorEl.textContent = text.slice(cursorIndex, cursorIndex + 1) || " ";
+
+        // A lone literal space as an inline-block's only content gets
+        // edge-trimmed to zero width by normal whitespace collapsing,
+        // which visually welded the two words on either side of it
+        // together whenever the cursor landed on a space in the text
+        // (not just past the end of the line). A non-breaking space is
+        // exempt from that collapsing, same as the past-the-end
+        // fallback already relied on.
+        const atCursor = text.slice(cursorIndex, cursorIndex + 1);
+
+        cursorEl.textContent = atCursor === "" || atCursor === " " ? " " : atCursor;
+
         afterEl.textContent = text.slice(cursorIndex + 1);
     }
 
