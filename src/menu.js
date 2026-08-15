@@ -261,7 +261,15 @@ function wireRoomSounds(sound) {
    The "> " prompt itself is a separate element from the editable text,
    so the cursor index below is naturally bounded to [0, text.length] -
    it can never reach into the prompt, which is what makes the prompt
-   effectively undeletable and unpassable, the same as a real shell. */
+   effectively undeletable and unpassable, the same as a real shell.
+
+   The cursor renders as a solid block in reverse video over whatever
+   character is at the cursor position, rather than a separate blinking
+   bar between two characters - text-mode terminals never displaced the
+   character under the cursor, they recolored it in place. At the end
+   of the line, where there's no character yet, it falls back to a
+   blinking empty cell (a non-breaking space), which is the same thing
+   a terminal shows past the last typed column. */
 
 const DAILY_MAX_LENGTH = 140;
 const INTERACTIVE_FOCUS_TAGS = new Set(["BUTTON", "A", "INPUT", "TEXTAREA"]);
@@ -277,19 +285,23 @@ function isInteractiveElementFocused() {
 
 function wireDailyPrompt() {
     const beforeEl = document.getElementById("dailyBefore");
+    const cursorEl = document.getElementById("dailyCursor");
     const afterEl = document.getElementById("dailyAfter");
 
-    if (!beforeEl || !afterEl) {
+    if (!beforeEl || !cursorEl || !afterEl) {
         return;
     }
 
-    let text = beforeEl.textContent;
+    let text = beforeEl.textContent + cursorEl.textContent + afterEl.textContent;
     let cursorIndex = text.length;
 
     function render() {
         beforeEl.textContent = text.slice(0, cursorIndex);
-        afterEl.textContent = text.slice(cursorIndex);
+        cursorEl.textContent = text.slice(cursorIndex, cursorIndex + 1) || " ";
+        afterEl.textContent = text.slice(cursorIndex + 1);
     }
+
+    render();
 
     window.addEventListener("keydown", (event) => {
         if (event.ctrlKey || event.altKey || event.metaKey) {

@@ -344,15 +344,29 @@ body {
     color: var(--ink-dim);
 }
 
+/* A solid reverse-video block over whatever character sits at the
+   cursor position - text-mode terminals recolored the character under
+   the cursor in place rather than displacing it, so the base (0%/50%)
+   state here is "inverted", and blinking toggles that off rather than
+   fading an empty bar's opacity. The character itself never
+   disappears, only its coloring toggles. */
 .daily .cursor {
     display: inline-block;
-    width: 0.6em;
     background: var(--cyan);
-    animation: blink 1s steps(1, end) infinite;
+    color: var(--ground);
+    animation: cursor-blink 1s steps(1, end) infinite;
 }
 
-@keyframes blink {
-    50% { opacity: 0; }
+@keyframes cursor-blink {
+    0%, 50% {
+        background: var(--cyan);
+        color: var(--ground);
+    }
+
+    50.01%, 100% {
+        background: transparent;
+        color: inherit;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
