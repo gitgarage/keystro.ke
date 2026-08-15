@@ -84,7 +84,12 @@ export const amoebaStage = {
         minWordYRatio: 0.18,
         maxWordYRatio: 0.86,
 
-        sessionDurationSeconds: 60
+        sessionDurationSeconds: 60,
+
+        // Completed-word count past which target text enters its golden
+        // "on a streak" glow. Not tuned per stage yet - 40 everywhere
+        // until each stage has been played enough to pick its own value.
+        goldenStreakWordCount: 40
     },
 
     progression: [

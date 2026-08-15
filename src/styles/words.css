@@ -391,10 +391,66 @@
     color: rgba(255, 255, 255, 0.92);
 }
 
+/* Golden "on a streak" glow, applied once the session's completed-word
+   count passes the active stage's goldenStreakWordCount (WordManager
+   toggles this class on word-layer itself, so it covers every current
+   and future target without touching individual elements). Targets the
+   text elements directly rather than .word-text's wrapper state after
+   renderProgress() splits it into .word-typed/.word-remaining - only
+   whichever of the three actually holds text at a given moment paints
+   anything, so listing all three here is correct in both states. */
+.word-layer.is-golden-streak .word-text,
+.word-layer.is-golden-streak .word-typed,
+.word-layer.is-golden-streak .word-remaining {
+    background-image: linear-gradient(
+        100deg,
+        #ffe778 0%,
+        #fff9d7 35%,
+        #ffcb57 50%,
+        #fff9d7 65%,
+        #ffe778 100%
+    );
+    background-size: 250% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation:
+        golden-sparkle-sweep 2.4s linear infinite,
+        golden-sparkle-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes golden-sparkle-sweep {
+    0% { background-position: 0% 50%; }
+    100% { background-position: -250% 50%; }
+}
+
+@keyframes golden-sparkle-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 0.35rem rgba(255, 231, 120, 0.5)) brightness(1);
+    }
+
+    50% {
+        filter: drop-shadow(0 0 0.9rem rgba(255, 231, 120, 0.95)) brightness(1.25);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .word-target,
     .word-organelle {
         animation: none;
+    }
+
+    .word-layer.is-golden-streak .word-text,
+    .word-layer.is-golden-streak .word-typed,
+    .word-layer.is-golden-streak .word-remaining {
+        animation: none;
+        background-image: none;
+        background-clip: initial;
+        -webkit-background-clip: initial;
+        color: #ffe778;
+        -webkit-text-fill-color: #ffe778;
+        filter: none;
     }
 }
 

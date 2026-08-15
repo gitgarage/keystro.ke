@@ -306,6 +306,16 @@ export class WordManager {
         return [...this.activeWords];
     }
 
+    /**
+     * Toggles the golden "on a streak" glow for target text. Applied once
+     * to wordLayer rather than per-target, so it automatically covers
+     * every currently active word and every word spawned afterward without
+     * WordManager needing to track which targets predate the streak.
+     */
+    setGoldenStreak(isActive) {
+        this.wordLayer.classList.toggle("is-golden-streak", isActive);
+    }
+
     settleWords() {
         this.activeTarget = null;
 

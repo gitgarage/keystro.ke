@@ -98,6 +98,13 @@ export class Game {
                     word,
                     progressionPhase.phaseIndex
                 );
+
+                if (
+                    this.sessionManager.completedWords >
+                    this.currentStage.tuning.goldenStreakWordCount
+                ) {
+                    this.wordManager.setGoldenStreak(true);
+                }
             },
 
             onIncorrectLetter: () => {
