@@ -89,11 +89,11 @@ body {
     position: relative;
     width: 100%;
     height: 100%;
-    max-width: 1500px;
-    max-height: 960px;
+    max-width: 2400px;
+    max-height: 1400px;
     background: linear-gradient(155deg, var(--bezel-hi), var(--bezel) 40%, #0c0b12);
     border-radius: clamp(10px, 2.4vmin, 28px);
-    padding: clamp(8px, 2vmin, 28px);
+    padding: clamp(8px, 1.6vmin, 22px);
     box-shadow:
         0 30px 70px rgba(0, 0, 0, 0.6),
         inset 0 2px 0 rgba(255, 255, 255, 0.05),
@@ -199,11 +199,11 @@ body {
 .hud {
     display: flex;
     align-items: center;
-    gap: clamp(6px, 2vmin, 22px);
+    gap: clamp(8px, 2.4vmin, 30px);
     flex-wrap: wrap;
-    padding-bottom: clamp(6px, 1.4vmin, 14px);
-    border-bottom: 1px solid rgba(var(--cyan-rgb), 0.22);
-    font-size: clamp(0.56rem, 1.6vmin, 0.78rem);
+    padding-bottom: clamp(8px, 1.8vmin, 18px);
+    border-bottom: 2px solid rgba(var(--cyan-rgb), 0.22);
+    font-size: clamp(0.7rem, 2vmin, 1.05rem);
 }
 
 .hud-item {
@@ -220,8 +220,8 @@ body {
 }
 
 .xp-track {
-    width: clamp(50px, 9vmin, 120px);
-    height: 8px;
+    width: clamp(70px, 12vmin, 180px);
+    height: 12px;
     border: 1px solid rgba(var(--gold-rgb), 0.5);
     background: rgba(var(--gold-rgb), 0.08);
     position: relative;
@@ -244,12 +244,12 @@ body {
 }
 
 .badge {
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
+    width: clamp(20px, 2.6vmin, 30px);
+    height: clamp(20px, 2.6vmin, 30px);
+    border-radius: 4px;
     display: grid;
     place-items: center;
-    font-size: 0.6rem;
+    font-size: clamp(0.6rem, 1.3vmin, 0.85rem);
     font-weight: 700;
 }
 
@@ -272,9 +272,9 @@ body {
     border: 1px solid rgba(var(--cyan-rgb), 0.4);
     color: var(--cyan);
     font-family: var(--mono);
-    font-size: 0.62rem;
+    font-size: clamp(0.62rem, 1.4vmin, 0.9rem);
     letter-spacing: 0.05em;
-    padding: 4px 8px;
+    padding: clamp(4px, 0.9vmin, 8px) clamp(8px, 1.4vmin, 14px);
     cursor: pointer;
 }
 
@@ -287,12 +287,12 @@ body {
 
 .wordmark-block {
     text-align: center;
-    padding: clamp(4px, 2vmin, 20px) 0 clamp(3px, 1.6vmin, 14px);
+    padding: clamp(6px, 2.6vmin, 26px) 0 clamp(4px, 2vmin, 18px);
 }
 
 .wordmark {
     margin: 0;
-    font-size: clamp(1.3rem, 6vmin, 3.1rem);
+    font-size: clamp(2rem, 9.5vmin, 6.5rem);
     font-weight: 800;
     letter-spacing: 0.02em;
     text-transform: uppercase;
@@ -300,7 +300,7 @@ body {
     text-shadow:
         0 0 2px rgba(var(--cyan-rgb), 0.9),
         0 0 22px rgba(var(--cyan-rgb), 0.45),
-        3px 3px 0 rgba(var(--violet-rgb), 0.5);
+        4px 4px 0 rgba(var(--violet-rgb), 0.5);
 }
 
 .wordmark .dot {
@@ -310,7 +310,7 @@ body {
 
 .tagline {
     margin: 0.35em 0 0;
-    font-size: clamp(0.5rem, 1.6vmin, 0.8rem);
+    font-size: clamp(0.7rem, 2.2vmin, 1.15rem);
     letter-spacing: 0.34em;
     text-transform: uppercase;
     color: var(--ink-dim);
@@ -342,7 +342,7 @@ body {
     min-height: 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: clamp(6px, 1.8vmin, 16px);
+    gap: clamp(10px, 2.6vmin, 28px);
     align-content: center;
     padding: clamp(4px, 1vmin, 10px) 0;
 }
@@ -352,11 +352,11 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(4px, 1vmin, 8px);
-    padding: clamp(6px, 1.8vmin, 18px) clamp(4px, 1vmin, 10px) clamp(8px, 1.8vmin, 16px);
+    gap: clamp(6px, 1.6vmin, 14px);
+    padding: clamp(12px, 3vmin, 34px) clamp(8px, 1.6vmin, 16px) clamp(16px, 3vmin, 30px);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
     border: 1px solid rgba(243, 247, 255, 0.14);
-    border-top: 3px solid var(--tile-accent, var(--cyan));
+    border-top: 4px solid var(--tile-accent, var(--cyan));
     cursor: pointer;
     font-family: var(--mono);
     color: var(--ink);
@@ -386,9 +386,9 @@ body {
 
 .room-icon {
     position: relative;
-    width: clamp(26px, 6vmin, 52px);
-    height: clamp(26px, 6vmin, 52px);
-    border-radius: 8px;
+    width: clamp(44px, 11vmin, 108px);
+    height: clamp(44px, 11vmin, 108px);
+    border-radius: clamp(8px, 1.6vmin, 14px);
     background: var(--tile-accent, var(--cyan));
     display: grid;
     place-items: center;
@@ -411,34 +411,34 @@ body {
 }
 
 .pixel-icon {
-    width: 62%;
-    height: 62%;
+    width: 70%;
+    height: 70%;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.3)) contrast(1.15) saturate(1.1);
 }
 
 .room-name {
-    font-size: clamp(0.54rem, 1.4vmin, 0.82rem);
+    font-size: clamp(0.85rem, 2.2vmin, 1.4rem);
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
 .room-blurb {
-    font-size: clamp(0.46rem, 1vmin, 0.64rem);
+    font-size: clamp(0.62rem, 1.5vmin, 0.98rem);
     color: var(--ink-dim);
     line-height: 1.4;
 }
 
 .room-flag {
     position: absolute;
-    top: -8px;
-    right: -6px;
-    font-size: 0.5rem;
+    top: -10px;
+    right: -8px;
+    font-size: clamp(0.5rem, 1.1vmin, 0.7rem);
     font-weight: 700;
     letter-spacing: 0.06em;
-    padding: 2px 5px;
+    padding: clamp(2px, 0.5vmin, 4px) clamp(5px, 1vmin, 8px);
     background: var(--ground);
     border: 1px solid currentColor;
     text-transform: uppercase;
@@ -447,8 +447,8 @@ body {
 /* ================= DAILY PROMPT ================= */
 
 .daily {
-    margin-top: clamp(4px, 1.4vmin, 12px);
-    font-size: clamp(0.48rem, 1.2vmin, 0.72rem);
+    margin-top: clamp(6px, 1.8vmin, 16px);
+    font-size: clamp(0.72rem, 1.8vmin, 1.05rem);
     color: var(--cyan);
     letter-spacing: 0.03em;
     text-shadow: 0 0 8px rgba(var(--cyan-rgb), 0.4);
@@ -457,19 +457,19 @@ body {
 /* ================= TICKER ================= */
 
 .ticker-bar {
-    margin-top: clamp(4px, 1.6vmin, 14px);
+    margin-top: clamp(6px, 2vmin, 18px);
     overflow: hidden;
     background: linear-gradient(90deg, rgba(var(--violet-rgb), 0.22), rgba(var(--magenta-rgb), 0.18));
     border-top: 1px solid rgba(var(--magenta-rgb), 0.4);
     border-bottom: 1px solid rgba(var(--magenta-rgb), 0.4);
-    padding: clamp(3px, 0.8vmin, 5px) 0;
+    padding: clamp(4px, 1vmin, 8px) 0;
 }
 
 .ticker-track {
     display: inline-flex;
     white-space: nowrap;
     animation: ticker-scroll 26s linear infinite;
-    font-size: clamp(0.48rem, 1.1vmin, 0.68rem);
+    font-size: clamp(0.68rem, 1.5vmin, 0.95rem);
     letter-spacing: 0.03em;
     color: var(--ink);
 }
@@ -501,9 +501,9 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: clamp(4px, 1.2vmin, 10px);
-    padding-top: clamp(3px, 1vmin, 8px);
-    font-size: clamp(0.46rem, 1vmin, 0.64rem);
+    margin-top: clamp(6px, 1.6vmin, 14px);
+    padding-top: clamp(4px, 1.2vmin, 10px);
+    font-size: clamp(0.6rem, 1.3vmin, 0.85rem);
     color: var(--ink-faint);
 }
 
