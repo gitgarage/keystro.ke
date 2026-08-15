@@ -41,6 +41,38 @@ body {
         sans-serif;
 }
 
+/* Off-screen until focused, so a keyboard/screen-reader user can bypass
+   the HUD's brand link and score/timer/combo readouts without every
+   sighted player seeing it. #main-content is an otherwise-empty anchor
+   right after the header - there's no separate content landmark to land
+   on yet, since gameplay itself is driven by raw keystrokes rather than
+   a focusable element. */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    background: #070914;
+    color: #f3f7ff;
+    border: 2px solid rgba(127, 235, 255, 0.8);
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    transition: top 150ms ease;
+}
+
+.skip-link:focus {
+    top: 1rem;
+}
+
+/* Invisible anchor, not a real interactive element - a default focus
+   ring around empty space would just look like a stray render glitch. */
+#main-content:focus {
+    outline: none;
+}
+
 .app-shell {
     width: 100vw;
     height: 100vh;

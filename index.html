@@ -17,6 +17,8 @@
     <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main menu</a>
+
     <div class="monitor">
         <div class="screen">
             <div class="boot" aria-hidden="true">
@@ -40,16 +42,24 @@
                     <div class="hud-item">LEVEL <strong id="menuLevel">1</strong></div>
                     <div class="hud-item">
                         XP
-                        <span class="xp-track"><span class="xp-fill" id="menuXpFill"></span></span>
+                        <span
+                            class="xp-track"
+                            role="progressbar"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="0"
+                            aria-valuetext="0 of 100 XP"
+                            id="menuXpTrack"
+                        ><span class="xp-fill" id="menuXpFill"></span></span>
                         <strong id="menuXpLabel">0/100</strong>
                     </div>
                     <div class="hud-item">STREAK <strong id="menuStreak">0</strong> DAYS</div>
                     <div class="badges" aria-label="Achievements — none unlocked yet">
-                        <span class="badge locked" title="Locked">??</span>
-                        <span class="badge locked" title="Locked">??</span>
-                        <span class="badge locked" title="Locked">??</span>
-                        <span class="badge locked" title="Locked">??</span>
-                        <span class="badge locked" title="Locked">??</span>
+                        <span class="badge locked" aria-hidden="true">??</span>
+                        <span class="badge locked" aria-hidden="true">??</span>
+                        <span class="badge locked" aria-hidden="true">??</span>
+                        <span class="badge locked" aria-hidden="true">??</span>
+                        <span class="badge locked" aria-hidden="true">??</span>
                     </div>
                     <button class="sound-toggle" id="soundToggle" type="button">SOUND: ON</button>
                 </header>
@@ -59,31 +69,31 @@
                     <p class="tagline">TRAIN YOUR FINGERS. LEVEL UP YOUR TYPING.<span class="cursor">&nbsp;</span></p>
                 </div>
 
-                <nav class="rooms" aria-label="Main menu">
+                <nav class="rooms" aria-label="Main menu" id="main-content" tabindex="-1">
                     <button class="room" type="button" disabled style="--tile-accent: var(--cyan); --tile-glow: var(--cyan-rgb);">
-                        <span class="room-flag" style="color: var(--cyan);">SOON</span>
-                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="cap"></canvas></span>
+                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="cap" aria-hidden="true"></canvas></span>
                         <span class="room-name">Lesson Hall</span>
+                        <span class="room-flag" style="color: var(--cyan);">SOON</span>
                         <span class="room-blurb">Home row to full speed, one drill at a time.</span>
                     </button>
 
                     <a class="room" href="arcade.html" style="--tile-accent: var(--magenta); --tile-glow: var(--magenta-rgb);">
-                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="stick"></canvas></span>
+                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="stick" aria-hidden="true"></canvas></span>
                         <span class="room-name">Arcade Wing</span>
                         <span class="room-blurb">Microscopic Drift &middot; Neural Current</span>
                     </a>
 
                     <button class="room" type="button" disabled style="--tile-accent: var(--gold); --tile-glow: var(--gold-rgb);">
-                        <span class="room-flag" style="color: var(--gold);">SOON</span>
-                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="star"></canvas></span>
+                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="star" aria-hidden="true"></canvas></span>
                         <span class="room-name">Records Room</span>
+                        <span class="room-flag" style="color: var(--gold);">SOON</span>
                         <span class="room-blurb">Stats, streaks, and every badge you've earned.</span>
                     </button>
 
                     <button class="room" type="button" disabled style="--tile-accent: var(--violet); --tile-glow: var(--violet-rgb);">
-                        <span class="room-flag" style="color: var(--violet);">SOON</span>
-                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="gear"></canvas></span>
+                        <span class="room-icon"><canvas class="pixel-icon" width="16" height="16" data-icon="gear" aria-hidden="true"></canvas></span>
                         <span class="room-name">Options Terminal</span>
+                        <span class="room-flag" style="color: var(--violet);">SOON</span>
                         <span class="room-blurb">Sound, motion, and accessibility settings.</span>
                     </button>
                 </nav>
