@@ -125,6 +125,37 @@ const LESSONS = [
                 text: "read dear hire fire hair guide slide regard"
             }
         ]
+    },
+    {
+        id: "reach-up-woty",
+        kicker: "REACH UP: W, O, T & Y",
+        resultsTitle: "Reach Up: W, O, T & Y",
+        // Four keys, but not four at once: W/O are a genuinely new reach
+        // (the ring fingers' first trip off the home row, from S and L),
+        // so they get their own drill before T/Y join in - T and Y are a
+        // lighter lift, just one more key for the index fingers that
+        // already learned R and U. Splitting the isolation drill this way
+        // keeps every single step to 1-2 new keys, per typing-tutor
+        // convention, without turning this into two separate lessons.
+        activeKeys: new Set(["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "r", "u", "e", "i", "w", "o", "t", "y", " "]),
+        steps: [
+            {
+                title: "Reach Up: W and O",
+                text: "wo ow wo ow wow low sow how"
+            },
+            {
+                title: "Reach Up: T and Y",
+                text: "ty ty yt yt sty sky yet let"
+            },
+            {
+                title: "The Full Row",
+                text: "asdfgh jkl; wo ty ow yt tw oy asdfgh jkl; ty wo"
+            },
+            {
+                title: "Real Words",
+                text: "today worth write tower great trade audit story"
+            }
+        ]
     }
 ];
 
