@@ -17,7 +17,7 @@
  * --------------
  * Behavior for the landing/main-menu screen (index.html): the scrolling
  * ticker and PC-speaker-style sound feedback on the room tiles. Room
- * artwork itself is static image assets (assets/icons/room-*.webp), not
+ * artwork itself is static image assets (assets/icons/room-*.png), not
  * rendered here.
  *
  * This intentionally does not touch anything under src/game/ - the menu
