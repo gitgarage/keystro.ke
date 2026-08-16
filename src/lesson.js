@@ -103,6 +103,28 @@ const LESSONS = [
                 text: "dark hard surf lush rush dull guard sugar"
             }
         ]
+    },
+    {
+        id: "reach-up-ei",
+        kicker: "REACH UP: E & I",
+        resultsTitle: "Reach Up: E & I",
+        // E and I sit directly above D and K - the middle fingers' turn to
+        // reach up, following R and U taught for the index fingers.
+        activeKeys: new Set(["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "r", "u", "e", "i", " "]),
+        steps: [
+            {
+                title: "Reach Up: E and I",
+                text: "ei ei ie ie eie iei ee ii ei ie"
+            },
+            {
+                title: "The Full Row",
+                text: "asdfgh jkl; ei ie de ki asdfgh jkl; ie ei"
+            },
+            {
+                title: "Real Words",
+                text: "read dear hire fire hair guide slide regard"
+            }
+        ]
     }
 ];
 
