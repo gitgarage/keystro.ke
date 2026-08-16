@@ -12,6 +12,7 @@ import { AudioManager } from "./AudioManager.js";
 import { LEVEL_ONE_CLEAR_WORD_COUNT } from "./constants.js";
 import { InputManager } from "./InputManager.js";
 import { MicroscopicEnvironment } from "./MicroscopicEnvironment.js";
+import { recordArcadeSession } from "../records.js";
 import { ScoreManager } from "./ScoreManager.js";
 import { SessionManager } from "./SessionManager.js";
 import { StageManager } from "./StageManager.js";
@@ -258,6 +259,12 @@ export class Game {
             this.sessionManager.getTelemetrySummary();
 
         this.logSessionTelemetry(telemetrySummary);
+
+        recordArcadeSession({
+            stageId: this.currentStage.id,
+            ...scoreSummary,
+            ...sessionSummary
+        });
 
         this.stagePresentationManager.complete({
             scoreSummary,

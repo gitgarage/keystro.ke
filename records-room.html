@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>keystro.ke — Records Room</title>
+
+    <meta
+        name="description"
+        content="Your level, streak, lifetime stats, and badges on keystro.ke."
+    >
+
+    <link rel="canonical" href="https://keystro.ke/records-room.html">
+    <link rel="stylesheet" href="src/styles/records-room.css">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to records</a>
+
+    <div class="monitor">
+        <div class="screen">
+            <div class="crt-overlay"></div>
+
+            <div class="screen-content">
+
+                <header class="hud">
+                    <a class="brand-mark" href="index.html">keystro.ke</a>
+                    <span class="records-label">RECORDS ROOM</span>
+                    <button class="sound-toggle" id="soundToggle" type="button">SOUND: ON</button>
+                </header>
+
+                <div class="records-viewport" id="main-content" tabindex="-1">
+                    <div class="records-lane">
+
+                        <div class="records-banner">
+                            <p class="records-kicker">ARCHIVE</p>
+                            <h1 class="records-title">Your Records</h1>
+                        </div>
+
+                        <section class="progress-panel" aria-labelledby="progress-heading">
+                            <h2 id="progress-heading" class="visually-hidden">Level and streak</h2>
+
+                            <div class="progress-stat">
+                                <span class="progress-stat-label">Level</span>
+                                <span class="progress-stat-value" id="recordsLevel">1</span>
+                            </div>
+
+                            <div class="progress-xp">
+                                <span
+                                    class="xp-track"
+                                    role="progressbar"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                    aria-valuenow="0"
+                                    aria-valuetext="0 of 100 XP"
+                                    id="recordsXpTrack"
+                                ><span class="xp-fill" id="recordsXpFill"></span></span>
+                                <span class="progress-xp-label" id="recordsXpLabel">0/100 XP</span>
+                            </div>
+
+                            <div class="progress-stat">
+                                <span class="progress-stat-label">Streak</span>
+                                <span class="progress-stat-value" id="recordsStreak">0</span>
+                                <span class="progress-stat-sublabel">days</span>
+                            </div>
+
+                            <div class="progress-stat">
+                                <span class="progress-stat-label">Longest streak</span>
+                                <span class="progress-stat-value" id="recordsLongestStreak">0</span>
+                                <span class="progress-stat-sublabel">days</span>
+                            </div>
+                        </section>
+
+                        <section class="stats-panel" aria-labelledby="stats-heading">
+                            <h2 id="stats-heading" class="panel-heading">Lifetime Stats</h2>
+
+                            <dl class="stats-grid" id="statsGrid"></dl>
+                        </section>
+
+                        <section class="badges-panel" aria-labelledby="badges-heading">
+                            <h2 id="badges-heading" class="panel-heading">Badges</h2>
+
+                            <ul class="badge-grid" id="badgeGrid"></ul>
+                        </section>
+
+                    </div>
+                </div>
+
+                <footer class="screen-footer">
+                    <span>keystro.ke &middot; open source &middot; AGPL-3.0-or-later</span>
+                    <a href="https://github.com/gitgarage/keystro.ke" target="_blank" rel="noopener noreferrer">View source &#8599;</a>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="src/records-room.js" type="module"></script>
+</body>
+</html>

@@ -16,15 +16,18 @@
  * Responsibility
  * --------------
  * Behavior for the landing/main-menu screen (index.html): the scrolling
- * ticker and PC-speaker-style sound feedback on the room tiles. Room
- * artwork itself is static image assets (assets/icons/room-*.png), not
- * rendered here.
+ * ticker, PC-speaker-style sound feedback on the room tiles, and populating
+ * the HUD strip (level, XP, streak, badges) from src/records.js's real
+ * persisted data. Room artwork itself is static image assets
+ * (assets/icons/room-*.png), not rendered here.
  *
  * This intentionally does not touch anything under src/game/ - the menu
  * has no gameplay state. It links to the arcade (arcade.html) rather than
  * hosting gameplay itself.
  * ============================================================================
  */
+
+import { getRecords } from "./records.js";
 
 const TICKER_MESSAGES = [
     "TIP: rest your index fingers on F and J -- find the bumps without looking",
@@ -133,7 +136,8 @@ const TYPING_LOCK_MS = 3000;
 // Rooms that are real destinations, keyed by the command that opens them.
 const ROOM_DESTINATIONS = {
     "ARCADE WING": "arcade.html",
-    "LESSON HALL": "lesson-hall.html"
+    "LESSON HALL": "lesson-hall.html",
+    "RECORDS ROOM": "records-room.html"
 };
 
 // Rooms that exist in the nav but aren't real destinations yet - kept
@@ -141,7 +145,6 @@ const ROOM_DESTINATIONS = {
 // command interpreter's vocabulary is a design decision independent
 // of whatever happens to be marked disabled in the markup right now.
 const UNAVAILABLE_ROOM_COMMANDS = new Set([
-    "RECORDS ROOM",
     "OPTIONS TERMINAL"
 ]);
 
@@ -301,9 +304,73 @@ function wireDailyPrompt() {
     });
 }
 
+// Populates the HUD strip (level, XP, streak, badges) from real persisted
+// data (src/records.js) - these elements used to be hardcoded placeholders
+// with no JS writer at all.
+function renderHud(records) {
+    const levelEl = document.getElementById("menuLevel");
+    const xpTrackEl = document.getElementById("menuXpTrack");
+    const xpFillEl = document.getElementById("menuXpFill");
+    const xpLabelEl = document.getElementById("menuXpLabel");
+    const streakEl = document.getElementById("menuStreak");
+    const badgesContainerEl = document.querySelector(".badges");
+    const badgeEls = document.querySelectorAll(".badges .badge");
+
+    if (levelEl) {
+        levelEl.textContent = String(records.level);
+    }
+
+    if (xpTrackEl && xpFillEl && xpLabelEl) {
+        const percent = Math.round((records.xpIntoLevel / records.xpPerLevel) * 100);
+
+        xpFillEl.style.width = `${percent}%`;
+        xpTrackEl.setAttribute("aria-valuemax", String(records.xpPerLevel));
+        xpTrackEl.setAttribute("aria-valuenow", String(records.xpIntoLevel));
+        xpTrackEl.setAttribute(
+            "aria-valuetext",
+            `${records.xpIntoLevel} of ${records.xpPerLevel} XP`
+        );
+        xpLabelEl.textContent = `${records.xpIntoLevel}/${records.xpPerLevel}`;
+    }
+
+    if (streakEl) {
+        streakEl.textContent = String(records.streak.current);
+    }
+
+    badgeEls.forEach((badgeEl, index) => {
+        const badge = records.badges[index];
+
+        if (!badge) {
+            return;
+        }
+
+        badgeEl.classList.toggle("won", badge.earned);
+        badgeEl.classList.toggle("locked", !badge.earned);
+        badgeEl.textContent = badge.earned ? "✓" : "??";
+        badgeEl.removeAttribute("aria-hidden");
+        badgeEl.setAttribute(
+            "aria-label",
+            badge.earned ? `${badge.name}: ${badge.description} (earned)` : `${badge.name}: locked`
+        );
+        badgeEl.title = badge.earned ? badge.description : "Locked achievement";
+    });
+
+    if (badgesContainerEl) {
+        const earnedCount = records.badges.filter((badge) => badge.earned).length;
+
+        badgesContainerEl.setAttribute(
+            "aria-label",
+            earnedCount === 0
+                ? "Achievements — none unlocked yet"
+                : `Achievements — ${earnedCount} of ${records.badges.length} unlocked`
+        );
+    }
+}
+
 function startMenu() {
     renderTicker();
     wireDailyPrompt();
+    renderHud(getRecords());
 
     const toggleButton = document.getElementById("soundToggle");
 

@@ -9,6 +9,7 @@
  */
 
 import { AudioManager } from "./game/AudioManager.js";
+import { recordLessonSession } from "./records.js";
 
 /**
  * ============================================================================
@@ -413,6 +414,14 @@ function wireLesson() {
         resultAccuracyEl.textContent = `${accuracy}%`;
         resultMistakesEl.textContent = String(totalMistakes);
         resultsStatusEl.textContent = buildResultsControlsText();
+
+        recordLessonSession({
+            lessonId: currentLesson.id,
+            wpm,
+            accuracy,
+            mistakes: totalMistakes,
+            completed: true
+        });
 
         resultsScreenEl.hidden = false;
 

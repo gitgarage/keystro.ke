@@ -25,6 +25,8 @@
  * ============================================================================
  */
 
+import { getRecords } from "./records.js";
+
 const LESSON_NODES = [
     { id: "home-row", title: "Home Row", built: true },
     { id: "home-row-2", title: "Home Row: Part 2", built: true },
@@ -41,22 +43,16 @@ const LESSON_NODES = [
     { id: "timed-prose", title: "Timed Prose", built: false }
 ];
 
-// Plain in-memory placeholder, not persisted anywhere - demonstrates the
-// completed-vs-available visual distinction using the lessons that exist
-// today. Resets on every load, same as the HUD's LEVEL/XP/STREAK values
-// elsewhere on the site. Swap for a real progress source once one exists.
-const COMPLETED_LESSON_IDS = new Set(["home-row"]);
-
-function getNodeStatus(lessonNode) {
+function getNodeStatus(lessonNode, completedLessonIds) {
     if (!lessonNode.built) {
         return "locked";
     }
 
-    return COMPLETED_LESSON_IDS.has(lessonNode.id) ? "completed" : "available";
+    return completedLessonIds.has(lessonNode.id) ? "completed" : "available";
 }
 
-function createNode(lessonNode, index) {
-    const status = getNodeStatus(lessonNode);
+function createNode(lessonNode, index, completedLessonIds) {
+    const status = getNodeStatus(lessonNode, completedLessonIds);
     const isLocked = status === "locked";
 
     const node = document.createElement(isLocked ? "div" : "a");
@@ -107,7 +103,7 @@ function createNode(lessonNode, index) {
 // position:relative box, not getBoundingClientRect - that keeps the trace
 // correct regardless of the lane's current horizontal scroll position,
 // with no scroll-offset math needed.
-function renderTraceSvg(laneEl, svgEl, nodeEls) {
+function renderTraceSvg(laneEl, svgEl, nodeEls, completedLessonIds) {
     svgEl.setAttribute("width", String(laneEl.scrollWidth));
     svgEl.setAttribute("height", String(laneEl.scrollHeight));
     svgEl.replaceChildren();
@@ -122,7 +118,7 @@ function renderTraceSvg(laneEl, svgEl, nodeEls) {
     });
 
     for (let i = 0; i < points.length - 1; i += 1) {
-        const isLit = LESSON_NODES[i] && getNodeStatus(LESSON_NODES[i]) === "completed";
+        const isLit = LESSON_NODES[i] && getNodeStatus(LESSON_NODES[i], completedLessonIds) === "completed";
 
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
         line.setAttribute("x1", String(points[i].x));
@@ -213,17 +209,19 @@ function wireLessonHall() {
     svgEl.setAttribute("aria-hidden", "true");
     laneEl.appendChild(svgEl);
 
+    const { completedLessonIds } = getRecords();
+
     const nodeEls = LESSON_NODES.map((lessonNode, index) => {
-        const nodeEl = createNode(lessonNode, index);
+        const nodeEl = createNode(lessonNode, index, completedLessonIds);
         laneEl.appendChild(nodeEl);
 
         return nodeEl;
     });
 
-    renderTraceSvg(laneEl, svgEl, nodeEls);
+    renderTraceSvg(laneEl, svgEl, nodeEls, completedLessonIds);
 
     window.addEventListener("resize", () => {
-        renderTraceSvg(laneEl, svgEl, nodeEls);
+        renderTraceSvg(laneEl, svgEl, nodeEls, completedLessonIds);
     });
 
     if (toggleButton) {
