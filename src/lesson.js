@@ -223,6 +223,17 @@ const FINGER_COLOR_VAR = {
     thumb: "--gold"
 };
 
+// Finger color alone isn't readable for colorblind players, so each active
+// key also gets its finger number (1 = pinky ... 5 = thumb) as a small
+// corner badge - a second, non-color channel for the same information.
+const FINGER_NUMBER = {
+    pinky: "1",
+    ring: "2",
+    middle: "3",
+    index: "4",
+    thumb: "5"
+};
+
 const TYPABLE_CHARACTER_PATTERN = /^[a-z ;]$/;
 
 // activeKeys is per-lesson (lesson one drills a-s-d-f-j-k-l-; only, lesson
@@ -242,6 +253,14 @@ function buildKeyboard(container, activeKeys) {
 
         if (activeKeys.has(key)) {
             keyEl.classList.add("is-active");
+
+            if (key !== " ") {
+                const fingerBadge = document.createElement("span");
+                fingerBadge.className = "key-finger";
+                fingerBadge.textContent = FINGER_NUMBER[finger];
+                fingerBadge.setAttribute("aria-hidden", "true");
+                keyEl.appendChild(fingerBadge);
+            }
         }
 
         keyElements.set(key, keyEl);

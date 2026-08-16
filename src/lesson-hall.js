@@ -93,7 +93,10 @@ function createNode(lessonNode, index, completedLessonIds) {
     if (status !== "available") {
         const note = document.createElement("span");
         note.className = "node-status-note";
-        note.textContent = status === "locked" ? "Locked" : "Completed";
+        // "locked" nodes aren't gated behind any player achievement - they're
+        // simply not built yet, so the copy says that plainly instead of
+        // implying an unlock condition that doesn't exist.
+        note.textContent = status === "locked" ? "Coming Soon" : "Completed";
         node.appendChild(note);
     }
 

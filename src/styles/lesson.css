@@ -372,6 +372,20 @@ body {
     border-color: var(--finger-color, var(--cyan));
 }
 
+/* Finger-number badge: a non-color-dependent backup for the same
+   information the key's background color already conveys, so which
+   finger a key belongs to doesn't rely on color perception alone. */
+.key-finger {
+    position: absolute;
+    bottom: 1px;
+    right: 2px;
+    font-size: clamp(0.4rem, 0.9vmin, 0.55rem);
+    font-weight: 700;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.75;
+}
+
 /* The next key gets a shape/glyph change in addition to color, so the
    cue does not rely on color perception alone. */
 .key.is-next {
