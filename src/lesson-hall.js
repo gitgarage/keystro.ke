@@ -26,6 +26,7 @@
  */
 
 import { getRecords } from "./records.js";
+import { getSettings, setSoundEnabled } from "./settings.js";
 
 const LESSON_NODES = [
     { id: "home-row", title: "Home Row", built: true },
@@ -132,8 +133,10 @@ function renderTraceSvg(laneEl, svgEl, nodeEls, completedLessonIds) {
 }
 
 function createSoundController(toggleButton) {
-    let soundOn = true;
+    let soundOn = getSettings().soundEnabled;
     let audioContext = null;
+
+    toggleButton.textContent = `SOUND: ${soundOn ? "ON" : "OFF"}`;
 
     function getContext() {
         if (!audioContext) {
@@ -175,6 +178,7 @@ function createSoundController(toggleButton) {
     toggleButton.addEventListener("click", () => {
         soundOn = !soundOn;
         toggleButton.textContent = `SOUND: ${soundOn ? "ON" : "OFF"}`;
+        setSoundEnabled(soundOn);
 
         if (soundOn) {
             blip(500, 70);

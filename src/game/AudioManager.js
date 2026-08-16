@@ -15,6 +15,10 @@ export class AudioManager {
         this.isEnabled = true;
     }
 
+    setEnabled(enabled) {
+        this.isEnabled = enabled;
+    }
+
     ensureAudioContext() {
         if (this.audioContext) {
             return;

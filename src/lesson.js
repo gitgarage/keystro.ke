@@ -10,6 +10,7 @@
 
 import { AudioManager } from "./game/AudioManager.js";
 import { recordLessonSession } from "./records.js";
+import { getSettings, setSoundEnabled } from "./settings.js";
 
 /**
  * ============================================================================
@@ -229,7 +230,11 @@ function wireLesson() {
     resultsTitleEl.textContent = currentLesson.resultsTitle;
 
     const audio = new AudioManager();
-    let soundOn = true;
+    let soundOn = getSettings().soundEnabled;
+
+    if (toggleButton) {
+        toggleButton.textContent = soundOn ? "SOUND: ON" : "SOUND: OFF";
+    }
 
     const keyElements = buildKeyboard(keyboardEl, currentLesson.activeKeys);
 
@@ -531,6 +536,7 @@ function wireLesson() {
         toggleButton.addEventListener("click", () => {
             soundOn = !soundOn;
             toggleButton.textContent = soundOn ? "SOUND: ON" : "SOUND: OFF";
+            setSoundEnabled(soundOn);
             audio.unlock();
         });
     }

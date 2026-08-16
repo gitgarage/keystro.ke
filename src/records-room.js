@@ -23,6 +23,7 @@
  */
 
 import { getRecords } from "./records.js";
+import { getSettings, setSoundEnabled } from "./settings.js";
 
 function renderProgress(records) {
     const levelEl = document.getElementById("recordsLevel");
@@ -151,8 +152,10 @@ function renderBadges(records) {
 // oscillator pattern and per-page precedent established in
 // src/menu.js/src/lesson-hall.js.
 function createSoundController(toggleButton) {
-    let soundOn = true;
+    let soundOn = getSettings().soundEnabled;
     let audioContext = null;
+
+    toggleButton.textContent = `SOUND: ${soundOn ? "ON" : "OFF"}`;
 
     function getContext() {
         if (!audioContext) {
@@ -194,6 +197,7 @@ function createSoundController(toggleButton) {
     toggleButton.addEventListener("click", () => {
         soundOn = !soundOn;
         toggleButton.textContent = `SOUND: ${soundOn ? "ON" : "OFF"}`;
+        setSoundEnabled(soundOn);
 
         if (soundOn) {
             blip(500, 70);

@@ -28,6 +28,7 @@
  */
 
 import { getRecords } from "./records.js";
+import { getSettings, setSoundEnabled } from "./settings.js";
 
 const TICKER_MESSAGES = [
     "TIP: rest your index fingers on F and J -- find the bumps without looking",
@@ -55,8 +56,10 @@ function renderTicker() {
 /* ---- PC-speaker-style sound feedback ---- */
 
 function createSoundController(toggleButton) {
-    let soundOn = true;
+    let soundOn = getSettings().soundEnabled;
     let audioContext = null;
+
+    toggleButton.textContent = `SOUND: ${soundOn ? "ON" : "OFF"}`;
 
     function getContext() {
         if (!audioContext) {
@@ -98,6 +101,7 @@ function createSoundController(toggleButton) {
     toggleButton.addEventListener("click", () => {
         soundOn = !soundOn;
         toggleButton.textContent = `SOUND: ${soundOn ? "ON" : "OFF"}`;
+        setSoundEnabled(soundOn);
 
         if (soundOn) {
             blip(500, 70);
@@ -137,16 +141,17 @@ const TYPING_LOCK_MS = 3000;
 const ROOM_DESTINATIONS = {
     "ARCADE WING": "arcade.html",
     "LESSON HALL": "lesson-hall.html",
-    "RECORDS ROOM": "records-room.html"
+    "RECORDS ROOM": "records-room.html",
+    "OPTIONS TERMINAL": "options-terminal.html"
 };
 
 // Rooms that exist in the nav but aren't real destinations yet - kept
 // as a literal list here rather than read from the DOM, since the
 // command interpreter's vocabulary is a design decision independent
 // of whatever happens to be marked disabled in the markup right now.
-const UNAVAILABLE_ROOM_COMMANDS = new Set([
-    "OPTIONS TERMINAL"
-]);
+// Empty now that every room is real; stays here as the place a future
+// disabled room's command would go.
+const UNAVAILABLE_ROOM_COMMANDS = new Set([]);
 
 function isInteractiveElementFocused() {
     const active = document.activeElement;

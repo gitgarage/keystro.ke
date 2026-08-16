@@ -9,6 +9,7 @@
  */
 
 import { Game } from "./game/Game.js";
+import { getSettings, setSoundEnabled } from "./settings.js";
 
 /**
  * ============================================================================
@@ -30,6 +31,29 @@ function getRequestedStageId() {
     );
 
     return searchParameters.get("stage") ?? "amoeba";
+}
+
+// Wires arcade's sound toggle to the shared, persisted setting - the same
+// pattern every other page's #soundToggle button already uses, applied here
+// for the first time since arcade previously had no way to mute at all
+// despite AudioManager already having an internal isEnabled flag.
+function wireSoundToggle(audioManager) {
+    const toggleButton = document.getElementById("soundToggle");
+
+    if (!toggleButton) {
+        return;
+    }
+
+    let soundOn = getSettings().soundEnabled;
+    audioManager.setEnabled(soundOn);
+    toggleButton.textContent = `SOUND: ${soundOn ? "ON" : "OFF"}`;
+
+    toggleButton.addEventListener("click", () => {
+        soundOn = !soundOn;
+        audioManager.setEnabled(soundOn);
+        toggleButton.textContent = `SOUND: ${soundOn ? "ON" : "OFF"}`;
+        setSoundEnabled(soundOn);
+    });
 }
 
 function startApplication() {
@@ -69,6 +93,8 @@ function startApplication() {
         ...elements,
         requestedStageId
     });
+
+    wireSoundToggle(game.audioManager);
 
     game.start();
 

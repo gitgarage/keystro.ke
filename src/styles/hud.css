@@ -46,6 +46,26 @@
     text-decoration: underline;
 }
 
+.sound-toggle {
+    appearance: none;
+    pointer-events: auto;
+    width: fit-content;
+    min-height: 28px;
+    background: rgba(127, 235, 255, 0.08);
+    border: 1px solid rgba(127, 235, 255, 0.4);
+    color: rgba(127, 235, 255, 0.84);
+    font: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+    background: rgba(127, 235, 255, 0.18);
+}
+
 .build-label,
 .score-label,
 .timer-label,

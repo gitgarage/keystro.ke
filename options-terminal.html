@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>keystro.ke — Options Terminal</title>
+
+    <meta
+        name="description"
+        content="Sound and motion settings for keystro.ke."
+    >
+
+    <link rel="canonical" href="https://keystro.ke/options-terminal.html">
+    <link rel="stylesheet" href="src/styles/options-terminal.css">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to settings</a>
+
+    <div class="monitor">
+        <div class="screen">
+            <div class="crt-overlay"></div>
+
+            <div class="screen-content">
+
+                <header class="hud">
+                    <a class="brand-mark" href="index.html">keystro.ke</a>
+                    <span class="options-label">OPTIONS TERMINAL</span>
+                </header>
+
+                <div class="options-viewport" id="main-content" tabindex="-1">
+                    <div class="options-lane">
+
+                        <div class="options-banner">
+                            <p class="options-kicker">CONFIGURATION</p>
+                            <h1 class="options-title">Options</h1>
+                        </div>
+
+                        <section class="settings-panel" aria-labelledby="settings-heading">
+                            <h2 id="settings-heading" class="visually-hidden">Settings</h2>
+
+                            <div class="setting-row">
+                                <div class="setting-copy">
+                                    <p class="setting-name">Sound</p>
+                                    <p class="setting-description">PC-speaker-style sound feedback across every page, including the Arcade Wing.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="setting-toggle"
+                                    id="soundSettingToggle"
+                                    role="switch"
+                                    aria-checked="true"
+                                >ON</button>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-copy">
+                                    <p class="setting-name">Reduce motion</p>
+                                    <p class="setting-description">Turns off animations and transitions site-wide, independent of your system setting.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="setting-toggle"
+                                    id="motionSettingToggle"
+                                    role="switch"
+                                    aria-checked="false"
+                                >OFF</button>
+                            </div>
+
+                            <p class="settings-note">This reflects keystro.ke's current settings - sound and motion are the only two right now.</p>
+                        </section>
+
+                    </div>
+                </div>
+
+                <footer class="screen-footer">
+                    <span>keystro.ke &middot; open source &middot; AGPL-3.0-or-later</span>
+                    <a href="https://github.com/gitgarage/keystro.ke" target="_blank" rel="noopener noreferrer">View source &#8599;</a>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="src/options-terminal.js" type="module"></script>
+</body>
+</html>
