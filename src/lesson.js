@@ -79,6 +79,30 @@ const LESSONS = [
                 text: "half hall dash flash glass shall flags gash"
             }
         ]
+    },
+    {
+        id: "reach-up-ru",
+        kicker: "REACH UP: R & U",
+        resultsTitle: "Reach Up: R & U",
+        // R and U sit directly above F and J - the same two index fingers
+        // that already anchor the home row just reach straight up instead
+        // of sideways, the classic "top-row reach" taught right after the
+        // home row itself is solid.
+        activeKeys: new Set(["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "r", "u", " "]),
+        steps: [
+            {
+                title: "Reach Up: R and U",
+                text: "ru ru ur ur rur uru rr uu ru ur"
+            },
+            {
+                title: "The Full Row",
+                text: "asdfgh jkl; ru ur fr uj asdfgh jkl; ur ru"
+            },
+            {
+                title: "Real Words",
+                text: "dark hard surf lush rush dull guard sugar"
+            }
+        ]
     }
 ];
 

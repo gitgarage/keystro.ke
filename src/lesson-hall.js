@@ -31,7 +31,7 @@ import { getSettings, setSoundEnabled } from "./settings.js";
 const LESSON_NODES = [
     { id: "home-row", title: "Home Row", built: true },
     { id: "home-row-2", title: "Home Row: Part 2", built: true },
-    { id: "reach-up-ru", title: "Reach Up: R & U", built: false },
+    { id: "reach-up-ru", title: "Reach Up: R & U", built: true },
     { id: "reach-up-ei", title: "Reach Up: E & I", built: false },
     { id: "reach-up-woty", title: "Reach Up: W, O, T & Y", built: false },
     { id: "reach-down-cm", title: "Reach Down: C & M", built: false },
